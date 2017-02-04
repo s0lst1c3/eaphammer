@@ -13,6 +13,10 @@ print '[*] Extracting hostapd from tar archive...'
 os.system('tar xzf hostapd-%s.tar.gz' % config.hostapd_version)
 print '[*] complete!'
 
+print '[*] Removing tar archive...'
+os.system('rm -f hostapd-%s.tar.gz' % config.hostapd_version)
+print '[*] complete!'
+
 print '[*] Initializing submodules...'
 os.system('git submodule init')
 print '[*] complete!'

@@ -8,3 +8,11 @@ First time setup:
 
 	# run setup script
 	python setup.py
+
+To create a new self-signed certificate:
+
+	python eaphammer.py --cert-wizard
+
+To execute an evil twin attack using hostapd-wpe:
+
+	python eaphammer.py --bssid <bssid> --essid <essid> --channel <channel> --interface <interface>

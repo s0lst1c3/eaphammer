@@ -1,6 +1,9 @@
 hostapd_version = '2.2'
 hostapd_submodule_dir = './hostapd-'+hostapd_version
 hostapd_dir = hostapd_submodule_dir + '/hostapd'
+hostapd_bin = hostapd_dir + '/hostapd-wpe'
+hostapd_cnf = hostapd_dir + '/hostapd-wpe.conf'
+eap_user_file = hostapd_dir + '/hostapd-wpe.eap_user'
 
 hostapd_wpe_dir = './hostapd-wpe'
 hostapd_wpe_patch = hostapd_wpe_dir + '/hostapd-wpe.patch'
@@ -15,4 +18,3 @@ server_pem = certs_dir + '/server.pem'
 private_key = certs_dir + '/server.pem'
 dh_file = certs_dir + '/dh'
 
-hostapd_cnf = hostapd_dir + '/hostapd-wpe.conf'

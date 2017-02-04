@@ -195,7 +195,7 @@ interface=%s
 #driver=wired
 
 # May have to change these depending on build location
-eap_user_file=hostapd-wpe.eap_user
+eap_user_file=%s
 ca_cert=%s
 server_cert=%s
 private_key=%s

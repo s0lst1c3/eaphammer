@@ -11,6 +11,7 @@ class hostapd_cnf(object):
     def configure(cls,
             interface=None,
             ca_pem=config.ca_pem,
+            eap_user_file=config.eap_user_file, 
             server_pem=config.server_pem,
             private_key=config.private_key,
             dh_file=config.dh_file,
@@ -33,6 +34,6 @@ class hostapd_cnf(object):
     
         with open(cls.path, 'w') as fd:
             fd.write(cls.template %\
-                (interface, ca_pem, server_pem,
-                    private_key, dh_file, ssid,
-                        hw_mode, channel, wpa, bssid))
+                (interface, eap_user_file, ca_pem,
+                    server_pem, private_key, dh_file,
+                        ssid, hw_mode, channel, wpa, bssid))

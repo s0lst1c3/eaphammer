@@ -10,7 +10,7 @@ os.system('wget https://w1.fi/releases/hostapd-%s.tar.gz' % config.hostapd_versi
 print '[*] complete!'
 
 print '[*] Extracting hostapd from tar archive...'
-os.system('tar xzf hostapd-%s.tgz' % config.hostapd_version)
+os.system('tar xzf hostapd-%s.tar.gz' % config.hostapd_version)
 print '[*] complete!'
 
 print '[*] Initializing submodules...'

@@ -17,6 +17,10 @@ print '[*] Initializing submodules...'
 os.system('git submodule init')
 print '[*] complete!'
 
+print '[*] Updating submodules...'
+os.system('git submodule update')
+print '[*] complete!'
+
 print '[*] Patching hostapd...'
 os.system('cd %s && pwd && patch -p1 < .%s' % (config.hostapd_submodule_dir, config.hostapd_wpe_patch))
 print '[*] complete!'

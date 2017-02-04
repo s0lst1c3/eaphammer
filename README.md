@@ -1,4 +1,2 @@
 # eaphammer
-EAP Cracking Toolkit
-
-EAPHammer is a set of wrapper scripts for hostapd-wpe. Designed for fast entry into targeted networks with minimal manual configuration.
+EAPHammer adds an easy to use command line interface to hostapd-wpe and its config files.

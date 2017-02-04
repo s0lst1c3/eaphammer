@@ -1,0 +1,3 @@
+[submodule "hostapd-wpe"]
+	path = hostapd-wpe
+	url = https://github.com/OpenSecurityResearch/hostapd-wpe.git

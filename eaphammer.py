@@ -92,7 +92,7 @@ def set_options():
 
         if options['interface'] is None:
 
-            print 'Please specify a valid PHY interface using the ---interface flag'
+            print 'Please specify a valid PHY interface using the --interface flag'
             sys.exit()
 
     return options

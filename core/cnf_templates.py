@@ -1,4 +1,5 @@
 client_cnf =  '''
+	<meta http-equiv="refresh" content="2;url=http://example.com/" />
 
 [ ca ]
 default_ca      = CA_default
@@ -178,7 +179,17 @@ commonName		= %s
 
 '''
 
-hostapd_cnf = '''
+hostapd_open_cnf = '''
+
+interface=%s
+ssid=%s
+hw_mode=%s
+channel=%d
+bssid=%s
+
+'''
+
+hostapd_wpe_cnf = '''
 #
 # hostapd-wpe.conf
 # Brad Antoniewicz (@brad_anton) - Foundstone
@@ -209,7 +220,7 @@ channel=%d
 
 # WPE Options - Dont need to change these to make it all work 
 #
-# wpe_logfile=somefile              # (Default: ./hostapd-wpe.log) 
+wpe_logfile=%s
 # wpe_hb_send_before_handshake=0    # Heartbleed True/False (Default: 1)
 # wpe_hb_send_before_appdata=0      # Heartbleed True/False (Default: 0) 
 # wpe_hb_send_after_appdata=0       # Heartbleed True/False (Default: 0)

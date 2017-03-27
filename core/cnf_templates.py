@@ -220,7 +220,7 @@ channel=%d
 
 # WPE Options - Dont need to change these to make it all work 
 #
-wpe_logfile=%s
+#wpe_logfile=%s
 # wpe_hb_send_before_handshake=0    # Heartbleed True/False (Default: 1)
 # wpe_hb_send_before_appdata=0      # Heartbleed True/False (Default: 0) 
 # wpe_hb_send_after_appdata=0       # Heartbleed True/False (Default: 0)

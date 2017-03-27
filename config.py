@@ -34,11 +34,15 @@ dnsspoof = None
 dnsspoof_bin = 'dnsspoof'
 dnsspoof_cnf = conf_dir + '/dnsspoof.conf'
 
+httpd = 'apache2'
+httpd_bin = None
+sleep_time = 3
+
 proc_ipforward = '/proc/sys/net/ipv4/ip_forward'
 
 # don't touch these
 wlan_clean_sleep = 1
-hostapd_sleep = 5
+hostapd_sleep = 4
 network_manager_sleep = 4
 dnsmasq_sleep = 2
 dnsspoof_sleep = 2

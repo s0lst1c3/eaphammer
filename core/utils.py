@@ -1,50 +1,95 @@
 import os
 import time
 import config
+from tqdm import tqdm
+
+def sleep_bar(sleep_time, text=''):
+
+    print
+    
+    if text:
+
+        print text
+        print
+
+    interval = sleep_time % 1
+    if interval == 0:
+        interval = 1
+        iterations = sleep_time
+    else:
+        iterations = sleep_time / interval
+
+    for i in tqdm(range(iterations)):
+        time.sleep(interval)
+
+    print
+        
 
 class Service(object):
 
     @classmethod
-    def start(cls):
+    def start(cls, verbose=True):
 
         if config.use_systemd:
             os.system('systemctl start %s' % cls.service_name)
         else:
             os.system('service %s start' % cls.service_name)
         
-        time.sleep(cls.sleep_time)
+        if verbose:
+            sleep_bar(cls.sleep_time, '[*] Starting %s service.' % cls.service_name)
+        else:
+            time.sleep(cls.sleep_time)
 
     @classmethod
-    def status(cls):
+    def status(cls, verbose=True):
 
         if config.use_systemd:
             os.system('echo "`systemctl status %s`"' % cls.service_name)
         else:
             os.system('service %s status' % cls.service_name)
-        time.sleep(cls.sleep_time)
+
+        if verbose:
+            sleep_bar(cls.sleep_time, '[*] Getting status of %s service.' % cls.service_name)
+        else:
+            time.sleep(cls.sleep_time)
 
     @classmethod
-    def stop(cls):
+    def stop(cls, verbose=True):
 
         if config.use_systemd:
             os.system('systemctl stop %s' % cls.service_name)
         else:
             os.system('service %s stop' % cls.service_name)
-        time.sleep(cls.sleep_time)
+
+        if verbose:
+            sleep_bar(cls.sleep_time, '[*] stopping %s service.' % cls.service_name)
+        else:
+            time.sleep(cls.sleep_time)
+
 
     @classmethod
-    def kill(cls):
+    def kill(cls, verbose=True):
 
-        os.system('for i in `pgrep %s`; do kill $i; done' % cls.service_name)
-        time.sleep(cls.sleep_time)
+        killname = os.path.basename(os.path.normpath(cls.bin_path))
+        os.system('for i in `pgrep %s`; do kill $i; done' % killname)
+
+        if verbose:
+            sleep_bar(cls.sleep_time, '[*] Killing all processes for: %s' % killname)
+        else:
+            time.sleep(cls.sleep_time)
 
     @classmethod
-    def hardstart(cls, args='', background=True):
+    def hardstart(cls, args='', background=True, verbose=True):
+
         if background:
             os.system('%s %s &' % (cls.bin_path, args))
         else:
             os.system('%s %s' % (cls.bin_path, args))
-        time.sleep(cls.sleep_time)
+
+        if verbose:
+            sleep_bar(cls.sleep_time, '[*] Starting process: %s' % cls.bin_path)
+        else:
+            time.sleep(cls.sleep_time)
 
 class NetworkManager(Service):
     
@@ -56,6 +101,12 @@ class Hostapd(Service):
 
     service_name = None
     bin_path = config.hostapd_bin
+    sleep_time = config.hostapd_sleep
+
+class Httpd(Service):
+
+    service_name = config.httpd
+    bin_path = config.httpd_bin
     sleep_time = config.hostapd_sleep
 
 class Dnsmasq(Service):
@@ -70,11 +121,14 @@ class Dnsspoof(Service):
     bin_path = config.dnsspoof_bin
     sleep_time = config.dnsspoof_sleep
 
-def wlan_clean():
+def wlan_clean(verbose=True):
 
     os.system('nmcli radio wifi off')
     os.system('rfkill unblock wlan')
-    time.sleep(config.wlan_clean_sleep)
+    if verbose:
+        sleep_bar(config.wlan_clean_sleep, '[*] Reticulating radio frequency splines...')
+    else:
+        time.sleep(config.wlan_clean_sleep)
 
 def set_ipforward(value):
 

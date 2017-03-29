@@ -8,8 +8,8 @@ Overview
 
 EAPHammer is a toolkit for performing targetted evil twin attacks against WPA2-Enterprise networks. It is designed to be used in full scope wireless assessments and red team engagements. As such, focus is placed on providing an easy-to-use interface that can be leveraged to execute powerful wireless attacks with minimal manual configuration. Leverages hostapd-wpe, dnsmasq, dnsspoof, Responder, and Python 2.7.
 
-Features:
----------
+Features
+--------
 
 - Steal RADIUS credentials from WPA-EAP and WPA2-EAP networks.
 - Perform hostile portal attacks to steal AD creds and perform indirect wireless pivots
@@ -19,8 +19,8 @@ Features:
 - No manual configuration necessary for most attacks.
 - No manual configuration necessary for installation and setup process
 
-Upcoming Features:
-------------------
+Upcoming Features
+-----------------
 
 - Perform seemeless MITM attacks with partial HSTS bypasses
 - Support attacks against WPA-PSK/WPA2-PSK
@@ -36,8 +36,8 @@ Will this tool ever support Karma attacks?
 - At some point yes, but for now the focus has been on directed evil twin attacks.
 - If Karma attacks are like a wireless grenade launcher, this tool is more like an easy-to-use wireless sniper rifle
 
-Setup Guide:
-============
+Setup Guide
+===========
 
 
 Begin by cloning the __eaphammer__ repo using the following command.
@@ -50,8 +50,8 @@ Finally, run the setup.py file as shown below to complete the eaphammer setup pr
 
 	python setup.py
 
-Usage Guide:
-============
+Usage Guide
+===========
 
 x.509 Certificate Generation
 ----------------------------

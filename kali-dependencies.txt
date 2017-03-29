@@ -1,4 +1,4 @@
 libssl-dev
 libssl1.0-dev
 libnl-3-dev
-libnl-genl3-dev
+libnl-genl-3-dev

@@ -31,6 +31,7 @@ Upcoming Features
 - directed rogue AP attacks (deauth then evil twin from PNL, deauth then karma + ACL)
 - Updated hostapd-wpe that works with the latest version of Hostapd
 - Integrated website cloner for cloning captive portal login pages
+- Integrated HTTP server
 
 Will this tool ever support Karma attacks?
 
@@ -96,4 +97,15 @@ This will cause eaphammer to execute an evil twin attack in which the HTTP(S) tr
 Additional Options
 ------------------
 
-Info about additional flags here.
+- __--cert-wizard__ - Use this flag to create a new RADIUS cert for your AP.
+- __-h, --help__ - Display detailed help message and exit.
+- __-i, --interface__ - Specify the a PHY interface on which to create your AP.
+- __-e ESSID, --essid ESSID__ - Specify access point ESSID.
+- __-b BSSID, --bssid BSSID__ - Specify access point BSSID.
+- __--hw-mode HW-MODE__ - Specify access point hardware mode (default: g).
+- __-c CHANNEL, --channel CHANNEL__ - Specify access point channel.
+- __--wpa {1,2}__ - Specify WPA type (default: 2).
+- __--auth {peap,ttls,open}__ - Specify auth type (default: open).
+- __--creds__ - Harvest EAP creds using an evil twin attack.
+- __--hostile-portal__ - Force clients to connect to hostile portal.
+- __--captive-portal__ - Force clients to connect to a captive portal.

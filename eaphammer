@@ -286,12 +286,28 @@ def set_options():
         if options['interface'] is None:
         
 
+            parser.print_usage()
+            print
             print 'Please specify a valid PHY interface using the --interface flag'
             sys.exit()
 
     return options
 
+def print_banner():
+
+
+    print '''
+                     .__                                         
+  ____ _____  ______ |  |__ _____    _____   _____   ___________ 
+_/ __ \\\\__  \\ \\____ \\|  |  \\\\__  \\  /     \\ /     \\_/ __ \\_  __ \\
+\\  ___/ / __ \\|  |_> >   Y  \\/ __ \\|  Y Y  \\  Y Y  \\  ___/|  | \\/
+ \\___  >____  /   __/|___|  (____  /__|_|  /__|_|  /\\___  >__|   
+     \\/     \\/|__|        \\/     \\/      \\/      \\/     \\/       
+    '''
+
 if __name__ == '__main__':
+
+    print_banner()
 
     options = set_options()
 

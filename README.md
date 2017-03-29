@@ -78,7 +78,7 @@ Please refer to the options described in [Additional Options](#additional-option
 Stealing AD Credentials Using Hostile Portal Attacks
 ----------------------------------------------------
 
-Eaphammer can perform hostile portal attacks that can force LLMNR/NBT-NS enabled Windows clients into surrenduring password hashes. The attack works by forcing associations using an evil twin attack, then forcing associated clients to attempt NetBIOS named resolution using a [Redirect To SMB](https://www.cylance.com/redirect-to-smb) attack. While this occurs, eaphammer runs [Responder](https://github.com/SpiderLabs/Responder) in the background to perform a nearly instantaneous LLMNR/NBT-NS poisoning attack against the affected wireless clients. The result is an attack that causes affected devices to not only connect to the rogue access point, but send NTLM hashes to the rogue access point as well.
+Eaphammer can perform hostile portal attacks that can force LLMNR/NBT-NS enabled Windows clients into surrendering password hashes. The attack works by forcing associations using an evil twin attack, then forcing associated clients to attempt NetBIOS named resolution using a [Redirect To SMB](https://www.cylance.com/redirect-to-smb) attack. While this occurs, eaphammer runs [Responder](https://github.com/SpiderLabs/Responder) in the background to perform a nearly instantaneous LLMNR/NBT-NS poisoning attack against the affected wireless clients. The result is an attack that causes affected devices to not only connect to the rogue access point, but send NTLM hashes to the rogue access point as well.
 
 Performing Indirect Wireless Pivots Using Hostile Portal Attacks
 ----------------------------------------------------------------

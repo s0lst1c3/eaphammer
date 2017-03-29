@@ -6,7 +6,7 @@ by Gabriel Ryan ([s0lst1c3](https://twitter.com/s0lst1c3))
 Overview
 --------
 
-EAPHammer is a toolkit for performing targetted evil twin attacks against WPA2-Enterprise networks. It is designed to be used in full scope wireless assessments and red team engagements. As such, focus is placed on providing an easy-to-use interface that can be leveraged to execute powerful wireless attacks with minimal manual configuration. Leverages hostapd-wpe, dnsmasq, dnsspoof, Responder, and Python 2.7.
+EAPHammer is a toolkit for performing targetted evil twin attacks against WPA2-Enterprise networks. It is designed to be used in full scope wireless assessments and red team engagements. As such, focus is placed on providing an easy-to-use interface that can be leveraged to execute powerful wireless attacks with minimal manual configuration. Leverages _hostapd-wpe_, _dnsmasq_, _dnsspoof_, _Responder_, and _Python 2.7_.
 
 Features
 --------

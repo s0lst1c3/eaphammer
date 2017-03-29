@@ -80,10 +80,16 @@ Stealing AD Credentials Using Hostile Portal Attacks
 
 Eaphammer can perform hostile portal attacks that can force LLMNR/NBT-NS enabled Windows clients into surrendering password hashes. The attack works by forcing associations using an evil twin attack, then forcing associated clients to attempt NetBIOS named resolution using a [Redirect To SMB](https://www.cylance.com/redirect-to-smb) attack. While this occurs, eaphammer runs [Responder](https://github.com/SpiderLabs/Responder) in the background to perform a nearly instantaneous LLMNR/NBT-NS poisoning attack against the affected wireless clients. The result is an attack that causes affected devices to not only connect to the rogue access point, but send NTLM hashes to the rogue access point as well.
 
+The --hostile-portal flag can be used to execute a hostile portal attack, as shown in the examples below.
+
+	./eaphammer --interface wlan0 --bssid 1C:7E:E5:97:79:B1 --essid EvilC0rp --channel 6 --auth peap --wpa 2 --hostile-portal
+
+	./eaphammer --interface wlan0 --essid TotallyLegit --channel 1 --auth open --hostile-portal
+
 Performing Indirect Wireless Pivots Using Hostile Portal Attacks
 ----------------------------------------------------------------
 
-Lorem ipsem blah blah blah.
+The hostile portal attack described in [Stealing AD Credentials Using Hostile Portal Attacks](#Stealing-AD-Credentials-Using-Hostile-Portal-Attacks) can be used to perform an SMB relay attack against the affected devices. An attacker can use hostile portal attack to perform an SMB relay attack that places timed reverse shell on an authorized wireless devices. The attacker can then disengage the attack to allow the authorized device to reconnect to the targetted network. When the attacker receives the reverse shell, he or she will have the same level of authorization as the attacker.
 
 Performing Captive Portal Attacks
 ---------------------------------

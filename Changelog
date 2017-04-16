@@ -7,3 +7,7 @@ Added tqdm to pip.req file.
 Added python-pip to kali-dependencies.txt.
 Added version string to ./eaphammer
 Updated README to reflect changes.
+
+0.0.3 - Gabriel Ryan <gryan@gdssecurity.com>
+Removed submodules, updated setup.py to reflect this.
+

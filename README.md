@@ -48,6 +48,10 @@ Begin by cloning the __eaphammer__ repo using the following command.
 
 Next, use your package manager to install the depencies listed in `kali-dependencies.txt`.
 
+After that, install the Python dependencies listed in `pip.req` using the following command:
+
+	pip install -r pip.req
+
 Finally, run the setup.py file as shown below to complete the eaphammer setup process.
 
 	python setup.py

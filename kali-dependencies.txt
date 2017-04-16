@@ -5,3 +5,4 @@ libnl-genl-3-dev
 dnsmasq
 dnsspoof
 apache2
+python-pip

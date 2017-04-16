@@ -1,3 +1,5 @@
+__version__ = '0.0.4'
+
 conf_dir = './conf'
 logdir = './logs'
 

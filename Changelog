@@ -11,3 +11,6 @@ Updated README to reflect changes.
 0.0.3 - Gabriel Ryan <gryan@gdssecurity.com>
 Removed submodules, updated setup.py to reflect this.
 
+0.0.4 - Gabriel Ryan <gryan@gdssecurity.com>
+Updated to use local copy of latest version of s0lst1c3/hostapd-wpe.
+Moved version string from ./eaphammer to ./config.py.

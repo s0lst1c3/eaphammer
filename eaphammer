@@ -8,8 +8,7 @@ import time
 
 from core import cert_manager, conf_manager, utils, responder
 from argparse import ArgumentParser
-
-__version__ = '0.0.3'
+from config import __version__
 
 def cert_wizard():
 

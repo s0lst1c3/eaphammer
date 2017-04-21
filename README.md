@@ -6,7 +6,7 @@ by Gabriel Ryan ([s0lst1c3](https://twitter.com/s0lst1c3))
 Overview
 --------
 
-EAPHammer is a toolkit for performing targetted evil twin attacks against WPA2-Enterprise networks. It is designed to be used in full scope wireless assessments and red team engagements. As such, focus is placed on providing an easy-to-use interface that can be leveraged to execute powerful wireless attacks with minimal manual configuration. Leverages _hostapd-wpe_, _dnsmasq_, _dnsspoof_, _Responder_, and _Python 2.7_.
+EAPHammer is a toolkit for performing targetted evil twin attacks against WPA2-Enterprise networks. It is designed to be used in full scope wireless assessments and red team engagements. As such, focus is placed on providing an easy-to-use interface that can be leveraged to execute powerful wireless attacks with minimal manual configuration. Leverages a modified version of _hostapd-wpe_, _dnsmasq_, _dnsspoof_, _Responder_, and _Python 2.7_.
 
 Features
 --------
@@ -41,20 +41,54 @@ Will this tool ever support Karma attacks?
 Setup Guide
 ===========
 
+Kali Setup Instructions
+-----------------------
+
 
 Begin by cloning the __eaphammer__ repo using the following command.
 
-	git clone git@github.com:s0lst1c3/eaphammer.git
+	git clone https://github.com/s0lst1c3/eaphammer.git
 
-Next, use your package manager to install the depencies listed in `kali-dependencies.txt`.
-
-After that, install the Python dependencies listed in `pip.req` using the following command:
-
-	pip install -r pip.req
-
-Finally, run the setup.py file as shown below to complete the eaphammer setup process.
+Next run the kali-setup.py file as shown below to complete the eaphammer setup process. This will install dependencies and compile hostapd.
 
 	python setup.py
+
+Other Distros
+-------------
+
+If you are _not_ using Kali, you can still compile eaphammer. I just haven't written a setup script for your distro yet, which means you'll have to do it manually. Ask yourself whether you understand the following:
+
+- python-devel vs python-dev
+- service vs systemctl
+- network-manager vs NetworkManager
+- httpd vs apache2
+
+If you looked at this list and immediately realized that each pair of items was to some extent equivalent (well, except for service vs systemctl, but you catch my drift), you'll probably have no problems getting this package to work on the distro of your choice. If not, please just stick with Kali until support is added for other distros.
+
+With that out of the way, here are the generic setup instructions:
+
+Use your package manager to install each of the dependencies listed in `kali-dependencies.txt`. Package names can vary slightly from distro to distro, so you may get a "package not found" error or similar. If this occurs, just use Google to find out what the equivalent package is for your distro and install that instead.
+
+Once you have installed each of the dependencies listed in `kali-dependencies.txt`, you'll need to install some additional packages that ship with Kali by default. These packages are listed below. If you're on a distro that uses httpd instead of apache2, install that instead.
+
+- dsniff
+- apache2 
+
+Compile hostapd using the following commands:
+
+	cd hostapd-eaphammer
+	make
+
+Open config.py in the text editor of your choice and edit the following lines so that to values that work for your distro:
+
+	# change this to False if you cannot/will not use systemd
+	use_systemd = True
+	
+	# change this to 'NetworkManager' if necessary
+	network_manager = 'network-manager'
+	
+	# change this 'httpd' if necessary
+	httpd = 'apache2'
 
 Usage Guide
 ===========

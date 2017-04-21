@@ -12,5 +12,8 @@ Updated README to reflect changes.
 Removed submodules, updated setup.py to reflect this.
 
 0.0.4 - Gabriel Ryan <gryan@gdssecurity.com>
-Updated to use local copy of latest version of s0lst1c3/hostapd-wpe.
+Updated to use local copy of s0lst1c3/hostapd-eaphammer (hostapd-wpe without Cupid and Karma, uses latest openssl, uses hostapd-2.6)
 Moved version string from ./eaphammer to ./config.py.
+Updated kali-dependencies.txt.
+Updated setup.py.
+Updated README to reflect changes.

@@ -6,7 +6,15 @@ by Gabriel Ryan ([s0lst1c3](https://twitter.com/s0lst1c3))
 Overview
 --------
 
-EAPHammer is a toolkit for performing targetted evil twin attacks against WPA2-Enterprise networks. It is designed to be used in full scope wireless assessments and red team engagements. As such, focus is placed on providing an easy-to-use interface that can be leveraged to execute powerful wireless attacks with minimal manual configuration. Leverages a modified version of _hostapd-wpe_, _dnsmasq_, _dnsspoof_, _Responder_, and _Python 2.7_.
+EAPHammer is a toolkit for performing targetted evil twin attacks against WPA2-Enterprise networks. It is designed to be used in full scope wireless assessments and red team engagements. As such, focus is placed on providing an easy-to-use interface that can be leveraged to execute powerful wireless attacks with minimal manual configuration. To illustrate how fast this tool is, here's an example of how to setup and execute credential stealing evil twin attack against a WPA2-TTLS network in just two commands:
+
+	# generate certificates
+	./eaphammer --cert-wizard
+
+	# launch attack
+	./eaphammer -i wlan0 --channel 4 --auth ttls --wpa 2 --essid CorpWifi --creds
+
+Leverages a lightly modified version of _hostapd-wpe_, _dnsmasq_, _dnsspoof (part of dsniff)_, _Responder_, and _Python 2.7_.
 
 Features
 --------
@@ -56,7 +64,7 @@ Next run the kali-setup.py file as shown below to complete the eaphammer setup p
 Other Distros
 -------------
 
-If you are _not_ using Kali, you can still compile eaphammer. I just haven't written a setup script for your distro yet, which means you'll have to do it manually. Ask yourself whether you understand the following:
+If you are not using Kali, you can still compile eaphammer. I just haven't written a setup script for your distro yet, which means you'll have to do it manually. Ask yourself whether you understand the following:
 
 - python-devel vs python-dev
 - service vs systemctl

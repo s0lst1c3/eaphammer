@@ -11,9 +11,6 @@ if __name__ == '__main__':
     os.system('apt-get install %s' % read_deps_file('kali-dependencies.txt'))
     print '[*] complete!'
 
-    print 'blah blah'
-    raw_input()
-
     print '[*] Installing Python dependencies...'
     os.system('pip install -r pip.req')
     print '[*] complete!'

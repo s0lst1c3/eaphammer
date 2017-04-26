@@ -121,10 +121,11 @@ class Dnsspoof(Service):
     bin_path = config.dnsspoof_bin
     sleep_time = config.dnsspoof_sleep
 
-def wlan_clean(verbose=True):
+def wlan_clean(iface, verbose=True):
 
     os.system('nmcli radio wifi off')
     os.system('rfkill unblock wlan')
+    os.system('ifconfig %s up' % iface)
     if verbose:
         sleep_bar(config.wlan_clean_sleep, '[*] Reticulating radio frequency splines...')
     else:

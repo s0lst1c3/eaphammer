@@ -17,3 +17,8 @@ Moved version string from ./eaphammer to ./config.py.
 Updated kali-dependencies.txt.
 Updated setup.py.
 Updated README to reflect changes.
+
+0.0.5 - Gabriel Ryan <gryan@gdssecurity.com>
+Certs are now signed using sha256 to ensure compatibility with current versions of OpenSSL.
+wlan_clean() in core/utils.py now properly raises network interface after stopping NetworkManager.
+Updated version string in ./config.py.

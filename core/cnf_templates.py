@@ -19,7 +19,7 @@ name_opt        = ca_default
 cert_opt        = ca_default
 default_days        = 365
 default_crl_days    = 30
-default_md      = md5
+default_md      = sha256
 preserve        = no
 policy          = policy_match
 
@@ -78,7 +78,7 @@ name_opt		= ca_default
 cert_opt		= ca_default
 default_days		= 365
 default_crl_days	= 30
-default_md		= md5
+default_md		= sha256
 preserve		= no
 policy			= policy_match
 
@@ -141,7 +141,7 @@ name_opt		= ca_default
 cert_opt		= ca_default
 default_days		= 365
 default_crl_days	= 30
-default_md		= md5
+default_md		= sha256
 preserve		= no
 policy			= policy_match
 

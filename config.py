@@ -1,4 +1,4 @@
-__version__ = '0.0.5'
+__version__ = '0.0.6'
 
 conf_dir = './conf'
 logdir = './logs'
@@ -36,6 +36,9 @@ httpd = 'apache2'
 httpd_bin = None
 sleep_time = 3
 
+wpa_supplicant = 'wpa_supplicant'
+wpa_supplicant_bin = None
+
 proc_ipforward = '/proc/sys/net/ipv4/ip_forward'
 
 # don't touch these
@@ -44,3 +47,4 @@ hostapd_sleep = 4
 network_manager_sleep = 4
 dnsmasq_sleep = 2
 dnsspoof_sleep = 2
+wpa_supplicant_sleep = 4

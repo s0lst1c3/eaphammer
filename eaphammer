@@ -46,6 +46,7 @@ def hostile_portal():
     try:
         # prepare environment
         utils.NetworkManager.stop()
+        utils.WPASupplicant.stop()
         utils.wlan_clean(options['interface'])
         utils.set_ipforward(1)
 
@@ -117,6 +118,7 @@ def captive_portal():
     try:
         # prepare environment
         utils.NetworkManager.stop()
+        utils.WPASupplicant.stop()
         utils.wlan_clean(options['interface'])
         utils.set_ipforward(1)
 
@@ -196,6 +198,7 @@ def reap_creds():
                                         wpa=options['wpa'])
 
         utils.NetworkManager.stop()
+        utils.WPASupplicant.stop()
         utils.wlan_clean(options['interface'])
         utils.Hostapd.hardstart('-s %s ' % config.hostapd_cnf, verbose=False)
 

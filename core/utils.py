@@ -121,6 +121,12 @@ class Dnsspoof(Service):
     bin_path = config.dnsspoof_bin
     sleep_time = config.dnsspoof_sleep
 
+class WPASupplicant(Service):
+
+    service_name = config.wpa_supplicant
+    bin_path = config.wpa_supplicant_bin
+    sleep_time = config.wpa_supplicant_sleep
+
 def wlan_clean(iface, verbose=True):
 
     os.system('nmcli radio wifi off')

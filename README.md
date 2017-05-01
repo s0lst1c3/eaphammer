@@ -59,7 +59,7 @@ Begin by cloning the __eaphammer__ repo using the following command.
 
 Next run the kali-setup.py file as shown below to complete the eaphammer setup process. This will install dependencies and compile hostapd.
 
-	python setup.py
+	python kali-setup.py
 
 Other Distros
 -------------

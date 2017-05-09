@@ -26,6 +26,7 @@ Features
 - Support for Open networks and WPA-EAP/WPA2-EAP
 - No manual configuration necessary for most attacks.
 - No manual configuration necessary for installation and setup process
+- Leverages latest version of hostapd (2.6)
 
 Upcoming Features
 -----------------
@@ -37,7 +38,6 @@ Upcoming Features
 - Integrated PowerShell payload generation
 - impacket integration for SMB relay attacks
 - directed rogue AP attacks (deauth then evil twin from PNL, deauth then karma + ACL)
-- Updated hostapd-wpe that works with the latest version of Hostapd
 - Integrated website cloner for cloning captive portal login pages
 - Integrated HTTP server
 

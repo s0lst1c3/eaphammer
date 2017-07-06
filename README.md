@@ -3,7 +3,7 @@ eaphammer
 
 by Gabriel Ryan ([s0lst1c3](https://twitter.com/s0lst1c3))
 
-[![Black Hat Arsenal](https://raw.githubusercontent.com/toolswatch/badges/master/arsenal/2017.svg)](https://www.blackhat.com/us-17/arsenal.html#eaphammer)
+[![Black Hat Arsenal](https://cdn.rawgit.com/toolswatch/badges/master/arsenal/2017.svg)](https://www.blackhat.com/us-17/arsenal.html#eaphammer)
 
 Overview
 --------

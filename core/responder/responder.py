@@ -237,34 +237,36 @@ class Responder(object):
             instance = Responder()
         return instance
     
-    def configure(self):
+    def configure(self, interface=None):
 
-        options = {}
-        options['interface'] = 'eth0'
-        options['responder'] = {}
-        options['responder']['lm_downgrade'] = True
-        options['responder']['wpad'] = True
-        options['responder']['w_redirect'] = True
-        options['responder']['nbtns_domain'] = False
-        options['responder']['basic_auth'] = False
-        options['responder']['fingerprint'] = False
-        options['responder']['ourip'] = None
-        options['responder']['force_wpad_auth'] = False
-        options['responder']['upstream_proxy'] = None
-        options['responder']['analyze'] = False
-        options['responder']['verbose'] = False
+        assert interface is not None
+
+        responder_configs = {}
+        responder_configs['interface'] = interface
+        responder_configs['responder'] = {}
+        responder_configs['responder']['lm_downgrade'] = True
+        responder_configs['responder']['wpad'] = True
+        responder_configs['responder']['w_redirect'] = True
+        responder_configs['responder']['nbtns_domain'] = False
+        responder_configs['responder']['basic_auth'] = False
+        responder_configs['responder']['fingerprint'] = False
+        responder_configs['responder']['ourip'] = None
+        responder_configs['responder']['force_wpad_auth'] = False
+        responder_configs['responder']['upstream_proxy'] = None
+        responder_configs['responder']['analyze'] = False
+        responder_configs['responder']['verbose'] = False
     
 
         if not os.geteuid() == 0:
             print color("[!] Responder must be run as root.")
             sys.exit(-1)
-        elif options['responder']['ourip'] is None and IsOsX() is True:
+        elif responder_configs['responder']['ourip'] is None and IsOsX() is True:
             print "\n\033[1m\033[31mOSX detected, -i mandatory option is missing\033[0m\n"
             parser.print_help()
             exit(-1)
         
         settings.init()
-        settings.Config.populate(options)
+        settings.Config.populate(responder_configs)
         
         StartupMessage()
         

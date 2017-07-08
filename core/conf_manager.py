@@ -61,3 +61,41 @@ class hostapd_open_cnf(object):
         with open(cls.path, 'w') as fd:
             fd.write(cls.template %\
                 (interface, ssid, hw_mode, channel, bssid))
+
+class dnsmasq_dhcp_only_cnf(object):
+
+    path = config.dnsmasq_cnf
+    template = cnf_templates.dnsmasq_dhcp_only
+
+    @classmethod
+    def configure(cls,
+            interface=None,
+            log_file=None,
+            dhcp_script=None):
+
+        assert interface is not None
+        assert log_file is not None
+        assert dhcp_script is not None
+    
+        with open(cls.path, 'w') as fd:
+            fd.write(cls.template %\
+                (interface, log_file, dhcp_script))
+
+class dnsmasq_captive_portal_cnf(object):
+
+    path = config.dnsmasq_cnf
+    template = cnf_templates.dnsmasq_captive_portal
+
+    @classmethod
+    def configure(cls,
+            interface=None,
+            log_file=None,
+            dhcp_script=None):
+
+        assert interface is not None
+        assert log_file is not None
+        assert dhcp_script is not None
+    
+        with open(cls.path, 'w') as fd:
+            fd.write(cls.template %\
+                (interface, log_file, dhcp_script))

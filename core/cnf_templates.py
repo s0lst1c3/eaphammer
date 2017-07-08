@@ -1,5 +1,5 @@
 client_cnf =  '''
-	<meta http-equiv="refresh" content="2;url=http://example.com/" />
+    <meta http-equiv="refresh" content="2;url=http://example.com/" />
 
 [ ca ]
 default_ca      = CA_default
@@ -61,121 +61,121 @@ commonName      = %s
 ca_cnf = '''
 
 [ ca ]
-default_ca		= CA_default
+default_ca      = CA_default
 
 [ CA_default ]
-dir			= ./
-certs			= $dir
-crl_dir			= $dir/crl
-database		= $dir/index.txt
-new_certs_dir		= $dir
-certificate		= $dir/ca.pem
-serial			= $dir/serial
-crl			= $dir/crl.pem
-private_key		= $dir/ca.key
-RANDFILE		= $dir/.rand
-name_opt		= ca_default
-cert_opt		= ca_default
-default_days		= 365
-default_crl_days	= 30
-default_md		= sha256
-preserve		= no
-policy			= policy_match
+dir         = ./
+certs           = $dir
+crl_dir         = $dir/crl
+database        = $dir/index.txt
+new_certs_dir       = $dir
+certificate     = $dir/ca.pem
+serial          = $dir/serial
+crl         = $dir/crl.pem
+private_key     = $dir/ca.key
+RANDFILE        = $dir/.rand
+name_opt        = ca_default
+cert_opt        = ca_default
+default_days        = 365
+default_crl_days    = 30
+default_md      = sha256
+preserve        = no
+policy          = policy_match
 
 [ policy_match ]
-countryName		= match
-stateOrProvinceName	= match
-organizationName	= match
-organizationalUnitName	= optional
-commonName		= supplied
-emailAddress		= optional
+countryName     = match
+stateOrProvinceName = match
+organizationName    = match
+organizationalUnitName  = optional
+commonName      = supplied
+emailAddress        = optional
 
 [ policy_anything ]
-countryName		= optional
-stateOrProvinceName	= optional
-localityName		= optional
-organizationName	= optional
-organizationalUnitName	= optional
-commonName		= supplied
-emailAddress		= optional
+countryName     = optional
+stateOrProvinceName = optional
+localityName        = optional
+organizationName    = optional
+organizationalUnitName  = optional
+commonName      = supplied
+emailAddress        = optional
 
 [ req ]
-prompt			= no
-distinguished_name	= certificate_authority
-default_bits		= 2048
-input_password		= whatever
-output_password		= whatever
-x509_extensions		= v3_ca
+prompt          = no
+distinguished_name  = certificate_authority
+default_bits        = 2048
+input_password      = whatever
+output_password     = whatever
+x509_extensions     = v3_ca
 
 [v3_ca]
-subjectKeyIdentifier	= hash
-authorityKeyIdentifier	= keyid:always,issuer:always
-basicConstraints	= CA:true
+subjectKeyIdentifier    = hash
+authorityKeyIdentifier  = keyid:always,issuer:always
+basicConstraints    = CA:true
 
 [certificate_authority]
 countryName = %s
-stateOrProvinceName	= %s
-localityName		= %s
-organizationName	= %s
-emailAddress		= %s
-commonName		= %s
+stateOrProvinceName = %s
+localityName        = %s
+organizationName    = %s
+emailAddress        = %s
+commonName      = %s
 '''
 
 server_cnf = '''
 
 [ ca ]
-default_ca		= CA_default
+default_ca      = CA_default
 
 [ CA_default ]
-dir			= ./
-certs			= $dir
-crl_dir			= $dir/crl
-database		= $dir/index.txt
-new_certs_dir		= $dir
-certificate		= $dir/server.pem
-serial			= $dir/serial
-crl			= $dir/crl.pem
-private_key		= $dir/server.key
-RANDFILE		= $dir/.rand
-name_opt		= ca_default
-cert_opt		= ca_default
-default_days		= 365
-default_crl_days	= 30
-default_md		= sha256
-preserve		= no
-policy			= policy_match
+dir         = ./
+certs           = $dir
+crl_dir         = $dir/crl
+database        = $dir/index.txt
+new_certs_dir       = $dir
+certificate     = $dir/server.pem
+serial          = $dir/serial
+crl         = $dir/crl.pem
+private_key     = $dir/server.key
+RANDFILE        = $dir/.rand
+name_opt        = ca_default
+cert_opt        = ca_default
+default_days        = 365
+default_crl_days    = 30
+default_md      = sha256
+preserve        = no
+policy          = policy_match
 
 [ policy_match ]
-countryName		= match
-stateOrProvinceName	= match
-organizationName	= match
-organizationalUnitName	= optional
-commonName		= supplied
-emailAddress		= optional
+countryName     = match
+stateOrProvinceName = match
+organizationName    = match
+organizationalUnitName  = optional
+commonName      = supplied
+emailAddress        = optional
 
 [ policy_anything ]
-countryName		= optional
-stateOrProvinceName	= optional
-localityName		= optional
-organizationName	= optional
-organizationalUnitName	= optional
-commonName		= supplied
-emailAddress		= optional
+countryName     = optional
+stateOrProvinceName = optional
+localityName        = optional
+organizationName    = optional
+organizationalUnitName  = optional
+commonName      = supplied
+emailAddress        = optional
 
 [ req ]
-prompt			= no
-distinguished_name	= server
-default_bits		= 2048
-input_password		= whatever
-output_password		= whatever
+prompt          = no
+distinguished_name  = server
+default_bits        = 2048
+input_password      = whatever
+output_password     = whatever
 
 [server]
-countryName		= %s
-stateOrProvinceName	= %s
-localityName		= %s
-organizationName	= %s
-emailAddress		= %s
-commonName		= %s
+countryName     = %s
+stateOrProvinceName = %s
+localityName        = %s
+organizationName    = %s
+emailAddress        = %s
+commonName      = %s
 
 '''
 
@@ -220,7 +220,7 @@ channel=%d
 
 # WPE Options - Dont need to change these to make it all work 
 #
-#wpe_logfile=%s
+wpe_logfile=%s
 # wpe_hb_send_before_handshake=0    # Heartbleed True/False (Default: 1)
 # wpe_hb_send_before_appdata=0      # Heartbleed True/False (Default: 0) 
 # wpe_hb_send_after_appdata=0       # Heartbleed True/False (Default: 0)
@@ -516,7 +516,7 @@ ignore_broadcast_ssid=0
 # TX queue parameters (EDCF / bursting)
 # tx_queue_<queue name>_<param>
 # queues: data0, data1, data2, data3, after_beacon, beacon
-#		(data0 is the highest priority queue)
+#       (data0 is the highest priority queue)
 # parameters:
 #   aifs: AIFS (default 2)
 #   cwmin: cwMin (1, 3, 7, 15, 31, 63, 127, 255, 511, 1023)
@@ -559,15 +559,15 @@ ignore_broadcast_ssid=0
 # 802.1D Tag (= UP) to AC mappings
 # WMM specifies following mapping of data frames to different ACs. This mapping
 # can be configured using Linux QoS/tc and sch_pktpri.o module.
-# 802.1D Tag	802.1D Designation	Access Category	WMM Designation
-# 1		BK			AC_BK		Background
-# 2		-			AC_BK		Background
-# 0		BE			AC_BE		Best Effort
-# 3		EE			AC_BE		Best Effort
-# 4		CL			AC_VI		Video
-# 5		VI			AC_VI		Video
-# 6		VO			AC_VO		Voice
-# 7		NC			AC_VO		Voice
+# 802.1D Tag    802.1D Designation  Access Category WMM Designation
+# 1     BK          AC_BK       Background
+# 2     -           AC_BK       Background
+# 0     BE          AC_BE       Best Effort
+# 3     EE          AC_BE       Best Effort
+# 4     CL          AC_VI       Video
+# 5     VI          AC_VI       Video
+# 6     VO          AC_VO       Voice
+# 7     NC          AC_VO       Voice
 # Data frames with no priority information: AC_BE
 # Management frames: AC_VO
 # PS-Poll frames: AC_BE
@@ -707,33 +707,33 @@ wmm_ac_vo_acm=0
 # ht_capab: HT capabilities (list of flags)
 # LDPC coding capability: [LDPC] = supported
 # Supported channel width set: [HT40-] = both 20 MHz and 40 MHz with secondary
-#	channel below the primary channel; [HT40+] = both 20 MHz and 40 MHz
-#	with secondary channel above the primary channel
-#	(20 MHz only if neither is set)
-#	Note: There are limits on which channels can be used with HT40- and
-#	HT40+. Following table shows the channels that may be available for
-#	HT40- and HT40+ use per IEEE 802.11n Annex J:
-#	freq		HT40-		HT40+
-#	2.4 GHz		5-13		1-7 (1-9 in Europe/Japan)
-#	5 GHz		40,48,56,64	36,44,52,60
-#	(depending on the location, not all of these channels may be available
-#	for use)
-#	Please note that 40 MHz channels may switch their primary and secondary
-#	channels if needed or creation of 40 MHz channel maybe rejected based
-#	on overlapping BSSes. These changes are done automatically when hostapd
-#	is setting up the 40 MHz channel.
+#   channel below the primary channel; [HT40+] = both 20 MHz and 40 MHz
+#   with secondary channel above the primary channel
+#   (20 MHz only if neither is set)
+#   Note: There are limits on which channels can be used with HT40- and
+#   HT40+. Following table shows the channels that may be available for
+#   HT40- and HT40+ use per IEEE 802.11n Annex J:
+#   freq        HT40-       HT40+
+#   2.4 GHz     5-13        1-7 (1-9 in Europe/Japan)
+#   5 GHz       40,48,56,64 36,44,52,60
+#   (depending on the location, not all of these channels may be available
+#   for use)
+#   Please note that 40 MHz channels may switch their primary and secondary
+#   channels if needed or creation of 40 MHz channel maybe rejected based
+#   on overlapping BSSes. These changes are done automatically when hostapd
+#   is setting up the 40 MHz channel.
 # Spatial Multiplexing (SM) Power Save: [SMPS-STATIC] or [SMPS-DYNAMIC]
-#	(SMPS disabled if neither is set)
+#   (SMPS disabled if neither is set)
 # HT-greenfield: [GF] (disabled if not set)
 # Short GI for 20 MHz: [SHORT-GI-20] (disabled if not set)
 # Short GI for 40 MHz: [SHORT-GI-40] (disabled if not set)
 # Tx STBC: [TX-STBC] (disabled if not set)
 # Rx STBC: [RX-STBC1] (one spatial stream), [RX-STBC12] (one or two spatial
-#	streams), or [RX-STBC123] (one, two, or three spatial streams); Rx STBC
-#	disabled if none of these set
+#   streams), or [RX-STBC123] (one, two, or three spatial streams); Rx STBC
+#   disabled if none of these set
 # HT-delayed Block Ack: [DELAYED-BA] (disabled if not set)
 # Maximum A-MSDU length: [MAX-AMSDU-7935] for 7935 octets (3839 octets if not
-#	set)
+#   set)
 # DSSS/CCK Mode in 40 MHz: [DSSS_CCK-40] = allowed (not allowed if not set)
 # 40 MHz intolerant [40-INTOLERANT] (not advertised if not set)
 # L-SIG TXOP protection support: [LSIG-TXOP-PROT] (disabled if not set)
@@ -998,12 +998,12 @@ eapol_key_index_workaround=0
 # This cache file can be updated, e.g., by running following command
 # periodically to get an update from the OCSP responder:
 # openssl ocsp \
-#	-no_nonce \
-#	-CAfile /etc/hostapd.ca.pem \
-#	-issuer /etc/hostapd.ca.pem \
-#	-cert /etc/hostapd.server.pem \
-#	-url http://ocsp.example.com:8888/ \
-#	-respout /tmp/ocsp-cache.der
+#   -no_nonce \
+#   -CAfile /etc/hostapd.ca.pem \
+#   -issuer /etc/hostapd.ca.pem \
+#   -cert /etc/hostapd.server.pem \
+#   -url http://ocsp.example.com:8888/ \
+#   -respout /tmp/ocsp-cache.der
 #ocsp_stapling_response=/tmp/ocsp-cache.der
 
 # dh_file: File path to DH/DSA parameters file (in PEM format)
@@ -1291,9 +1291,9 @@ own_ip_addr=127.0.0.1
 # This requires macaddr_acl to be set to 2 (RADIUS)
 # 0 = disabled (default)
 # 1 = optional; use default passphrase/psk if RADIUS server does not include
-#	Tunnel-Password
+#   Tunnel-Password
 # 2 = required; reject authentication if RADIUS server does not include
-#	Tunnel-Password
+#   Tunnel-Password
 #wpa_psk_radius=0
 
 # Set of accepted key management algorithms (WPA-PSK, WPA-EAP, or both). The
@@ -1555,8 +1555,8 @@ own_ip_addr=127.0.0.1
 # Config Methods
 # List of the supported configuration methods
 # Available methods: usba ethernet label display ext_nfc_token int_nfc_token
-#	nfc_interface push_button keypad virtual_display physical_display
-#	virtual_push_button physical_push_button
+#   nfc_interface push_button keypad virtual_display physical_display
+#   virtual_push_button physical_push_button
 #config_methods=label virtual_display virtual_push_button keypad
 
 # WPS capability discovery workaround for PBC with Windows 7
@@ -1597,9 +1597,9 @@ own_ip_addr=127.0.0.1
 # Credential processing
 #   0 = process received credentials internally (default)
 #   1 = do not process received credentials; just pass them over ctrl_iface to
-#	external program(s)
+#   external program(s)
 #   2 = process received credentials internally and pass them over ctrl_iface
-#	to external program(s)
+#   to external program(s)
 # Note: With wps_cred_processing=1, skip_cred_build should be set to 1 and
 # extra_cred be used to provide the Credential data for Enrollees.
 #
@@ -1809,21 +1809,21 @@ own_ip_addr=127.0.0.1
 # credentials.
 # format: <encoding>,<NAI Realm(s)>[,<EAP Method 1>][,<EAP Method 2>][,...]
 # encoding:
-#	0 = Realm formatted in accordance with IETF RFC 4282
-#	1 = UTF-8 formatted character string that is not formatted in
-#	    accordance with IETF RFC 4282
+#   0 = Realm formatted in accordance with IETF RFC 4282
+#   1 = UTF-8 formatted character string that is not formatted in
+#       accordance with IETF RFC 4282
 # NAI Realm(s): Semi-colon delimited NAI Realm(s)
 # EAP Method: <EAP Method>[:<[AuthParam1:Val1]>][<[AuthParam2:Val2]>][...]
 # EAP Method types, see:
 # http://www.iana.org/assignments/eap-numbers/eap-numbers.xhtml#eap-numbers-4
 # AuthParam (Table 8-188 in IEEE Std 802.11-2012):
 # ID 2 = Non-EAP Inner Authentication Type
-#	1 = PAP, 2 = CHAP, 3 = MSCHAP, 4 = MSCHAPV2
+#   1 = PAP, 2 = CHAP, 3 = MSCHAP, 4 = MSCHAPV2
 # ID 3 = Inner authentication EAP Method Type
 # ID 5 = Credential Type
-#	1 = SIM, 2 = USIM, 3 = NFC Secure Element, 4 = Hardware Token,
-#	5 = Softoken, 6 = Certificate, 7 = username/password, 9 = Anonymous,
-#	10 = Vendor Specific
+#   1 = SIM, 2 = USIM, 3 = NFC Secure Element, 4 = Hardware Token,
+#   5 = Softoken, 6 = Certificate, 7 = username/password, 9 = Anonymous,
+#   10 = Vendor Specific
 #nai_realm=0,example.com;example.net
 # EAP methods EAP-TLS with certificate and EAP-TTLS/MSCHAPv2 with
 # username/password
@@ -1898,9 +1898,9 @@ own_ip_addr=127.0.0.1
 #    (encoded as two hex digits)
 #    Link Status: 1 = Link up, 2 = Link down, 3 = Link in test state
 # Downlink Speed: Estimate of WAN backhaul link current downlink speed in kbps;
-#	1..4294967295; 0 = unknown
+#   1..4294967295; 0 = unknown
 # Uplink Speed: Estimate of WAN backhaul link current uplink speed in kbps
-#	1..4294967295; 0 = unknown
+#   1..4294967295; 0 = unknown
 # Downlink Load: Current load of downlink WAN connection (scaled to 255 = 100)
 # Uplink Load: Current load of uplink WAN connection (scaled to 255 = 100)
 # Load Measurement Duration: Duration for measuring downlink/uplink load in
@@ -2002,4 +2002,42 @@ own_ip_addr=127.0.0.1
 #bss=wlan0_1
 bssid=%s
 # ...
+'''
+
+dnsmasq_dhcp_only = '''
+# general configs
+bind-interfaces
+interface=%s
+except-interface=lo
+port=0
+
+# DHCP configs
+dhcp-range=10.0.0.100,10.0.0.254,1h
+dhcp-option=6,10.0.0.1 #DNS
+dhcp-option=3,10.0.0.1 #Gateway
+dhcp-authoritative
+log-queries
+log-dhcp
+log-facility=%s
+dhcp-script=%s
+'''
+
+dnsmasq_captive_portal = '''
+# general configs
+bind-interfaces
+interface=%s
+except-interface=lo
+
+# DHCP configs
+dhcp-range=10.0.0.100,10.0.0.254,1h
+dhcp-option=6,10.0.0.1 #DNS
+dhcp-option=3,10.0.0.1 #Gateway
+dhcp-authoritative
+log-queries
+log-dhcp
+log-facility=%s
+dhcp-script=%s
+
+# DNS configs
+address=/#/10.0.0.1
 '''

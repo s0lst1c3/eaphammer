@@ -27,3 +27,13 @@ Updated version string in ./config.py.
 Added WPASupplicant service to core utilities.
 Eaphammer now stops wpa_supplicant service.
 Updated version string in ./config.py.
+
+0.0.7 - Gabriel Ryan <gryan@gdssecurity.com>
+Daemons now log to [project root]/logs directory.
+Dsniff's dnsspoof has been retired in favor dnsmasq.
+Integrated redirect server added for hostile portal attacks (see core/servers/redirect_server.py).
+Dnsmasq's config files are now managed by core.conf_manager.
+Dnsmasq DHCP Only and Captive Portal configurations have been improved.
+Responder now works swimmingly.
+Updated mainline logic for Captive Portal and Hostile Portal modes of operation (see eaphammer).
+Support for dnsmasq's dhcp-script option added.

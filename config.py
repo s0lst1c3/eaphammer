@@ -1,16 +1,21 @@
-__version__ = '0.0.6'
+import os
 
-conf_dir = './conf'
-logdir = './logs'
+__version__ = '0.0.7'
 
-hostapd_submodule_dir = './hostapd-eaphammer'
+root_dir, conf_file = os.path.split(os.path.abspath(__file__))
+
+conf_dir = root_dir + '/conf'
+logdir = root_dir + '/logs'
+script_dir = root_dir + '/scripts'
+
+hostapd_submodule_dir = root_dir + '/hostapd-eaphammer'
 hostapd_dir = hostapd_submodule_dir + '/hostapd'
 hostapd_bin = hostapd_dir + '/hostapd-wpe'
 hostapd_cnf = conf_dir + '/hostapd-wpe.conf'
 eap_user_file = hostapd_dir + '/hostapd-wpe.eap_user'
 hostapd_log = logdir + '/hostapd-wpe.log'
 
-certs_dir = './certs'
+certs_dir = root_dir + '/certs'
 ca_cnf = certs_dir + '/ca.cnf'
 server_cnf = certs_dir + '/server.cnf'
 client_cnf = certs_dir + '/client.cnf'
@@ -27,6 +32,8 @@ network_manager = 'network-manager'
 dnsmasq = 'dnsmasq'
 dnsmasq_bin = 'dnsmasq'
 dnsmasq_cnf = conf_dir + '/dnsmasq.conf'
+dnsmasq_log = logdir + '/dnsmasq.log'
+dhcp_script = script_dir + '/dhcp_script.py'
 
 dnsspoof = None
 dnsspoof_bin = 'dnsspoof'

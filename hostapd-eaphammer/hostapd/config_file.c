@@ -1997,6 +1997,8 @@ static int hostapd_config_fill(struct hostapd_config *conf,
 			   sizeof(conf->bss[0]->iface));
 	} else if (os_strcmp(buf, "bridge") == 0) {
 		os_strlcpy(bss->bridge, pos, sizeof(bss->bridge));
+	} else if (os_strcmp(buf, "use_karma") == 0) {
+		bss->use_karma = atoi(pos);
 	} else if (os_strcmp(buf, "vlan_bridge") == 0) {
 		os_strlcpy(bss->vlan_bridge, pos, sizeof(bss->vlan_bridge));
 	} else if (os_strcmp(buf, "wds_bridge") == 0) {
@@ -2112,6 +2114,10 @@ static int hostapd_config_fill(struct hostapd_config *conf,
 		wpa_printf(MSG_DEBUG, "eapol_version=%d", bss->eapol_version);
     } else if (os_strcmp(buf, "wpe_logfile") == 0) {
         wpe_conf.wpe_logfile = os_strdup(pos);
+    } else if (os_strcmp(buf, "eaphammer_fifo_path") == 0) { // eaphammer
+        wpe_conf.eaphammer_fifo = os_strdup(pos);
+    } else if (os_strcmp(buf, "eaphammer_use_autocrack") == 0) { // eaphammer
+        wpe_conf.eaphammer_use_autocrack = atoi(pos);
 #ifdef EAP_SERVER
 	} else if (os_strcmp(buf, "eap_authenticator") == 0) {
 		bss->eap_server = atoi(pos);

@@ -16,7 +16,7 @@ EAPHammer is a toolkit for performing targeted evil twin attacks against WPA2-En
 	# launch attack
 	./eaphammer -i wlan0 --channel 4 --auth ttls --wpa 2 --essid CorpWifi --creds
 
-Leverages a [lightly modified](https://github.com/s0lst1c3/hostapd-eaphammer) version of [hostapd-wpe](https://github.com/opensecurityresearch/hostapd-wpe) (shoutout to [Brad Anton](https://github.com/brad-anton) for creating the original), _dnsmasq_, [dsniff](https://www.monkey.org/~dugsong/dsniff/), [Responder](https://github.com/SpiderLabs/Responder), and _Python 2.7_.
+Leverages a [lightly modified](https://github.com/s0lst1c3/hostapd-eaphammer) version of [hostapd-wpe](https://github.com/opensecurityresearch/hostapd-wpe) (shoutout to [Brad Anton](https://github.com/brad-anton) for creating the original), _dnsmasq_, [Responder](https://github.com/SpiderLabs/Responder), and _Python 2.7_.
 
 Features
 --------
@@ -29,6 +29,9 @@ Features
 - No manual configuration necessary for most attacks.
 - No manual configuration necessary for installation and setup process
 - Leverages latest version of hostapd (2.6)
+- Support for evil twin and karma attacks
+- Generate timed Powershell payloads for indirect wireless pivots
+- Integrated HTTP server for Hostile Portal attacks
 
 Upcoming Features
 -----------------
@@ -36,17 +39,9 @@ Upcoming Features
 - Perform seemeless MITM attacks with partial HSTS bypasses
 - Support attacks against WPA-PSK/WPA2-PSK
 - Support for SSID cloaking
-- Generate timed payloads for indirect wireless pivots
-- Integrated PowerShell payload generation
-- impacket integration for SMB relay attacks
 - directed rogue AP attacks (deauth then evil twin from PNL, deauth then karma + ACL)
 - Integrated website cloner for cloning captive portal login pages
-- Integrated HTTP server
-
-Will this tool ever support Karma attacks?
-
-- At some point yes, but for now the focus has been on directed evil twin attacks.
-- If Karma attacks are like a wireless grenade launcher, this tool is more like an easy-to-use wireless sniper rifle
+- Integrated HTTP server for captive portals
 
 Setup Guide
 ===========
@@ -59,9 +54,9 @@ Begin by cloning the __eaphammer__ repo using the following command.
 
 	git clone https://github.com/s0lst1c3/eaphammer.git
 
-Next run the kali-setup.py file as shown below to complete the eaphammer setup process. This will install dependencies and compile hostapd.
+Next run the kali-setup file as shown below to complete the eaphammer setup process. This will install dependencies and compile hostapd.
 
-	python kali-setup.py
+	./kali-setup
 
 Other Distros
 -------------

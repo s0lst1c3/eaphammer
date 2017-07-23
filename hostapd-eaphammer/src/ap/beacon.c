@@ -416,9 +416,20 @@ static u8 * hostapd_gen_probe_resp(struct hostapd_data *hapd,
 
 	pos = resp->u.probe_resp.variable;
 	*pos++ = WLAN_EID_SSID;
-	*pos++ = hapd->conf->ssid.ssid_len;
-	os_memcpy(pos, hapd->conf->ssid.ssid, hapd->conf->ssid.ssid_len);
-	pos += hapd->conf->ssid.ssid_len;
+	
+	// begin karma
+	if (hapd->conf->use_karma) {
+
+		*pos++ = hapd->karma_info.ssid_len;
+		os_memcpy(pos, hapd->karma_info.ssid, hapd->karma_info.ssid_len);
+		pos += hapd->karma_info.ssid_len;
+	} else {
+
+		*pos++ = hapd->conf->ssid.ssid_len;
+		os_memcpy(pos, hapd->conf->ssid.ssid, hapd->conf->ssid.ssid_len);
+   		pos += hapd->conf->ssid.ssid_len;
+	}
+	// end karma
 
 	/* Supported rates */
 	pos = hostapd_eid_supp_rates(hapd, pos);
@@ -551,6 +562,12 @@ static enum ssid_match_result ssid_match(struct hostapd_data *hapd,
 {
 	const u8 *pos, *end;
 	int wildcard = 0;
+
+	// begin karma
+	if (hapd->conf->use_karma) {
+		return EXACT_SSID_MATCH;
+	}
+	// end karma
 
 	if (ssid_len == 0)
 		wildcard = 1;
@@ -747,16 +764,23 @@ void handle_probe_req(struct hostapd_data *hapd,
 	 * is less likely to see them (Probe Request frame sent on a
 	 * neighboring, but partially overlapping, channel).
 	 */
-	if (elems.ds_params &&
-	    hapd->iface->current_mode &&
-	    (hapd->iface->current_mode->mode == HOSTAPD_MODE_IEEE80211G ||
-	     hapd->iface->current_mode->mode == HOSTAPD_MODE_IEEE80211B) &&
-	    hapd->iconf->channel != elems.ds_params[0]) {
-		wpa_printf(MSG_DEBUG,
-			   "Ignore Probe Request due to DS Params mismatch: chan=%u != ds.chan=%u",
-			   hapd->iconf->channel, elems.ds_params[0]);
-		return;
+	
+
+	// begin karma
+	if (!hapd->conf->use_karma) {
+
+		if (elems.ds_params &&
+		    hapd->iface->current_mode &&
+		    (hapd->iface->current_mode->mode == HOSTAPD_MODE_IEEE80211G ||
+		     hapd->iface->current_mode->mode == HOSTAPD_MODE_IEEE80211B) &&
+		    hapd->iconf->channel != elems.ds_params[0]) {
+			wpa_printf(MSG_DEBUG,
+				   "Ignore Probe Request due to DS Params mismatch: chan=%u != ds.chan=%u",
+				   hapd->iconf->channel, elems.ds_params[0]);
+			return;
+		}
 	}
+	// end karma
 
 #ifdef CONFIG_P2P
 	if (hapd->p2p && hapd->p2p_group && elems.wps_ie) {
@@ -830,6 +854,14 @@ void handle_probe_req(struct hostapd_data *hapd,
 		}
 		return;
 	}
+
+	// begin karma
+	if (hapd->conf->use_karma) {
+
+		os_memcpy(hapd->karma_info.ssid, elems.ssid, elems.ssid_len);
+		hapd->karma_info.ssid_len = elems.ssid_len;
+	}
+	// end karma
 
 #ifdef CONFIG_INTERWORKING
 	if (hapd->conf->interworking &&

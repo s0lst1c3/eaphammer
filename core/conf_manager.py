@@ -20,7 +20,10 @@ class hostapd_wpe_cnf(object):
             hw_mode=None,
             channel=None,
             wpa=None,
-            bssid=None):
+            bssid=None,
+            karma=False,
+            use_autocrack=False,
+            eaphammer_fifo_path=None):
 
         assert interface is not None
         assert ca_pem is not None
@@ -32,12 +35,15 @@ class hostapd_wpe_cnf(object):
         assert channel is not None
         assert wpa is not None
         assert bssid is not None
+        assert eaphammer_fifo_path is not None
     
         with open(cls.path, 'w') as fd:
             fd.write(cls.template %\
                 (interface, eap_user_file, ca_pem,
                     server_pem, private_key, dh_file,
-                        ssid, hw_mode, channel, logpath, wpa, bssid))
+                        ssid, hw_mode, channel, logpath,
+                            wpa, bssid, int(karma), int(use_autocrack),
+                                eaphammer_fifo_path))
 
 class hostapd_open_cnf(object):
 
@@ -50,7 +56,8 @@ class hostapd_open_cnf(object):
             ssid=None,
             hw_mode=None,
             channel=None,
-            bssid=None):
+            bssid=None,
+            karma=False):
 
         assert interface is not None
         assert ssid is not None
@@ -60,7 +67,7 @@ class hostapd_open_cnf(object):
     
         with open(cls.path, 'w') as fd:
             fd.write(cls.template %\
-                (interface, ssid, hw_mode, channel, bssid))
+                (interface, ssid, hw_mode, channel, bssid, int(karma)))
 
 class dnsmasq_dhcp_only_cnf(object):
 
@@ -99,3 +106,32 @@ class dnsmasq_captive_portal_cnf(object):
         with open(cls.path, 'w') as fd:
             fd.write(cls.template %\
                 (interface, log_file, dhcp_script))
+
+def f(s):
+    return 'On' if s else 'Off'
+
+class responder_cnf(object):
+
+    path = config.responder_cnf
+    template = cnf_templates.responder_cnf
+
+    @classmethod
+    def configure(cls,
+            sql=True,
+            smb=True,
+            kerberos=True,
+            ftp=True,
+            pop=True,
+            smtp=True,
+            imap=True,
+            http=False,
+            https=False,
+            dns=False,
+            ldap=True,
+            db_file=config.responder_db):
+
+        with open(cls.path, 'w') as fd:
+            fd.write(cls.template %\
+                (f(sql), f(smb), f(kerberos), f(ftp),
+                    f(pop), f(smtp), f(imap), f(http),
+                        f(https), f(dns), f(ldap), db_file))

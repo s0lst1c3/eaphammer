@@ -7,12 +7,24 @@ root_dir, conf_file = os.path.split(os.path.abspath(__file__))
 conf_dir = root_dir + '/conf'
 logdir = root_dir + '/logs'
 script_dir = root_dir + '/scripts'
+db_dir = root_dir + '/db'
+wordlist_dir = root_dir + '/wordlists'
+default_wordlist = wordlist_dir +  '/rockyou.txt'
+wordlist_source = 'https://github.com/danielmiessler/SecLists/raw/master/Passwords/rockyou.txt.tar.gz'
+
+fifo_path = db_dir + '/eaphammer_fifo.node'
+
+payload_path = root_dir + '/payloads/base.ps1'
+
+responder_db = db_dir + '/Responder.db'
+responder_cnf = conf_dir + '/Responder.conf'
 
 hostapd_submodule_dir = root_dir + '/hostapd-eaphammer'
 hostapd_dir = hostapd_submodule_dir + '/hostapd'
+eap_users_file = db_dir + '/hostapd-wpe.eap_user'
 hostapd_bin = hostapd_dir + '/hostapd-wpe'
 hostapd_cnf = conf_dir + '/hostapd-wpe.conf'
-eap_user_file = hostapd_dir + '/hostapd-wpe.eap_user'
+eap_user_file = db_dir + '/hostapd-wpe.eap_user'
 hostapd_log = logdir + '/hostapd-wpe.log'
 
 certs_dir = root_dir + '/certs'

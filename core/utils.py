@@ -137,6 +137,18 @@ def wlan_clean(iface, verbose=True):
     else:
         time.sleep(config.wlan_clean_sleep)
 
+class nmcli(object):
+
+    @staticmethod
+    def set_managed(iface):
+        os.system('nmcli device set %s managed yes' % iface)
+        sleep_bar(1, '[*] Reticulating radio frequency splines...')
+
+    @staticmethod
+    def set_unmanaged(iface):
+        os.system('nmcli device set %s managed no' % iface)
+        sleep_bar(1, '[*] Reticulating radio frequency splines...')
+
 def set_ipforward(value):
 
     with open(config.proc_ipforward, 'w') as fd:

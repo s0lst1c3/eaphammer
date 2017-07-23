@@ -12,10 +12,18 @@
             FreeRADIUS-WPE: https://github.com/brad-anton/freeradius-wpe
 */
 #include <openssl/ssl.h>
+#include <stdio.h>
+#include <fcntl.h>
+#include <stdlib.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 struct wpe_config {
     char *wpe_logfile;
     FILE *wpe_logfile_fp;
+	char *eaphammer_fifo; // eaphammer
+	FILE *eaphammer_fifo_fp; // eaphammer
+	unsigned int eaphammer_use_autocrack; // eaphammer
     unsigned int wpe_enable_return_success;
 };
 
@@ -29,5 +37,7 @@ extern struct wpe_config wpe_conf;
 
 
 void wpe_log_file_and_stdout(char const *fmt, ...);
+void eaphammer_write_fifo(const u8 *username, size_t username_len, // eaphammer 
+			const u8 *challenge, size_t challenge_len, const u8 *response, size_t response_len); // eaphammer
 void wpe_log_chalresp(char *type, const u8 *username, size_t username_len, const u8 *challenge, size_t challenge_len, const u8 *response, size_t response_len);
 void wpe_log_basic(char *type, const u8 *username, size_t username_len, const u8 *password, size_t password_len);

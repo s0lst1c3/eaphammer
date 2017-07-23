@@ -118,6 +118,7 @@ struct hostapd_data {
 	struct hostapd_iface *iface;
 	struct hostapd_config *iconf;
 	struct hostapd_bss_config *conf;
+	struct hostapd_karma_info karma_info;
 	int interface_added; /* virtual interface added for this BSS */
 	unsigned int started:1;
 	unsigned int disabled:1;

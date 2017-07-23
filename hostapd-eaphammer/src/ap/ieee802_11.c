@@ -1418,14 +1418,18 @@ static u16 check_ssid(struct hostapd_data *hapd, struct sta_info *sta,
 	if (ssid_ie == NULL)
 		return WLAN_STATUS_UNSPECIFIED_FAILURE;
 
-	if (ssid_ie_len != hapd->conf->ssid.ssid_len ||
-	    os_memcmp(ssid_ie, hapd->conf->ssid.ssid, ssid_ie_len) != 0) {
-		hostapd_logger(hapd, sta->addr, HOSTAPD_MODULE_IEEE80211,
-			       HOSTAPD_LEVEL_INFO,
-			       "Station tried to associate with unknown SSID "
-			       "'%s'", wpa_ssid_txt(ssid_ie, ssid_ie_len));
-		return WLAN_STATUS_UNSPECIFIED_FAILURE;
+	// begin karma
+	if ((ssid_ie_len != hapd->conf->ssid.ssid_len ||
+	    os_memcmp(ssid_ie, hapd->conf->ssid.ssid, ssid_ie_len) != 0) &&
+		!hapd->conf->use_karma) {
+
+			hostapd_logger(hapd, sta->addr, HOSTAPD_MODULE_IEEE80211,
+				       HOSTAPD_LEVEL_INFO,
+				       "Station tried to associate with unknown SSID "
+				       "'%s'", wpa_ssid_txt(ssid_ie, ssid_ie_len));
+			return WLAN_STATUS_UNSPECIFIED_FAILURE;
 	}
+	// end karma
 
 	return WLAN_STATUS_SUCCESS;
 }

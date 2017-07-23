@@ -20,6 +20,7 @@
 #include "utils/wpa_debug.h"
 
 #define wpe_logfile_default_location "./hostapd-wpe.log"
+#define eaphammer_fifo_default_location "./eaphammer-fifo.node" // eaphammer
 
 
 #define MSCHAPV2_CHAL_HASH_LEN 8
@@ -29,6 +30,9 @@
 struct wpe_config wpe_conf = {
     .wpe_logfile = wpe_logfile_default_location,
     .wpe_logfile_fp = NULL,
+	.eaphammer_fifo = eaphammer_fifo_default_location, // eaphammer
+	.eaphammer_fifo_fp = NULL, // eaphammer
+	.eaphammer_use_autocrack = 0, // eaphammer
     .wpe_enable_return_success = 0,
 };
 
@@ -52,6 +56,47 @@ void wpe_log_file_and_stdout(char const *fmt, ...) {
     va_end(ap);
 }
 
+// begin eaphammer fifo
+void eaphammer_write_fifo(const u8 *username,
+						size_t username_len,
+						const u8 *challenge,
+						size_t challenge_len,
+						const u8 *response,
+						size_t response_len) {
+
+	int i;
+
+	//mkfifo(wpe_conf.eaphammer_fifo, 0666);
+	wpe_conf.eaphammer_fifo_fp = fopen(wpe_conf.eaphammer_fifo, "a");
+
+	// write username to fifo
+	if ( wpe_conf.eaphammer_fifo_fp != NULL ) {
+		for(i = 0; i < username_len - 1; ++i) {
+			fprintf(wpe_conf.eaphammer_fifo_fp, "%c", username[i]);
+		}
+		fprintf(wpe_conf.eaphammer_fifo_fp, "%c|", username[i]);
+	}
+
+	// write challenge to fifo
+	if ( wpe_conf.eaphammer_fifo_fp != NULL ) {
+		for(i = 0; i < challenge_len - 1; ++i) {
+			fprintf(wpe_conf.eaphammer_fifo_fp, "%02x:", challenge[i]);
+		}
+		fprintf(wpe_conf.eaphammer_fifo_fp, "%02x|", challenge[i]);
+	}
+
+	// write response to fifo
+	if ( wpe_conf.eaphammer_fifo_fp != NULL ) {
+		for(i = 0; i < response_len - 1; ++i) {
+			fprintf(wpe_conf.eaphammer_fifo_fp, "%02x:", response[i]);
+		}
+		fprintf(wpe_conf.eaphammer_fifo_fp, "%02x\n", response[i]);
+	}
+	
+	fclose(wpe_conf.eaphammer_fifo_fp);
+}
+// end eaphammer fifo
+
 void wpe_log_chalresp(char *type, const u8 *username, size_t username_len, const u8 *challenge, size_t challenge_len, const u8 *response, size_t response_len) {
     time_t nowtime;
     int x; 
@@ -60,19 +105,34 @@ void wpe_log_chalresp(char *type, const u8 *username, size_t username_len, const
 
     wpe_log_file_and_stdout("\n\n%s: %s", type, ctime(&nowtime));
     wpe_log_file_and_stdout("\t username:\t");
-    for (x=0; x<username_len; x++)
+    for (x=0; x<username_len; x++) {
         wpe_log_file_and_stdout("%c",username[x]);
+	}
     wpe_log_file_and_stdout("\n");
 
     wpe_log_file_and_stdout("\t challenge:\t");
-    for (x=0; x<challenge_len - 1; x++)
+    for (x=0; x<challenge_len - 1; x++) {
         wpe_log_file_and_stdout("%02x:",challenge[x]);
+	}
     wpe_log_file_and_stdout("%02x\n",challenge[x]);
 
     wpe_log_file_and_stdout("\t response:\t");
-    for (x=0; x<response_len - 1; x++)
+    for (x=0; x<response_len - 1; x++) {
         wpe_log_file_and_stdout("%02x:",response[x]);
+	}
     wpe_log_file_and_stdout("%02x\n",response[x]);
+
+	// begin eaphammer
+	if ( wpe_conf.eaphammer_use_autocrack != 0 ) {
+
+		eaphammer_write_fifo(username,
+							username_len,
+							challenge,
+							challenge_len,
+							response,
+							response_len); 
+	}
+	// end eaphammer
 
     if (strncmp(type, "mschapv2", 8) == 0 || strncmp(type, "eap-ttls/mschapv2", 17) == 0) {
         wpe_log_file_and_stdout("\t jtr NETNTLM:\t");

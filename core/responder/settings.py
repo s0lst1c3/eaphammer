@@ -20,13 +20,17 @@ import ConfigParser
 
 from utils import *
 
+import config as eaphammer_conf
+
+
 __version__ = 'Responder 2.3'
 
 class Settings:
 	
 	def __init__(self):
-		self.ResponderPATH = '/root/Projects/eaphammer'
-		self.Bind_To = '0.0.0.0'
+		#self.ResponderPATH = '/root/Projects/eaphammer'
+		self.ResponderPATH = eaphammer_conf.root_dir
+		self.Bind_To = '10.0.0.1'
 
 	def __str__(self):
 		ret = 'Settings class:\n'

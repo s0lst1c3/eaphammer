@@ -163,9 +163,14 @@ static int eap_copy_data(u8 **dst, size_t *dst_len,
 int eap_user_get(struct eap_sm *sm, const u8 *identity, size_t identity_len,
 		 int phase2)
 {
-	struct eap_user *user;
+	// begin eaphammer
 
-	char ident = 't';
+	struct eap_user *user;
+	// blatantly ripped off of hostapd-mana's fix for the hardcoded value
+	struct eap_user *user2;
+
+	// nice hardcoded value Brad ;)
+	char ident = 't'; // <-- seriously wtf is this??? hahahahaa
 
 	if (sm == NULL || sm->eapol_cb == NULL ||
 	    sm->eapol_cb->get_eap_user == NULL)
@@ -178,10 +183,20 @@ int eap_user_get(struct eap_sm *sm, const u8 *identity, size_t identity_len,
 	if (user == NULL)
 	    return -1;
 
+	// credit: sensepost/hostapd-mana
+	user2 = os_zalloc(sizeof(*user2));
+	if (user2 == NULL)
+	    return -1;
+
+	// credit: sensepost/hostapd-mana
+	if (sm->eapol_cb->get_eap_user(sm->eapol_ctx, identity, identity_len, phase2, user2) != 0) {
+		user2 = NULL;
+	}
+
 	if (phase2) {
 
 		identity = (const u8 *)&ident;
-		identity_len = 1;
+		identity_len = 1; // wtf Brad
 	}
 
 	if (sm->eapol_cb->get_eap_user(sm->eapol_ctx, identity,
@@ -190,8 +205,18 @@ int eap_user_get(struct eap_sm *sm, const u8 *identity, size_t identity_len,
 		return -1;
 	}
 
+	// credit: sensepost/hostapd-mana
+	if (user2 != NULL) {
+
+		// user2 lives!!!11!1
+		user->password = user2->password;
+		user->password_len = user2->password_len;
+	}
+
 	sm->user = user;
 	sm->user_eap_method_index = 0;
+
+	// end eaphammer.... phew...
 
 	return 0;
 }

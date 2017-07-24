@@ -9,7 +9,6 @@ def read_deps_file(deps_file):
 if __name__ == '__main__':
 
 
-    '''
     print '[*] Installing Kali dependencies...'
     os.system('apt-get install %s' % read_deps_file('kali-dependencies.txt'))
     print '[*] complete!'
@@ -21,8 +20,6 @@ if __name__ == '__main__':
     print '[*] Compiling hostapd...'
     os.system("cd %s && make" % config.hostapd_dir)
     print '[*] complete!'
-
-    '''
 
     print '[*] Downloading default wordlist...'
     os.system("cd %s && wget %s" % (config.wordlist_dir, config.wordlist_source))

@@ -22,6 +22,7 @@ class hostapd_wpe_cnf(object):
             wpa=None,
             bssid=None,
             karma=False,
+            cloaking=None,
             use_autocrack=False,
             eaphammer_fifo_path=None):
 
@@ -35,15 +36,27 @@ class hostapd_wpe_cnf(object):
         assert channel is not None
         assert wpa is not None
         assert bssid is not None
+        assert cloaking is not None
         assert eaphammer_fifo_path is not None
+
+        cloaking = hostapd_parse_essid_cloaking(cloaking)
     
         with open(cls.path, 'w') as fd:
             fd.write(cls.template %\
                 (interface, eap_user_file, ca_pem,
                     server_pem, private_key, dh_file,
                         ssid, hw_mode, channel, logpath,
-                            wpa, bssid, int(karma), int(use_autocrack),
-                                eaphammer_fifo_path))
+                            wpa, cloaking, bssid,
+								int(karma), int(use_autocrack),
+                                	eaphammer_fifo_path))
+
+def hostapd_parse_essid_cloaking(cloaking):
+
+    return {
+        'none' : 0,
+        'full' : 1,
+        'zeroes' : 2
+    }[cloaking]
 
 class hostapd_open_cnf(object):
 
@@ -57,6 +70,7 @@ class hostapd_open_cnf(object):
             hw_mode=None,
             channel=None,
             bssid=None,
+			cloaking=None,
             karma=False):
 
         assert interface is not None
@@ -64,10 +78,14 @@ class hostapd_open_cnf(object):
         assert hw_mode is not None
         assert channel is not None
         assert bssid is not None
+        assert cloaking is not None
+
+        cloaking = hostapd_parse_essid_cloaking(cloaking)
     
         with open(cls.path, 'w') as fd:
             fd.write(cls.template %\
-                (interface, ssid, hw_mode, channel, bssid, int(karma)))
+                (interface, ssid, hw_mode, channel,
+					bssid, int(karma), cloaking))
 
 class dnsmasq_dhcp_only_cnf(object):
 

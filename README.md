@@ -32,13 +32,13 @@ Features
 - Support for evil twin and karma attacks
 - Generate timed Powershell payloads for indirect wireless pivots
 - Integrated HTTP server for Hostile Portal attacks
+- Support for SSID cloaking
 
 Upcoming Features
 -----------------
 
 - Perform seemeless MITM attacks with partial HSTS bypasses
 - Support attacks against WPA-PSK/WPA2-PSK
-- Support for SSID cloaking
 - directed rogue AP attacks (deauth then evil twin from PNL, deauth then karma + ACL)
 - Integrated website cloner for cloning captive portal login pages
 - Integrated HTTP server for captive portals
@@ -67,7 +67,9 @@ Table of Contents
                * [VI.2.ad - Updating Users](#vi2ad---updating-users)
                * [VI.2.ae - Search Filters](#vi2ae---search-filters)
             * [VI.2.b - Advanced Usage](#vi2b---advanced-usage)
-      * [VII - Additional EAPHammer Options](#vii---additional-eaphammer-options)
+      * [VII - ESSID Cloaking](#vii---essid-cloaking)
+      * [VIII - Using Karma](#viii---using-karma)
+      * [IX - Additional EAPHammer Options](#ix---additional-eaphammer-options)
 
 
 Setup Guide
@@ -142,7 +144,7 @@ The flags shown above are self explanatory. For more granular control over the a
 
 	./eaphammer --bssid 00:11:22:33:44:00 --essid h4x0r --channel 4 --wpa 2 --auth ttls --interface wlan0 --creds
 
-Please refer to the options described in [VII - Additional EAPHammer Options](#vii---additional-eaphammer-options) section of this document for additional details about these flags.
+Please refer to the options described in [VIII - Additional EAPHammer Options](#vii---additional-eaphammer-options) section of this document for additional details about these flags.
 
 ## III - Stealing AD Credentials Using Hostile Portal Attacks
 
@@ -238,7 +240,7 @@ For victims with weak passwords, you can use the --local-autocrack flag in order
 To use EAPHammer's builtin AutoCrack capability, just include the --local-autocrack flag with whatever attack you are attempting to perform. For example, to enable AutoCrack while performing a Hostile Portal attack, you can use the following command:
 
 	./eaphammer -i wlan0 --essid EvilC0rp -c 6 --auth peap  --hostile-portal --local-autocrack
-	
+
 Note that at this time, EAPHammer only supports performing an autocrack 'n add using EAPHammer's internal hash cracking capability. Unless you're using a cracking rig to run EAPHammer, this is going to be very slow. Support for sending hashes to a remote cracking rig will be added in the near future.
 
 ### VI.2 - EAPHammer User Database
@@ -319,7 +321,34 @@ Options for adding a user to database:
  - __--methods METHODS__ - Leave this as the default unless you really know what you are doing. A comma seperated list of the authentication methods that should be used when the user attempts to connect. EAPHammer will attempt to use each of these methods one by one until the victim accepts one.
  - __--phase {1,2}__ - You should probably leave this as the default.
 
-## VII - Additional EAPHammer Options
+## VII - ESSID Cloaking
+
+EAPHammer supports the creation of hidden wireles networks. Just add one of the following three flags to whatever attack you're performing:
+
+ - __--cloaking full__ - Send empty string as ESSID in beacons and ignore broadcast probes.
+ - __--cloaking zeroes__ - Replace all characters in ESSID with ASCII 0 in becaons and ignore broadcast probes.
+ - __--cloaking none__ - Do not use ESSID cloaking (default).
+
+For example, to add full ESSID cloaking to a Hostile Portal attack:
+
+	./eaphammer -i wlan0 -e TotallyLegit -c 1 --auth open --hostile-portal --cloaking full
+
+There are a couple of reason why you might want to use ESSID cloaking:
+
+1. The network you are targeting uses ESSID cloaking (although in a lot of cases you'll get better results without cloaking your rogue access point. Try it without cloaking first).
+2. You are performing a Karma attack and trying to be stealthy.
+
+## VIII - Using Karma
+
+EAPHammer supports Karma attacks. Just add the --karma flag to whatever attack you're performing.
+
+Warning: EAPHammer does not yet support the use of ACLs to limit the scope of Karma attacks. Using the --karma flag will cause EAPHammer to attack everything within range of your wireless card. The author of this software takes no responsibility for any legal issues, ruined careers, lost friendships, or hurt feelings that result from using the --karma flag.
+
+With that out of the way, here's a usage example:
+
+	./eaphammer -i wlan0 --essid lulz --cloaking full -c 1 --auth open --hostile-portal --karma
+
+## IX - Additional EAPHammer Options
 
 - __--cert-wizard__ - Use this flag to create a new RADIUS cert for your AP.
 - __-h, --help__ - Display detailed help message and exit.
@@ -333,3 +362,5 @@ Options for adding a user to database:
 - __--creds__ - Harvest EAP creds using an evil twin attack.
 - __--hostile-portal__ - Force clients to connect to hostile portal.
 - __--captive-portal__ - Force clients to connect to a captive portal.
+- __--cloaking__ - Use ESSID cloaking (see [VII - ESSID Cloaking](#vii---essid-cloaking))
+- __--karma__ - Enable Karma (see [VIII - Using Karma](#viii---using-karma))

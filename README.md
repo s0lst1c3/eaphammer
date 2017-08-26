@@ -43,11 +43,38 @@ Upcoming Features
 - Integrated website cloner for cloning captive portal login pages
 - Integrated HTTP server for captive portals
 
+Table of Contents
+=================
+
+   * [Setup Guide](#setup-guide)
+      * [I. Kali Setup Instructions](#i-kali-setup-instructions)
+      * [II. Other Distros](#ii-other-distros)
+   * [Usage Guide](#usage-guide)
+      * [I - x.509 Certificate Generation](#i---x509-certificate-generation)
+      * [II - Stealing RADIUS Credentials Using EAPHammer](#ii---stealing-radius-credentials-using-eaphammer)
+      * [III - Stealing AD Credentials Using Hostile Portal Attacks](#iii---stealing-ad-credentials-using-hostile-portal-attacks)
+      * [IV - Indirect Wireless Pivots](#iv---indirect-wireless-pivots)
+         * [IV.1 - Performing Indirect Wireless Pivots Using Hostile Portal Attacks](#iv1---performing-indirect-wireless-pivots-using-hostile-portal-attacks)
+         * [IV.2 - Indirect Wireless Pivots - A Generalized Strategy](#iv2---indirect-wireless-pivots---a-generalized-strategy)
+      * [V - Performing Captive Portal Attacks](#v---performing-captive-portal-attacks)
+      * [VI - Attacking WPA2-EAP Networks](#vi---attacking-wpa2-eap-networks)
+         * [VI.1 - Using AutoCrack](#vi1---using-autocrack)
+         * [VI.2 - EAPHammer User Database](#vi2---eaphammer-user-database)
+            * [VI.2.a - Basic Usage](#vi2a---basic-usage)
+               * [VI.2.aa - Listing Users](#vi2aa---listing-users)
+               * [VI.2.ab - Adding Users](#vi2ab---adding-users)
+               * [VI.2.ac - Deleting Users](#vi2ac---deleting-users)
+               * [VI.2.ad - Updating Users](#vi2ad---updating-users)
+               * [VI.2.ae - Search Filters](#vi2ae---search-filters)
+            * [VI.2.b - Advanced Usage](#vi2b---advanced-usage)
+      * [VII - Additional EAPHammer Options](#vii---additional-eaphammer-options)
+
+
 Setup Guide
 ===========
 
-Kali Setup Instructions
------------------------
+I. Kali Setup Instructions
+--------------------------
 
 
 Begin by cloning the __eaphammer__ repo using the following command.
@@ -58,8 +85,8 @@ Next run the kali-setup file as shown below to complete the eaphammer setup proc
 
 	./kali-setup
 
-Other Distros
--------------
+II. Other Distros
+-----------------
 
 If you are not using Kali, you can still compile eaphammer. I just haven't written a setup script for your distro yet, which means you'll have to do it manually. Ask yourself whether you understand the following:
 
@@ -77,7 +104,7 @@ Use your package manager to install each of the dependencies listed in `kali-dep
 Once you have installed each of the dependencies listed in `kali-dependencies.txt`, you'll need to install some additional packages that ship with Kali by default. These packages are listed below. If you're on a distro that uses httpd instead of apache2, install that instead.
 
 - dsniff
-- apache2 
+- apache2
 
 Compile hostapd using the following commands:
 
@@ -88,25 +115,24 @@ Open config.py in the text editor of your choice and edit the following lines so
 
 	# change this to False if you cannot/will not use systemd
 	use_systemd = True
-	
+
 	# change this to 'NetworkManager' if necessary
 	network_manager = 'network-manager'
-	
+
 	# change this 'httpd' if necessary
 	httpd = 'apache2'
 
-Usage Guide
-===========
+# Usage Guide
 
-x.509 Certificate Generation
-----------------------------
+## I - x.509 Certificate Generation
 
-Eaphammer provides an easy-to-use wizard for generating x.509 certificates. To launch eaphammer's certificate wizard, just use the command shown below.
+Certificates are required to perform any attack against networks that use EAP-PEAP, EAP-TTLS, or any other form of EAP in which the inner authentication occurs through a secure tunnel. Fortunately, EAPHammer provides an easy-to-use wizard for generating x.509 certificates. To launch eaphammer's certificate wizard, just use the command shown below.
 
 	./eaphammer --cert-wizard
 
-Stealing RADIUS Credentials From EAP Networks
----------------------------------------------
+## II - Stealing RADIUS Credentials Using EAPHammer
+
+*Note: you will need to generate a certificate in order to perform this attack. Please refer to* [I - x.509 Certificate Generation](#i---x509-certificate-generation) *for instructions on how to do this.*
 
 To steal RADIUS credentials by executing an evil twin attack against an EAP network, use the --creds flag as shown below.
 
@@ -116,12 +142,21 @@ The flags shown above are self explanatory. For more granular control over the a
 
 	./eaphammer --bssid 00:11:22:33:44:00 --essid h4x0r --channel 4 --wpa 2 --auth ttls --interface wlan0 --creds
 
-Please refer to the options described in [Additional Options](#additional-options) section of this document for additional details about these flags.
+Please refer to the options described in [VII - Additional EAPHammer Options](#vii---additional-eaphammer-options) section of this document for additional details about these flags.
 
-Stealing AD Credentials Using Hostile Portal Attacks
-----------------------------------------------------
+## III - Stealing AD Credentials Using Hostile Portal Attacks
 
-Eaphammer can perform hostile portal attacks that can force LLMNR/NBT-NS enabled Windows clients into surrendering password hashes. The attack works by forcing associations using an evil twin attack, then forcing associated clients to attempt NetBIOS named resolution using a [Redirect To SMB](https://www.cylance.com/redirect-to-smb) attack. While this occurs, eaphammer runs [Responder](https://github.com/SpiderLabs/Responder) in the background to perform a nearly instantaneous LLMNR/NBT-NS poisoning attack against the affected wireless clients. The result is an attack that causes affected devices to not only connect to the rogue access point, but send NTLM hashes to the rogue access point as well.
+*Note: you will need to generate a certificate in order to perform this attack against most EAP networks. Please refer to* [I - x.509 Certificate Generation](#i---x509-certificate-generation) *for instructions on how to do this.*
+
+*Note: you will need RADIUS creds in order to perform this attack against EAP implementations that use mutual authentication protocols such as MS-CHAPv2 for inner authentication. Please refer to* [VI - Attacking WPA2-EAP Networks](#vi---attacking-wpa2-eap-networks) *for additional information.*
+
+Hostile Portal Attacks are a weaponization of the captive portals typically used to restrict access to open networks in environments such as hotels and coffee shops. Instead of redirecting HTTP traffic to a login page, as with a captive portal, the hostile portal redirects HTTP traffic to an SMB share located on the attacker's machine. The result is that after the victim is forced to associate with the attacker using a rogue access point attack, any HTTP traffic generated by the victim will cause the victim's device to attempt NTLM authentication with the attacker. This is, in essence, an assisted [Redirect To SMB](https://www.cylance.com/redirect-to-smb) attack. The attacker also performs LLMNR/NBT-NS poisoning against the victim.
+
+This attack gets you lots and lots of Active Directory credentials, simply by forcing clients to connect and authenticate with you. The results are similar to what you'd get using a tool such as [Responder](https://github.com/lgandx/Responder), with some disctict advantages:
+
+- __Stealthy__: This is a rogue AP attack, so no direct network is required
+- __Large Area of Effect__: This is an attack that works across multiple subnets -- you can pwn everything that is connected to the wireless network.
+- __Efficient__: This is an active attack in which the attacker forces clients to authenticate. There is no waiting for a network event to occur, as with LLMNR/NBT-NS poisoning.
 
 The --hostile-portal flag can be used to execute a hostile portal attack, as shown in the examples below.
 
@@ -129,13 +164,58 @@ The --hostile-portal flag can be used to execute a hostile portal attack, as sho
 
 	./eaphammer --interface wlan0 --essid TotallyLegit --channel 1 --auth open --hostile-portal
 
-Performing Indirect Wireless Pivots Using Hostile Portal Attacks
-----------------------------------------------------------------
+## IV - Indirect Wireless Pivots
 
-The hostile portal attack described in [Stealing AD Credentials Using Hostile Portal Attacks](#Stealing-AD-Credentials-Using-Hostile-Portal-Attacks) can be used to perform an SMB relay attack against the affected devices. An attacker can use hostile portal attack to perform an SMB relay attack that places timed reverse shell on an authorized wireless devices. The attacker can then disengage the attack to allow the authorized device to reconnect to the targetted network. When the attacker receives the reverse shell, he or she will have the same level of authorization as the attacker.
+*Note: you will need to generate a certificate in order to perform this attack against most EAP networks. Please refer to* [I - x.509 Certificate Generation](#i---x509-certificate-generation) *for instructions on how to do this.*
 
-Performing Captive Portal Attacks
----------------------------------
+*Note: you will need RADIUS creds in order to perform this attack against EAP implementations that use mutual authentication protocols such as MS-CHAPv2 for inner authentication. Please refer to* [VI - Attacking WPA2-EAP Networks](#vi---attacking-wpa2-eap-networks) *for additional information.*
+
+An Indirect Wireless Pivot is a technique for bypassing port-based access control mechanisms using rogue access point attacks. The attack requires the attacker to use two wireless network interfaces. The first network interface is used to obtain an IP address on the target network. Presumably, this first network interface is placed in quarantine by the NAC when this occurs. The attacker then uses a rogue AP attack to coerce a victim into connecting to the attacker's second wireless interface. The attacker then exploits the victim in some way, allowing the attacker to place a timed payload on the victim's device. The attacker then shuts down the rogue access point, allowing the victim to reassociate with the target network. The attacker then waits for the timed payload to execute and send a reverse shell back to the first interface, allowing the attacker to escape the quarantine.
+
+EAPHammer can be used to perform Indirect Wireless Piviots, as described in the following sections.
+
+### IV.1 - Performing Indirect Wireless Pivots Using Hostile Portal Attacks
+
+Before you begin the attack, make sure you have the following:
+
+1. RADIUS creds for a number of victim devices (see [VI - Attacking WPA2-EAP Networks](#vi---attacking-wpa2-eap-networks))
+2. Two network interfaces: we will call these **Interface A** and **Interface B**.
+
+__Step 1__ - Connect to the target network using **Interface A**
+
+__Step 2__ - Use the payload\_generator to generate a timed payload to execute on the victim. If your payload is a reverse shell, make sure to configure it so that it connects back to **Interface A**.
+
+	./payload_generator --delay DELAY_IN_SECONDS --command COMMAND --args ARGS
+
+__Step 3__ - Execute a Hostile Portal Attack using EAPHammer, making sure to add the --pivot flag as shown below. Make sure to use **Interface B** to execute the attack.
+
+	./eaphammer -i wlan0 --essid EvilCorp --channel 3 --hostile-portal --pivot
+
+__Step 4__ - After at least two victims have connected to your rogue access point, start your SMB Relay server as shown below. The following example uses [impacket](https://github.com/CoreSecurity/impacket)'s smbrelayx script, but you can realistically use any SMB Relay server you want. MultiRelay (which is part of [Responder](https://github.com/lgandx/Responder)) and [snarf.js](https://github.com/purpleteam/snarf) are both solid choices. The SMB Relay server should be configured to listen on **Interface B**, and to execute the timed payload you created in Step 2 when the attack succeeds. The target of the attack should be the IP address of one of the devices that is connected to your rogue access point.
+
+	smbrelayx.py -h TARGET_IP -c TIMED_PAYLOAD
+
+__Step 5__ - When your SMB Relay script executes, shutdown EAPHammer by pressing the Enter key on your keyboard.
+
+__Step 6__ - Wait for the timed payload to execute and send a reverse shell back to **Interface A**.
+
+### IV.2 - Indirect Wireless Pivots - A Generalized Strategy
+
+Be creative. The specific details of this attack aren't important, and the steps provided in the previous section are merely one example of how to perform an Indirect Wireless Pivot. As long as you use the following general steps, the attack should work:
+
+1. Connect to the target network using your first network interface
+2. Use a rogue access point attack to force an authorized device to connect to your second network interface
+3. Exploit the connected device in some way to place an implant or timed payload on the device
+4. Allow the connected device to reassociate with the target network
+5. Wait for your payload to execute
+
+The takeaway here is that you are removing an authorized device from its protected environment, exploiting it in some way, then allowing it to reassociate with the target network.
+
+## V - Performing Captive Portal Attacks
+
+*Note: you will need to generate a certificate in order to perform this attack against most EAP networks. Please refer to* [I - x.509 Certificate Generation](#i---x509-certificate-generation) *for instructions on how to do this.*
+
+*Note: you will need RADIUS creds in order to perform this attack against EAP implementations that use mutual authentication protocols such as MS-CHAPv2 for inner authentication. Please refer to* [VI - Attacking WPA2-EAP Networks](#vi---attacking-wpa2-eap-networks) *for additional information.*
 
 To perform a captive portal attack using eaphammer, use the --captive-portal flag as shown below.
 
@@ -143,8 +223,103 @@ To perform a captive portal attack using eaphammer, use the --captive-portal fla
 
 This will cause eaphammer to execute an evil twin attack in which the HTTP(S) traffic of all affected wireless clients are redirected to a website you control. Eaphammer will leverage Apache2 to serve web content out of /var/www/html if used with the default Apache2 configuration. Future iterations of eaphammer will provide an integrated HTTP server and website cloner for attacks against captive portal login pages.
 
-Additional Options
-------------------
+## VI - Attacking WPA2-EAP Networks
+
+For the most part, attacks against WPA2-EAP networks require creds in order to work. The exception for this that you don't need creds to steal creds (because that's just redundant). The reason for this is that the more advanced forms of WPA2-EAP use MS-CHAPv2, which requires mutual authentication between the wireless client and the access point. In other words, if you cannot prove knowldge of the victim's password, you will not be able to get the victim to fully associate with you.
+
+Fortunately, you have a couple of options available to you. The first option is to simply steal a bunch of RADIUS creds using the --creds flag (see [II - Stealing RADIUS Credentials Using EAPHammer](#ii---stealing-radius-credentials-using-eaphammer) for instructions on how to do this. You can then crack the creds offline, then return and finish the attack later. This method will work regardless of the strength of the user's password due to weaknesses found in MS-CHAPv2 (see [Defeating PPTP VPNs and WPA2 Enterprise with MS-CHAPv2 | DC20 | Moxie Marlinspike and David Hulton](https://www.youtube.com/watch?v=sIidzPntdCM)). You will also have to add the cracked RADIUS creds to EAPHammer's database. Please refer to [VI.2 - EAPHammer User Database](#vi2---eaphammer-user-database) for instructions on how to do this.
+
+For victims with weak passwords, you can use the --local-autocrack flag in order to perform an auto crack 'n add attack (see [VI.1 - Using AutoCrack](#vi1---using-autocrack) for usage instructions, see [Improvements In Rogue AP Attacks - MANA 1/2](https://sensepost.com/blog/2015/improvements-in-rogue-ap-attacks-mana-1%2F2/) for details on how this attack works).
+
+### VI.1 - Using AutoCrack
+
+"Autocrack 'n add" is a technique introduced by Dominic White and Ian de Villiers in 2014 which was first introduced into their [Mana Toolkit](https://github.com/sensepost/mana). When autocrack ‘n add is used, the captured MS-CHAPv2 challenge and response is immediately sent to a cracking rig (local or remote) before the authentication response is sent to the victim. The cracked credentials are then appended to the end of the eap\_user file. If the challenge and response are cracked fast enough, the cracked credentials are added to eap\_user file before hostapd attempts to retrieve them. Even if the challenge and response cannot be cracked in time, the attack will succeed when the client attempts to reauthenticate provided the password can be cracked within a short period of time. When weak passwords are used, this process can take seconds. See the original [Improvements In Rogue AP Attacks - MANA 1/2](https://sensepost.com/blog/2015/improvements-in-rogue-ap-attacks-mana-1%2F2/) blog post for a more detailed explanation of this attack.
+
+To use EAPHammer's builtin AutoCrack capability, just include the --local-autocrack flag with whatever attack you are attempting to perform. For example, to enable AutoCrack while performing a Hostile Portal attack, you can use the following command:
+
+	./eaphammer -i wlan0 --essid EvilC0rp -c 6 --auth peap  --hostile-portal --local-autocrack
+	
+Note that at this time, EAPHammer only supports performing an autocrack 'n add using EAPHammer's internal hash cracking capability. Unless you're using a cracking rig to run EAPHammer, this is going to be very slow. Support for sending hashes to a remote cracking rig will be added in the near future.
+
+### VI.2 - EAPHammer User Database
+
+For now, EAPHammer's database is really just an interface to hostapd's eap\_user file. This will change in subsequent versions.
+
+For most use cases, just stick with the [VI.2.a - Basic Usage](#vi2a---basic-usage) section found below.
+
+#### VI.2.a - Basic Usage
+
+##### VI.2.aa - Listing Users
+
+To list entries in the database, use the --list flag as shown below:
+
+	./ehdb --list
+
+You can also filter for users that match specific attributes. Please see [VI.2.ae - Search Filters](#vi2ae---search-filters) for additional information.
+
+##### VI.2.ab - Adding Users
+
+At minimum, each user that you add to the database needs to have the following attributes:
+
+ - Identity (RADIUS jardon. A fancy way of saying "username")
+ - Password OR nt password hash
+
+To add an identity and password to the database:
+
+	./ehdb --add --identity USERNAME --password Passw0rd!
+
+To add an identity and NT password hash to the database:
+
+	./ehdb --add --identity USERNAME --password Passw0rd!
+
+There are other attributes that you can specify as well (see [VI.2.b - Advanced Usage](#vi2b---advanced-usage)). However,
+the default attributes will work in the vast majority of situations, so try not to worry about those
+unless you absolutely have to.
+
+##### VI.2.ac - Deleting Users
+
+To remove an identity from the database:
+
+	./ehdb --delete --identity-is USERNAME
+
+To remove all identities from the datbase:
+
+	./ehdb --delete --delete-all
+
+You can also delete multiple users at once by using search filters. Please see [VI.2.ae - Search Filters](#vi2ae---search-filters) for additional information.
+
+##### VI.2.ad - Updating Users
+
+To update a user's password (or other attribute), just use the --add flag. The existing user entry will be updated to reflect your modifications.
+
+##### VI.2.ae - Search Filters
+
+You can use search filters to narrow the output of the --list flag and to delete multiple users using the --delete flag.
+
+Filter options for --list and --delete:
+
+ - __--by-phase PHASE__ - Filter by phase (1 or 2).
+ - __--identity-is IDENTITY__ - Filter by identity (exact match)
+ - __--in-identity KEYWORD__ - Filter for any identities containing a specified keyword.
+ - __--methods-any METHODS__ - Filter for users that can authenticate using any of the provided methods (comma separated list).
+ - __--methods-all METHODS__ - Filter for users that can authenticate using all of the provided methods (comma separated list).
+ - __--has-password__ - Filter for users that have a password in the database.
+ - __--has-nt-hash__ - Filter for users that have a nt hash in the database.
+ - __--invert__ - Invert the results of the search.
+
+#### VI.2.b - Advanced Usage
+
+Aside from --identity, --password, and --nt-hash, you probably won't need to use these options except for rare edge cases. However, they are there if you need them.
+
+Options for adding a user to database:
+
+ - __--identity IDENTITY__ - The username for the user you wish to add.
+ - __--password PASSWORD__ - Specify the user's password. You should probably specify a password for your user unless you are specifying an nt password hash.
+ - __--nt-hash NT\_HASH__ - Specify the nt hash of the user's password. You should probably specify the nt hash for your user unless you are specifying a password instead.
+ - __--methods METHODS__ - Leave this as the default unless you really know what you are doing. A comma seperated list of the authentication methods that should be used when the user attempts to connect. EAPHammer will attempt to use each of these methods one by one until the victim accepts one.
+ - __--phase {1,2}__ - You should probably leave this as the default.
+
+## VII - Additional EAPHammer Options
 
 - __--cert-wizard__ - Use this flag to create a new RADIUS cert for your AP.
 - __-h, --help__ - Display detailed help message and exit.

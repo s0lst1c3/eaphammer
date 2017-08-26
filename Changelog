@@ -47,3 +47,6 @@ Added payload_generator script to generate timed Powershell payloads for indirec
 
 0.0.9 - Gabriel Ryan <gryan@gdssecurity.com>
 Added ehdb script for updating and managing eap_user file. 
+
+0.1.0 - Gabriel Ryan <gryan@gdssecurity.com>
+Added major expansion to documentation (README.md).

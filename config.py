@@ -1,6 +1,6 @@
 import os
 
-__version__ = '0.0.7'
+__version__ = '0.0.9'
 
 root_dir, conf_file = os.path.split(os.path.abspath(__file__))
 
@@ -25,6 +25,7 @@ eap_users_file = db_dir + '/hostapd-wpe.eap_user'
 hostapd_bin = hostapd_dir + '/hostapd-wpe'
 hostapd_cnf = conf_dir + '/hostapd-wpe.conf'
 eap_user_file = db_dir + '/hostapd-wpe.eap_user'
+eap_user_header = db_dir + '/eap_user_header.txt'
 hostapd_log = logdir + '/hostapd-wpe.log'
 
 certs_dir = root_dir + '/certs'
@@ -67,3 +68,7 @@ network_manager_sleep = 4
 dnsmasq_sleep = 2
 dnsspoof_sleep = 2
 wpa_supplicant_sleep = 4
+
+# database stuff
+wildcard = '*\tPEAP,TTLS,TLS,FAST'
+hardcoded_fuckery = '"t"\tTTLS-PAP,TTLS-CHAP,TTLS-MSCHAP,MSCHAPV2,MD5,GTC,TTLS,TTLS-MSCHAPV2\t"t"\t[2]'

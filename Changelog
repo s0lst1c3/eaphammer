@@ -44,3 +44,6 @@ Added autocrack and add functionality to support full EAP authentication.
 No longer kills NetworkManager. Uses nmcli to set interfaces to "unmanaged" instead.
 Added support for indirect wireless pivots (disable's Responder's SMB server so you can run MultiRelay, smbrelayx, etc).
 Added payload_generator script to generate timed Powershell payloads for indirect wireless pivots (note: timed payload is for PoC purposes. If you're doing it for real, use a CobaltStrike beacon, Empire agent, or other respectable implant instead).
+
+0.0.9 - Gabriel Ryan <gryan@gdssecurity.com>
+Added ehdb script for updating and managing eap_user file. 

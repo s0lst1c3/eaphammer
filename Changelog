@@ -50,3 +50,7 @@ Added ehdb script for updating and managing eap_user file.
 
 0.1.0 - Gabriel Ryan <gryan@gdssecurity.com>
 Added major expansion to documentation (README.md).
+
+0.1.1 - Gabriel Ryan <gryan@gdssecurity.com>
+Added support for ESSID cloaking.
+

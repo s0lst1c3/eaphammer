@@ -189,6 +189,16 @@ bssid=%s
 
 use_karma=%d
 
+# Send empty SSID in beacons and ignore probe request frames that do not
+# specify full SSID, i.e., require stations to know SSID.
+# default: disabled (0)
+# 1 = send empty (length=0) SSID in beacon and ignore probe request for
+#     broadcast SSID
+# 2 = clear SSID (ASCII 0), but keep the original length (this may be required
+#     with some clients that do not support empty SSID) and ignore probe
+#     requests for broadcast SSID
+ignore_broadcast_ssid=%d
+
 '''
 
 hostapd_wpe_cnf = '''
@@ -506,7 +516,7 @@ auth_algs=3
 # 2 = clear SSID (ASCII 0), but keep the original length (this may be required
 #     with some clients that do not support empty SSID) and ignore probe
 #     requests for broadcast SSID
-ignore_broadcast_ssid=0
+ignore_broadcast_ssid=%d
 
 # Additional vendor specfic elements for Beacon and Probe Response frames
 # This parameter can be used to add additional vendor specific element(s) into

@@ -65,6 +65,7 @@ def hostile_portal():
                                             hw_mode=options['hw_mode'],
                                             bssid=options['bssid'],
                                             channel=options['channel'],
+											cloaking=options['cloaking'],
                                             karma=options['karma'])
         else:
             conf_manager.hostapd_wpe_cnf.configure(interface=options['interface'],
@@ -75,6 +76,7 @@ def hostile_portal():
                                             wpa=options['wpa'],
                                             karma=options['karma'],
                                             use_autocrack=options['use_autocrack'],
+											cloaking=options['cloaking'],
                                             eaphammer_fifo_path=config.fifo_path)
 
         utils.Hostapd.hardstart('%s ' % config.hostapd_cnf, verbose=False)
@@ -179,6 +181,7 @@ def captive_portal():
                                             hw_mode=options['hw_mode'],
                                             bssid=options['bssid'],
                                             channel=options['channel'],
+											cloaking=options['cloaking'],
                                             karma=options['karma'])
         else:
             conf_manager.hostapd_wpe_cnf.configure(interface=options['interface'],
@@ -188,6 +191,7 @@ def captive_portal():
                                             channel=options['channel'],
                                             wpa=options['wpa'],
                                             karma=options['karma'],
+											cloaking=options['cloaking'],
                                             use_autocrack=options['use_autocrack'],
                                             eaphammer_fifo_path=config.fifo_path)
 
@@ -271,6 +275,7 @@ def reap_creds():
                                         channel=options['channel'],
                                         wpa=options['wpa'],
                                         karma=options['karma'],
+										cloaking=options['cloaking'],
                                         use_autocrack=options['use_autocrack'],
                                         eaphammer_fifo_path=config.fifo_path)
 
@@ -347,6 +352,19 @@ def set_options():
                     choices=['peap', 'ttls', 'open'],
                     default='open',
                     help='Specify auth type (default: open).')
+
+    parser.add_argument('--cloaking',
+					dest='cloaking',
+					choices=['none', 'full', 'zeroes'],
+					default='none',
+					help='Send empty SSID in beacons and ignore probe request '
+						 'frames that do not specify full SSID (i.e. require '
+						 'stations to know SSID). Choices: [1. none - do '
+						 'not use SSID cloaking. ] [2. full - Send empty string '
+						 'in beacon and ignore probe requests for broadcast '
+						 'SSID ] [3. zeroes - Replace all characters in SSID '
+						 'with ASCII 0 and ignore probe requests for '
+						 'broadcast SSID.]')
 
     parser.add_argument('--creds',
                     dest='reap_creds',

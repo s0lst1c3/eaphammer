@@ -2,6 +2,18 @@ import os
 import config
 import cnf_templates
 
+def hostapd_parse_essid_cloaking(cloaking):
+
+    return {
+        'none' : 0,
+        'full' : 1,
+        'zeroes' : 2
+    }[cloaking]
+
+def responder_parse_on_off(s):
+
+    return 'On' if s else 'Off'
+
 class hostapd_wpe_cnf(object):
 
     path = config.hostapd_cnf
@@ -47,16 +59,8 @@ class hostapd_wpe_cnf(object):
                     server_pem, private_key, dh_file,
                         ssid, hw_mode, channel, logpath,
                             wpa, cloaking, bssid,
-								int(karma), int(use_autocrack),
+                                int(karma), int(use_autocrack),
                                 	eaphammer_fifo_path))
-
-def hostapd_parse_essid_cloaking(cloaking):
-
-    return {
-        'none' : 0,
-        'full' : 1,
-        'zeroes' : 2
-    }[cloaking]
 
 class hostapd_open_cnf(object):
 
@@ -125,8 +129,6 @@ class dnsmasq_captive_portal_cnf(object):
             fd.write(cls.template %\
                 (interface, log_file, dhcp_script))
 
-def f(s):
-    return 'On' if s else 'Off'
 
 class responder_cnf(object):
 
@@ -147,6 +149,8 @@ class responder_cnf(object):
             dns=False,
             ldap=True,
             db_file=config.responder_db):
+
+        f = responder_parse_on_off
 
         with open(cls.path, 'w') as fd:
             fd.write(cls.template %\

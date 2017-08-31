@@ -54,3 +54,5 @@ Added major expansion to documentation (README.md).
 0.1.1 - Gabriel Ryan <gryan@gdssecurity.com>
 Added support for ESSID cloaking.
 
+0.1.2 - Gabriel Ryan <gryan@gdssecurity.com>
+Code cleanup.

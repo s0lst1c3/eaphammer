@@ -36,12 +36,3 @@ def bootstrap():
     
     os.system(config.bootstrap_file)
 
-if __name__ == '__main__':
-
-    ca_cnf.configure('US', 'Vermont', 'locale9', 'org9', 'email9', 'cn9')
-
-    server_cnf.configure('US', 'Vermont', 'locale9', 'org9', 'email9', 'cn9')
-
-    client_cnf.configure('US', 'Vermont', 'locale9', 'org9', 'email9', 'cn9')
-
-    bootstrap()

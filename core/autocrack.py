@@ -97,8 +97,6 @@ class Autocrack(object):
     @staticmethod
     def _start(args):
 
-
-        print 'test'
         run_autocrack(args['wordlist'])
 
     def start(self):

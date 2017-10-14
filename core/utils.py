@@ -72,4 +72,22 @@ class Iptables(object):
     def route_dns2_addr(addr, iface):
         os.system('iptables -t nat -A PREROUTING -i %s '
                         '-p udp --dport 53 -j DNAT --to %s' % (iface, addr))
+
+    @staticmethod
+    def save_rules(rules_file=None):
+        print "[*] Saving current iptables configuration..."
+        if rules_file is None:
+            os.system('iptables-save > /tmp/rules_file.txt')
+        else:
+            os.system('iptables-save > ' + rules_file)
+    
+    @staticmethod
+    def restore_rules(rules_file=None):
+        print "[*] Restoring previous iptables configuration..."
+        if rules_file is None:
+            os.system('iptables-restore </tmp/rules_file.txt')
+        else:
+            os.system('iptables-restore > ' + rules_file)
+
+
         

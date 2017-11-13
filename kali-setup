@@ -8,6 +8,9 @@ def read_deps_file(deps_file):
 
 if __name__ == '__main__':
 
+    if raw_input('Do you want update your package list ("apt-get update")? [y/N]').lower() == 'y':
+        print '[*] Downloading package lists from kali repositories'
+        os.system('apt-get update')
 
     print '[*] Installing Kali dependencies...'
     os.system('apt-get install %s' % read_deps_file('kali-dependencies.txt'))

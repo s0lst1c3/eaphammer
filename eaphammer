@@ -150,6 +150,8 @@ def hostile_portal():
         utils.Iptables.flush()
         utils.Iptables.flush('nat')
 
+        utils.Iptables.restore_rules()
+
 
         # cleanly allow network manager to regain control of interface
         utils.nmcli.set_managed(options['interface'])
@@ -169,6 +171,8 @@ def hostile_portal():
         utils.Iptables.accept_all()
         utils.Iptables.flush()
         utils.Iptables.flush('nat')
+
+        utils.Iptables.restore_rules()
 
         # cleanly allow network manager to regain control of interface
         utils.nmcli.set_managed(options['interface'])
@@ -260,6 +264,8 @@ def captive_portal():
         utils.Iptables.flush()
         utils.Iptables.flush('nat')
 
+        utils.Iptables.restore_rules()
+
         # cleanly allow network manager to regain control of interface
         utils.nmcli.set_managed(options['interface'])
 
@@ -278,6 +284,8 @@ def captive_portal():
         utils.Iptables.accept_all()
         utils.Iptables.flush()
         utils.Iptables.flush('nat')
+
+        utils.Iptables.restore_rules()
 
         # cleanly allow network manager to regain control of interface
         utils.nmcli.set_managed(options['interface'])
@@ -312,7 +320,7 @@ def reap_creds():
         utils.nmcli.set_unmanaged(options['interface'])
         services.Hostapd.hardstart('%s ' % config.hostapd_cnf, verbose=False)
 
-        # pause execution until user quits
+        # pause execution until user quits  
         raw_input('press enter to quit...')
 
         # kill hostapd
@@ -494,6 +502,7 @@ _/ __ \\\\__  \\ \\____ \\|  |  \\\\__  \\  /     \\ /     \\_/ __ \\_  __ \\
 if __name__ == '__main__':
 
     print_banner()
+    utils.Iptables.save_rules()
 
     options = set_options()
 

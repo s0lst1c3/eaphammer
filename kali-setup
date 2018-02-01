@@ -8,26 +8,33 @@ def read_deps_file(deps_file):
 
 if __name__ == '__main__':
 
-    if raw_input('Do you want update your package list ("apt-get update")? [y/N]').lower() == 'y':
-        print '[*] Downloading package lists from kali repositories'
-        os.system('apt-get update')
+    if raw_input('Do you want update your package list ("apt -y update")(recommended)? [y/N]: ').lower() == 'y':
+        print '\n[*] Downloading package lists from kali repositories...\n'
+        os.system('apt -y update')
+    print '\n[*] complete!\n'
 
-    print '[*] Installing Kali dependencies...'
-    os.system('apt-get install %s' % read_deps_file('kali-dependencies.txt'))
-    print '[*] complete!'
+    if raw_input('Do you want upgrade your package list ("apt -y upgrade")(recommended)? [y/N]: ').lower() == 'y':
+        print '\n[*] Performing upgrade...\n'
+        os.system('apt -y upgrade')
+    print '\n[*] complete!\n'
 
-    print '[*] Installing Python dependencies...'
+    print '\n[*] Installing Kali dependencies...\n'
+    os.system('apt -y install %s' % read_deps_file('kali-dependencies.txt'))
+    print '\n[*] complete!\n'
+
+    print '\n[*] Installing Python dependencies...\n'
     os.system('pip install -r pip.req')
-    print '[*] complete!'
+    print '\n[*] complete!\n'
 
-    print '[*] Compiling hostapd...'
+
+    print '\n[*] Compiling hostapd...\n'
     os.system("cd %s && make" % config.hostapd_dir)
-    print '[*] complete!'
+    print '\n[*] complete!\n'
 
-    print '[*] Downloading default wordlist...'
-    os.system("cd %s && wget %s" % (config.wordlist_dir, config.wordlist_source))
-    print '[*] complete!'
+    print '\n[*] Downloading default wordlist...\n'
+    os.system("wget %s -O %s.tar.gz" % (config.wordlist_source, config.default_wordlist))
+    print '\n[*] complete!\n'
 
-    print '[*] Extracting default wordlist...'
+    print '\n[*] Extracting default wordlist...\n'
     os.system("cd %s && tar xzf %s.tar.gz" % (config.wordlist_dir, config.default_wordlist))
-    print '[*] complete!'
+    print '\n[*] complete!\n'

@@ -1,6 +1,6 @@
 import os
 
-__version__ = '0.1.3'
+__version__ = '0.1.4'
 
 root_dir, conf_file = os.path.split(os.path.abspath(__file__))
 
@@ -10,7 +10,7 @@ script_dir = root_dir + '/scripts'
 db_dir = root_dir + '/db'
 wordlist_dir = root_dir + '/wordlists'
 default_wordlist = wordlist_dir +  '/rockyou.txt'
-wordlist_source = 'https://github.com/danielmiessler/SecLists/raw/master/Passwords/rockyou.txt.tar.gz'
+wordlist_source = 'https://github.com/danielmiessler/SecLists/blob/43e28e38957f456cac37d29e6596284cd7c88f90/Passwords/rockyou.txt.tar.gz?raw=true'
 
 fifo_path = db_dir + '/eaphammer_fifo.node'
 

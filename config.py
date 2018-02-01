@@ -1,6 +1,6 @@
 import os
 
-__version__ = '0.1.2'
+__version__ = '0.1.3'
 
 root_dir, conf_file = os.path.split(os.path.abspath(__file__))
 

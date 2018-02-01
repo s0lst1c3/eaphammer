@@ -56,3 +56,6 @@ Added support for ESSID cloaking.
 
 0.1.2 - Gabriel Ryan <gryan@gdssecurity.com>
 Code cleanup.
+
+0.1.3 - Gabriel Ryan <gabriel@solstice.me>
+EAPHammer now displays captured MS-CHAPv2 challenge / response pairs in Hashcat format.

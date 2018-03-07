@@ -26,9 +26,9 @@ def set_options():
 
     parser.add_argument('--args',
                     dest='args',
-                    required=True,
+                    required=False,
                     type=str,
-                    help='Arguments passed to the command specified using the --comand flag.')
+                    help='Arguments passed to the command specified using the --command flag.')
 
     args = parser.parse_args()
 

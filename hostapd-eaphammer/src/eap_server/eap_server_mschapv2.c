@@ -13,7 +13,7 @@
 #include "crypto/random.h"
 #include "eap_i.h"
 
-#include "wpe/wpe.h"
+#include "eaphammer_wpe/eaphammer_wpe.h"
 
 struct eap_mschapv2_hdr {
 	u8 op_code; /* MSCHAPV2_OP_* */
@@ -414,7 +414,7 @@ static void eap_mschapv2_process_response(struct eap_sm *sm,
 	}
 
 	// wpe
-	if (wpe_conf.wpe_enable_return_success) {
+	if (eaphammer_global_conf.always_return_success) {
 		os_memset((void *)nt_response, 0, 24);
 		os_memset((void *)expected, 0, 24);
 	}
@@ -461,7 +461,7 @@ static void eap_mschapv2_process_response(struct eap_sm *sm,
 	}
 
 	// wpe
-	if (wpe_conf.wpe_enable_return_success) {
+	if (eaphammer_global_conf.always_return_success) {
 	    data->state = SUCCESS;
 	}
 }

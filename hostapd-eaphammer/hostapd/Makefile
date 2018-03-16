@@ -29,6 +29,13 @@ export BINDIR ?= /usr/local/bin/
 
 -include .config
 
+hostapd-eaphammer_lib: CFLAGS += -fPIC
+hostapd-eaphammer_lib: LDFLAGS += -shared
+
+ifdef CONFIG_EAPHAMMER
+CFLAGS += -DCONFIG_EAPHAMMER
+endif
+
 ifndef CONFIG_NO_GITVER
 # Add VERSION_STR postfix for builds from a git repository
 ifeq ($(wildcard ../.git),../.git)
@@ -86,7 +93,7 @@ OBJS += ../src/ap/beacon.o
 OBJS += ../src/ap/bss_load.o
 OBJS += ../src/ap/neighbor_db.o
 OBJS += ../src/ap/rrm.o
-OBJS += ../src/wpe/wpe.o
+OBJS += ../src/eaphammer_wpe/eaphammer_wpe.o
 
 OBJS_c = hostapd_cli.o
 OBJS_c += ../src/common/wpa_ctrl.o
@@ -1013,7 +1020,7 @@ OBJS += ../src/fst/fst_ctrl_iface.o
 endif
 endif
 
-ALL=hostapd-wpe hostapd-wpe_cli
+ALL=hostapd-eaphammer hostapd-eaphammer_cli 
 
 all: verify_config $(ALL)
 
@@ -1060,15 +1067,19 @@ install: $(addprefix $(DESTDIR)$(BINDIR)/,$(ALL))
 
 BCHECK=../src/drivers/build.hostapd
 
-hostapd-wpe: $(BCHECK) $(OBJS)
-	$(Q)$(CC) $(LDFLAGS) -o hostapd-wpe $(OBJS) $(LIBS)
+hostapd-eaphammer: $(BCHECK) $(OBJS)
+	$(Q)$(CC) $(LDFLAGS) -o hostapd-eaphammer $(OBJS) $(LIBS)
 	@$(E) "  LD " $@
 
 ifdef CONFIG_WPA_TRACE
 OBJS_c += ../src/utils/trace.o
 endif
-hostapd-wpe_cli: $(OBJS_c)
-	$(Q)$(CC) $(LDFLAGS) -o hostapd-wpe_cli $(OBJS_c) $(LIBS_c)
+hostapd-eaphammer_cli: $(OBJS_c)
+	$(Q)$(CC) $(LDFLAGS) -o hostapd-eaphammer_cli $(OBJS_c) $(LIBS_c)
+	@$(E) "  LD " $@
+
+hostapd-eaphammer_lib: $(BCHECK) $(OBJS)
+	$(Q)$(CC) $(LDFLAGS) -o libhostapd-eaphammer.so $(OBJS) $(LIBS)
 	@$(E) "  LD " $@
 
 NOBJS = nt_password_hash.o ../src/crypto/ms_funcs.o $(SHA1OBJS)
@@ -1115,7 +1126,7 @@ lcov-html:
 
 clean:
 	$(MAKE) -C ../src clean
-	rm -f core *~ *.o hostapd-wpe hostapd-wpe_cli nt_password_hash hlr_auc_gw
+	rm -f core *~ *.o hostapd-eaphammer hostapd-eaphammer_cli nt_password_hash hlr_auc_gw libhostapd-eaphammer
 	rm -f *.d *.gcno *.gcda *.gcov
 	rm -f lcov.info
 	rm -rf lcov-html

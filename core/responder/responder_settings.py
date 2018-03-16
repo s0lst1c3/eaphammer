@@ -15,21 +15,21 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import utils
+import sys
+import os
 import ConfigParser
+import utils
 
-from utils import *
+from core.responder.utils import *
 
-import config as eaphammer_conf
-
+from settings import settings
 
 __version__ = 'Responder 2.3'
 
 class Settings:
 	
 	def __init__(self):
-		#self.ResponderPATH = '/root/Projects/eaphammer'
-		self.ResponderPATH = eaphammer_conf.root_dir
+		self.ResponderPATH = settings.dict['paths']['directories']['root']
 		self.Bind_To = '10.0.0.1'
 
 	def __str__(self):
@@ -69,29 +69,39 @@ class Settings:
 
 	def populate(self, options):
 
+		config = settings.dict['core']['responder'] 
+
 		if options['interface'] is None and utils.IsOsX() is False:
 			print utils.color("Error: -I <if> mandatory option is missing", 1)
 			sys.exit(-1)
 
-		# Config parsing
-		config = ConfigParser.ConfigParser()
-		config.read(os.path.join(self.ResponderPATH, 'conf', 'Responder.conf'))
-
 		# Servers
-		self.HTTP_On_Off     = self.toBool(config.get('Responder Core', 'HTTP'))
-		self.SSL_On_Off      = self.toBool(config.get('Responder Core', 'HTTPS'))
-		self.SMB_On_Off      = self.toBool(config.get('Responder Core', 'SMB'))
-		self.SQL_On_Off      = self.toBool(config.get('Responder Core', 'SQL'))
-		self.FTP_On_Off      = self.toBool(config.get('Responder Core', 'FTP'))
-		self.POP_On_Off      = self.toBool(config.get('Responder Core', 'POP'))
-		self.IMAP_On_Off     = self.toBool(config.get('Responder Core', 'IMAP'))
-		self.SMTP_On_Off     = self.toBool(config.get('Responder Core', 'SMTP'))
-		self.LDAP_On_Off     = self.toBool(config.get('Responder Core', 'LDAP'))
-		self.DNS_On_Off      = self.toBool(config.get('Responder Core', 'DNS'))
-		self.Krb_On_Off      = self.toBool(config.get('Responder Core', 'Kerberos'))
+		self.HTTP_On_Off     = self.toBool(config['Responder Core']['http'])
+		self.SSL_On_Off      = self.toBool(config['Responder Core']['https'])
+		self.SMB_On_Off      = self.toBool(config['Responder Core']['smb'])
+		self.SQL_On_Off      = self.toBool(config['Responder Core']['sql'])
+		self.FTP_On_Off      = self.toBool(config['Responder Core']['ftp'])
+		self.POP_On_Off      = self.toBool(config['Responder Core']['pop'])
+		self.IMAP_On_Off     = self.toBool(config['Responder Core']['imap'])
+		self.SMTP_On_Off     = self.toBool(config['Responder Core']['smtp'])
+		self.LDAP_On_Off     = self.toBool(config['Responder Core']['ldap'])
+		self.DNS_On_Off      = self.toBool(config['Responder Core']['dns'])
+		self.Krb_On_Off      = self.toBool(config['Responder Core']['kerberos'])
 
+		#self.HTTP_On_Off     = self.toBool(config.get('Responder Core', 'HTTP'))
+		#self.SSL_On_Off      = self.toBool(config.get('Responder Core', 'HTTPS'))
+		#self.SMB_On_Off      = self.toBool(config.get('Responder Core', 'SMB'))
+		#self.SQL_On_Off      = self.toBool(config.get('Responder Core', 'SQL'))
+		#self.FTP_On_Off      = self.toBool(config.get('Responder Core', 'FTP'))
+		#self.POP_On_Off      = self.toBool(config.get('Responder Core', 'POP'))
+		#self.IMAP_On_Off     = self.toBool(config.get('Responder Core', 'IMAP'))
+		#self.SMTP_On_Off     = self.toBool(config.get('Responder Core', 'SMTP'))
+		#self.LDAP_On_Off     = self.toBool(config.get('Responder Core', 'LDAP'))
+		#self.DNS_On_Off      = self.toBool(config.get('Responder Core', 'DNS'))
+		#self.Krb_On_Off      = self.toBool(config.get('Responder Core', 'Kerberos'))
 		# Db File
-		self.DatabaseFile    = os.path.join(self.ResponderPATH, config.get('Responder Core', 'Database'))
+		#self.DatabaseFile    = os.path.join(self.ResponderPATH, config.get('Responder Core', 'Database'))
+		self.DatabaseFile    = os.path.join(self.ResponderPATH, config['Responder Core']['database'])
 
 		# Log Files
 		self.LogDir = os.path.join(self.ResponderPATH, 'logs')
@@ -99,9 +109,9 @@ class Settings:
 		if not os.path.exists(self.LogDir):
 			os.mkdir(self.LogDir)
 
-		self.SessionLogFile      = os.path.join(self.LogDir, config.get('Responder Core', 'SessionLog'))
-		self.PoisonersLogFile    = os.path.join(self.LogDir, config.get('Responder Core', 'PoisonersLog'))
-		self.AnalyzeLogFile      = os.path.join(self.LogDir, config.get('Responder Core', 'AnalyzeLog'))
+		self.SessionLogFile      = os.path.join(self.LogDir, config['Responder Core']['sessionlog'])
+		self.PoisonersLogFile    = os.path.join(self.LogDir, config['Responder Core']['poisonerslog'])
+		self.AnalyzeLogFile      = os.path.join(self.LogDir, config['Responder Core']['analyzelog'])
 
 		self.FTPLog          = os.path.join(self.LogDir, 'FTP-Clear-Text-Password-%s.txt')
 		self.IMAPLog         = os.path.join(self.LogDir, 'IMAP-Clear-Text-Password-%s.txt')
@@ -124,14 +134,14 @@ class Settings:
 		self.SMBNTLMSSPv2Log = os.path.join(self.LogDir, 'SMB-NTLMSSPv2-Client-%s.txt')
 
 		# HTTP Options
-		self.Serve_Exe	      = self.toBool(config.get('HTTP Server', 'Serve-Exe'))
-		self.Serve_Always     = self.toBool(config.get('HTTP Server', 'Serve-Always'))
-		self.Serve_Html       = self.toBool(config.get('HTTP Server', 'Serve-Html'))
-		self.Html_Filename    = config.get('HTTP Server', 'HtmlFilename')
-		self.Exe_Filename     = config.get('HTTP Server', 'ExeFilename')
-		self.Exe_DlName       = config.get('HTTP Server', 'ExeDownloadName')
-		self.WPAD_Script      = config.get('HTTP Server', 'WPADScript')
-		self.HtmlToInject     = config.get('HTTP Server', 'HtmlToInject')
+		self.Serve_Exe	      = self.toBool(config['HTTP Server']['serve-exe'])
+		self.Serve_Always     = self.toBool(config['HTTP Server']['serve-always'])
+		self.Serve_Html       = self.toBool(config['HTTP Server']['serve-html'])
+		self.Html_Filename    = config['HTTP Server']['htmlfilename']
+		self.Exe_Filename     = config['HTTP Server']['exefilename']
+		self.Exe_DlName       = config['HTTP Server']['exedownloadname']
+		self.WPAD_Script      = config['HTTP Server']['wpadscript']
+		self.HtmlToInject     = config['HTTP Server']['htmltoinject']
 
 		if not os.path.exists(self.Html_Filename):
 			print utils.color("/!\ Warning: %s: file not found" % self.Html_Filename, 3, 1)
@@ -140,18 +150,18 @@ class Settings:
 			print utils.color("/!\ Warning: %s: file not found" % self.Exe_Filename, 3, 1)
 
 		# SSL Options
-		self.SSLKey  = config.get('HTTPS Server', 'SSLKey')
-		self.SSLCert = config.get('HTTPS Server', 'SSLCert')
+		self.SSLKey  = config['HTTPS Server']['sslkey']
+		self.SSLCert = config['HTTPS Server']['sslcert']
 
 		# Respond to hosts
-		self.RespondTo         = filter(None, [x.upper().strip() for x in config.get('Responder Core', 'RespondTo').strip().split(',')])
-		self.RespondToName     = filter(None, [x.upper().strip() for x in config.get('Responder Core', 'RespondToName').strip().split(',')])
-		self.DontRespondTo     = filter(None, [x.upper().strip() for x in config.get('Responder Core', 'DontRespondTo').strip().split(',')])
-		self.DontRespondToName = filter(None, [x.upper().strip() for x in config.get('Responder Core', 'DontRespondToName').strip().split(',')])
+		self.RespondTo         = filter(None, [x.upper().strip() for x in config['Responder Core']['respondto'].strip().split(',')])
+		self.RespondToName     = filter(None, [x.upper().strip() for x in config['Responder Core']['respondtoname'].strip().split(',')])
+		self.DontRespondTo     = filter(None, [x.upper().strip() for x in config['Responder Core']['dontrespondto'].strip().split(',')])
+		self.DontRespondToName = filter(None, [x.upper().strip() for x in config['Responder Core']['dontrespondtoname'].strip().split(',')])
 
 		# Auto Ignore List
-		self.AutoIgnore                 = self.toBool(config.get('Responder Core', 'AutoIgnoreAfterSuccess'))
-		self.CaptureMultipleCredentials = self.toBool(config.get('Responder Core', 'CaptureMultipleCredentials'))
+		self.AutoIgnore                 = self.toBool(config['Responder Core']['autoignoreaftersuccess'])
+		self.CaptureMultipleCredentials = self.toBool(config['Responder Core']['capturemultiplecredentials'])
 		self.AutoIgnoreList             = []
 
 		# CLI options
@@ -178,7 +188,7 @@ class Settings:
 		self.Os_version      = sys.platform
 
 		# Set up Challenge
-		self.NumChal = config.get('Responder Core', 'Challenge')
+		self.NumChal = config['Responder Core']['challenge']
 
 		if len(self.NumChal) is not 16:
 			print utils.color("[!] The challenge must be exactly 16 chars long.\nExample: 1122334455667788", 1)

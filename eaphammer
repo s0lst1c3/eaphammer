@@ -2,14 +2,16 @@
 
 import sys
 import os
-import config
 import time
+import json
 
 from core import cert_manager, conf_manager, utils, responder, services
 from core.servers.redirect_server import RedirectServer
 from core.autocrack import Autocrack
+from core.hostapd import HostapdEaphammer
 from argparse import ArgumentParser
-from config import __version__
+from settings import settings, __version__
+
 
 def cert_wizard():
 
@@ -47,6 +49,7 @@ def cert_wizard():
 
 def hostile_portal():
     global responder
+
 
     daemons = []
 
@@ -86,10 +89,10 @@ def hostile_portal():
                         karma=options['karma'],
                         use_autocrack=options['use_autocrack'],
                         cloaking=options['cloaking'],
-                        eaphammer_fifo_path=config.fifo_path,
             )
 
-        services.Hostapd.hardstart('%s ' % config.hostapd_cnf, verbose=False)
+        hostapd = HostapdEaphammer(settings)
+        hostapd.start()
 
         # configure routing 
         os.system('ifconfig %s 10.0.0.1 netmask 255.255.255.0' %\
@@ -97,13 +100,8 @@ def hostile_portal():
         os.system('route add -net 10.0.0.0 netmask 255.255.255.0 gw 10.0.0.1')
 
         # configure dnsmasq
-        conf_manager.dnsmasq_captive_portal_cnf.configure(
-                                        interface=options['interface'],
-                                        log_file=config.dnsmasq_log,
-                                        dhcp_script=config.dhcp_script,
-        )
-        
-        services.Dnsmasq.hardstart('-C %s 2>&1' % config.dnsmasq_cnf)
+        conf_manager.dnsmasq_captive_portal_cnf.configure(interface=options['interface']) 
+        services.Dnsmasq.hardstart('-C %s 2>&1' % settings.dict['paths']['dnsmasq']['conf'])
 
         # start RedirectServer
         rs = RedirectServer.get_instance()
@@ -117,9 +115,9 @@ def hostile_portal():
             print '[*] Pivot mode activated. Rogue SMB server disabled.'
             print ('[*] Run payload_generator to '
                         'generate a timed payload if desired.')
-            conf_manager.responder_cnf.configure(smb=False)
+            settings.dict['core']['responder']['Responder Core']['SMB'] = 'Off'
         else:
-            conf_manager.responder_cnf.configure(smb=True)
+            settings.dict['core']['responder']['Responder Core']['SMB'] = 'On'
         resp = responder.Responder.get_instance()
         resp.configure(interface=options['interface'])
         resp.start()
@@ -135,10 +133,10 @@ def hostile_portal():
         utils.Iptables.route_http2_addr('10.0.0.1', options['interface'])
 
         # pause execution until user quits
-        raw_input('Press enter to quit...')
+        raw_input('\n\nPress enter to quit...\n\n')
 
         # kill base services
-        services.Hostapd.kill()
+        hostapd.stop()
         services.Dnsmasq.kill()
 
         # stop additional daemon processes
@@ -160,7 +158,7 @@ def hostile_portal():
     except KeyboardInterrupt:
     
         # terminate base services
-        services.Hostapd.kill()
+        hostapd.stop()
         services.Dnsmasq.kill()
 
         # stop additional daemon processes
@@ -217,10 +215,10 @@ def captive_portal():
                         karma=options['karma'],
 						cloaking=options['cloaking'],
                         use_autocrack=options['use_autocrack'],
-                        eaphammer_fifo_path=config.fifo_path,
             )
 
-        services.Hostapd.hardstart('%s' % config.hostapd_cnf, verbose=False)
+        hostapd = HostapdEaphammer(settings)
+        hostapd.start()
 
         # configure routing 
         os.system('ifconfig %s 10.0.0.1 netmask 255.255.255.0' %\
@@ -228,12 +226,8 @@ def captive_portal():
         os.system('route add -net 10.0.0.0 netmask 255.255.255.0 gw 10.0.0.1')
 
         # configure dnsmasq
-        conf_manager.dnsmasq_captive_portal_cnf.configure(
-                                        interface=options['interface'],
-                                        log_file=config.dnsmasq_log,
-                                        dhcp_script=config.dhcp_script)
-        
-        services.Dnsmasq.hardstart('-C %s 2>&1' % config.dnsmasq_cnf)
+        conf_manager.dnsmasq_captive_portal_cnf.configure(interface=options['interface'])
+        services.Dnsmasq.hardstart('-C %s 2>&1' % settings.dict['paths']['dnsmasq']['conf'])
 
         # start httpd
         services.Httpd.start()
@@ -248,10 +242,10 @@ def captive_portal():
         utils.Iptables.route_http2_addr('10.0.0.1', options['interface'])
         
         # pause execution until user quits
-        raw_input('press enter to quit...')
+        raw_input('\n\nPress enter to quit...\n\n')
 
         # terminate base services
-        services.Hostapd.kill()
+        hostapd.stop()
         services.Dnsmasq.kill()
         services.Httpd.stop()
 
@@ -272,7 +266,7 @@ def captive_portal():
     except KeyboardInterrupt:
 
         # terminate base services
-        services.Hostapd.kill()
+        hostapd.stop()
         services.Dnsmasq.kill()
         utils.Httpd.stop()
 
@@ -314,17 +308,18 @@ def reap_creds():
                     karma=options['karma'],
                     cloaking=options['cloaking'],
                     use_autocrack=options['use_autocrack'],
-                    eaphammer_fifo_path=config.fifo_path,
         ) 
 
         utils.nmcli.set_unmanaged(options['interface'])
-        services.Hostapd.hardstart('%s ' % config.hostapd_cnf, verbose=False)
+        hostapd = HostapdEaphammer(settings)
+        hostapd.start()
+
 
         # pause execution until user quits  
-        raw_input('press enter to quit...')
+        raw_input('\n\nPress enter to quit...\n\n')
 
         # kill hostapd
-        services.Hostapd.kill()
+        hostapd.stop()
 
         # kill additional daemon processes
         for d in daemons:
@@ -336,7 +331,7 @@ def reap_creds():
     except KeyboardInterrupt:
 
         # kill hostapd
-        services.Hostapd.kill()
+        hostapd.stop()
 
         # kill additional daemon processes
         for d in daemons:
@@ -437,6 +432,11 @@ def set_options():
                     action='store_true',
                     help='Enable karma.')
 
+    parser.add_argument('--debug',
+                    dest='debug',
+                    action='store_true',
+                    help='Enable debug output.')
+
     parser.add_argument('--remote-autocrack',
                     dest='remote_autocrack',
                     metavar='hostname:port',
@@ -445,7 +445,7 @@ def set_options():
 
     parser.add_argument('--wordlist',
                     dest='wordlist',
-                    default=config.default_wordlist,
+                    default=os.path.join(settings.dict['paths']['directories']['wordlists'], settings.dict['core']['eaphammer']['general']['default_wordlist']),
                     type=str,
                     help='Specify the wordlist to use with '
                          'the autocrack feature.')
@@ -506,6 +506,10 @@ if __name__ == '__main__':
 
     options = set_options()
 
+    if options['debug']:
+        print json.dumps(settings.dict, indent=4, sort_keys=True)
+
+
     if options['cert_wizard']:
         cert_wizard()
     elif options['captive_portal']:
@@ -514,3 +518,4 @@ if __name__ == '__main__':
         hostile_portal()
     else:
         reap_creds()
+

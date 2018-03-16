@@ -15,10 +15,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import struct
-import settings
 
 from base64 import b64decode, b64encode
 from odict import OrderedDict
+from core.responder import responder_settings
 
 # Packet class handling all packet generation (see odict.py).
 class Packet():
@@ -56,7 +56,7 @@ class NBT_Ans(Packet):
 	def calculate(self,data):
 		self.fields["Tid"] = data[0:2]
 		self.fields["NbtName"] = data[12:46]
-		self.fields["IP"] = settings.Config.IP_aton
+		self.fields["IP"] = responder_settings.Config.IP_aton
 
 # DNS Answer Packet
 class DNS_Ans(Packet):
@@ -82,7 +82,7 @@ class DNS_Ans(Packet):
 	def calculate(self,data):
 		self.fields["Tid"] = data[0:2]
 		self.fields["QuestionName"] = ''.join(data[12:].split('\x00')[:1])
-		self.fields["IP"] = settings.Config.IP_aton
+		self.fields["IP"] = responder_settings.Config.IP_aton
 		self.fields["IPLen"] = struct.pack(">h",len(self.fields["IP"]))
 
 # LLMNR Answer Packet
@@ -110,7 +110,7 @@ class LLMNR_Ans(Packet):
 	])
 
 	def calculate(self):
-		self.fields["IP"] = settings.Config.IP_aton
+		self.fields["IP"] = responder_settings.Config.IP_aton
 		self.fields["IPLen"] = struct.pack(">h",len(self.fields["IP"]))
 		self.fields["AnswerNameLen"] = struct.pack(">h",len(self.fields["AnswerName"]))[1]
 		self.fields["QuestionNameLen"] = struct.pack(">h",len(self.fields["QuestionName"]))[1]

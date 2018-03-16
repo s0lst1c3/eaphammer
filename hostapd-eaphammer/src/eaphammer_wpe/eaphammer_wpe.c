@@ -16,31 +16,32 @@
 #include <openssl/ssl.h>
 #include "includes.h"
 #include "common.h"
-#include "wpe/wpe.h"
+#include "eaphammer_wpe/eaphammer_wpe.h"
 #include "utils/wpa_debug.h"
 
-#define wpe_logfile_default_location "./hostapd-wpe.log"
-#define eaphammer_fifo_default_location "./eaphammer-fifo.node" // eaphammer
+#define logfile_default_location "./hostapd-wpe.log"
+#define autocrack_fifo_default_location "./eaphammer-fifo.node" // eaphammer
 
 
 #define MSCHAPV2_CHAL_HASH_LEN 8
 #define MSCHAPV2_CHAL_LEN 16 
 #define MSCHAPV2_RESP_LEN 24
 
-struct wpe_config wpe_conf = {
-    .wpe_logfile = wpe_logfile_default_location,
-    .wpe_logfile_fp = NULL,
-	.eaphammer_fifo = eaphammer_fifo_default_location, // eaphammer
-	.eaphammer_fifo_fp = NULL, // eaphammer
-	.eaphammer_use_autocrack = 0, // eaphammer
-    .wpe_enable_return_success = 0,
+struct eaphammer_global_config eaphammer_global_conf = {
+    .logfile = logfile_default_location,
+    .logfile_fp = NULL,
+	.autocrack_fifo = autocrack_fifo_default_location, // eaphammer
+	.autocrack_fifo_fp = NULL, // eaphammer
+	.use_autocrack = 0, // eaphammer
+    .always_return_success = 0,
+	.use_karma = 0,
 };
 
 void wpe_log_file_and_stdout(char const *fmt, ...) {
 
-    if ( wpe_conf.wpe_logfile_fp == NULL ) {
-        wpe_conf.wpe_logfile_fp = fopen(wpe_conf.wpe_logfile, "a");
-        if ( wpe_conf.wpe_logfile_fp == NULL ) 
+    if ( eaphammer_global_conf.logfile_fp == NULL ) {
+        eaphammer_global_conf.logfile_fp = fopen(eaphammer_global_conf.logfile, "a");
+        if ( eaphammer_global_conf.logfile_fp == NULL ) 
             printf("WPE: Cannot file log file");
     }
 
@@ -51,8 +52,8 @@ void wpe_log_file_and_stdout(char const *fmt, ...) {
     va_end(ap);
 
     va_start(ap, fmt);
-    if ( wpe_conf.wpe_logfile_fp != NULL )
-        vfprintf(wpe_conf.wpe_logfile_fp, fmt, ap);
+    if ( eaphammer_global_conf.logfile_fp != NULL )
+        vfprintf(eaphammer_global_conf.logfile_fp, fmt, ap);
     va_end(ap);
 }
 
@@ -66,34 +67,34 @@ void eaphammer_write_fifo(const u8 *username,
 
 	int i;
 
-	//mkfifo(wpe_conf.eaphammer_fifo, 0666);
-	wpe_conf.eaphammer_fifo_fp = fopen(wpe_conf.eaphammer_fifo, "a");
+	//mkfifo(eaphammer_global_conf.autocrack_fifo, 0666);
+	eaphammer_global_conf.autocrack_fifo_fp = fopen(eaphammer_global_conf.autocrack_fifo, "a");
 
 	// write username to fifo
-	if ( wpe_conf.eaphammer_fifo_fp != NULL ) {
+	if ( eaphammer_global_conf.autocrack_fifo_fp != NULL ) {
 		for(i = 0; i < username_len - 1; ++i) {
-			fprintf(wpe_conf.eaphammer_fifo_fp, "%c", username[i]);
+			fprintf(eaphammer_global_conf.autocrack_fifo_fp, "%c", username[i]);
 		}
-		fprintf(wpe_conf.eaphammer_fifo_fp, "%c|", username[i]);
+		fprintf(eaphammer_global_conf.autocrack_fifo_fp, "%c|", username[i]);
 	}
 
 	// write challenge to fifo
-	if ( wpe_conf.eaphammer_fifo_fp != NULL ) {
+	if ( eaphammer_global_conf.autocrack_fifo_fp != NULL ) {
 		for(i = 0; i < challenge_len - 1; ++i) {
-			fprintf(wpe_conf.eaphammer_fifo_fp, "%02x:", challenge[i]);
+			fprintf(eaphammer_global_conf.autocrack_fifo_fp, "%02x:", challenge[i]);
 		}
-		fprintf(wpe_conf.eaphammer_fifo_fp, "%02x|", challenge[i]);
+		fprintf(eaphammer_global_conf.autocrack_fifo_fp, "%02x|", challenge[i]);
 	}
 
 	// write response to fifo
-	if ( wpe_conf.eaphammer_fifo_fp != NULL ) {
+	if ( eaphammer_global_conf.autocrack_fifo_fp != NULL ) {
 		for(i = 0; i < response_len - 1; ++i) {
-			fprintf(wpe_conf.eaphammer_fifo_fp, "%02x:", response[i]);
+			fprintf(eaphammer_global_conf.autocrack_fifo_fp, "%02x:", response[i]);
 		}
-		fprintf(wpe_conf.eaphammer_fifo_fp, "%02x\n", response[i]);
+		fprintf(eaphammer_global_conf.autocrack_fifo_fp, "%02x\n", response[i]);
 	}
 	
-	fclose(wpe_conf.eaphammer_fifo_fp);
+	fclose(eaphammer_global_conf.autocrack_fifo_fp);
 }
 // end eaphammer fifo
 
@@ -123,7 +124,7 @@ void wpe_log_chalresp(char *type, const u8 *username, size_t username_len, const
     wpe_log_file_and_stdout("%02x\n",response[x]);
 
 	// begin eaphammer
-	if ( wpe_conf.eaphammer_use_autocrack != 0 ) {
+	if ( eaphammer_global_conf.use_autocrack != 0 ) {
 
 		eaphammer_write_fifo(username,
 							username_len,

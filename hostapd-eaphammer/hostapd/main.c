@@ -29,7 +29,7 @@
 #include "eap_register.h"
 #include "ctrl_iface.h"
 
-#include "wpe/wpe.h"
+#include "eaphammer_wpe/eaphammer_wpe.h"
 
 
 struct hapd_global {
@@ -39,6 +39,9 @@ struct hapd_global {
 
 static struct hapd_global global;
 
+#ifdef CONFIG_EAPHAMMER
+static int global_disable_signal_handler = 0;
+#endif
 
 #ifndef CONFIG_NO_HOSTAPD_LOGGER
 static void hostapd_logger_cb(void *ctx, const u8 *addr, unsigned int module,
@@ -358,6 +361,16 @@ static int hostapd_global_init(struct hapd_interfaces *interfaces,
 #endif /* CONFIG_NATIVE_WINDOWS */
 	eloop_register_signal_terminate(handle_term, interfaces);
 
+#ifdef CONFIG_EAPHAMMER
+	
+	if (!global_disable_signal_handler) {
+
+		eloop_register_signal_terminate(handle_term, interfaces);
+	}
+#else
+	eloop_register_signal_terminate(handle_term, interfaces);
+#endif // END CONFIG_EAPHAMMER
+
 #ifndef CONFIG_NATIVE_WINDOWS
 	openlog("hostapd", 0, LOG_DAEMON);
 #endif /* CONFIG_NATIVE_WINDOWS */
@@ -495,10 +508,16 @@ static void usage(void)
 		"   -i   list of interface names to use\n"
 		"   -S   start all the interfaces synchronously\n"
 		"   -t   include timestamps in some debug messages\n"
+#ifdef CONFIG_EAPHAMMER
 		"   -v   show hostapd version\n\n"
-        " WPE Options -------------------\n"
+        " EAPHAMMER Options -------------------\n"
         "       (credential logging always enabled)\n"
+		"   -N   Disable signal handler (needed to run from scripts)\n"
+		"   -a   Allow BSS overlap on non-dfs channels.\n"
         "   -s   Return Success where possible\n\n");
+#else
+		"   -v   show hostapd version\n\n");
+#endif
 
 	exit(1);
 }
@@ -673,7 +692,11 @@ int main(int argc, char *argv[])
 	dl_list_init(&interfaces.global_ctrl_dst);
 
 	for (;;) {
-		c = getopt(argc, argv, "b:Bde:f:hi:KP:STtu:vg:G:s");
+#ifdef CONFIG_EAPHAMMER
+		c = getopt(argc, argv, "b:Bde:f:hi:KP:STtu:vg:G:sN");
+#else
+		c = getopt(argc, argv, "b:Bde:f:hi:KP:STtu:vg:G:");
+#endif
 		if (c < 0)
 			break;
 		switch (c) {
@@ -742,9 +765,14 @@ int main(int argc, char *argv[])
 							&if_names_size, optarg))
 				goto out;
 			break;
+#ifdef CONFIG_EAPHAMMER
         case 's': 
-            wpe_conf.wpe_enable_return_success++;
+            eaphammer_global_conf.always_return_success++;
             break;
+        case 'N': 
+			global_disable_signal_handler = 1;
+            break;
+#endif
 		default:
 			usage();
 			break;

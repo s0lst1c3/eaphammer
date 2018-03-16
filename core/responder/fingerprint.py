@@ -21,7 +21,7 @@ import struct
 import string
 import logging
 
-from utils import *
+from core.responder import utils
 from odict import OrderedDict
 from packets import SMBHeader, SMBNego, SMBNegoFingerData, SMBSessionFingerData
 
@@ -64,5 +64,5 @@ def RunSmbFinger(host):
 		if data[8:10] == "\x73\x16":
 			return OsNameClientVersion(data)
 	except:
-		settings.Config.AnalyzeLogger.warning("Fingerprint failed for host: {}".format(host))
+		responder_settings.Config.AnalyzeLogger.warning("Fingerprint failed for host: {}".format(host))
 		return None

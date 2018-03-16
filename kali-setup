@@ -1,19 +1,26 @@
 #!/usr/bin/env python
 import os
-import config
+
+from settings import settings
 
 def read_deps_file(deps_file):
     with open(deps_file) as fd:
         return ' '.join([ line.strip() for line in fd ])
 
 if __name__ == '__main__':
+                    
+
+    default_wordlist = os.path.join(settings.dict['paths']['directories']['wordlists'], settings.dict['core']['eaphammer']['general']['default_wordlist'])
+
+    wordlist_source = settings.dict['core']['eaphammer']['general']['wordlist_source']
+
 
     if raw_input('Do you want update your package list ("apt -y update")(recommended)? [y/N]: ').lower() == 'y':
         print '\n[*] Downloading package lists from kali repositories...\n'
         os.system('apt -y update')
     print '\n[*] complete!\n'
 
-    if raw_input('Do you want upgrade your package list ("apt -y upgrade")(recommended)? [y/N]: ').lower() == 'y':
+    if raw_input('Do you want upgrade your installed packages ("apt -y upgrade")(recommended)? [y/N]: ').lower() == 'y':
         print '\n[*] Performing upgrade...\n'
         os.system('apt -y upgrade')
     print '\n[*] complete!\n'
@@ -28,13 +35,13 @@ if __name__ == '__main__':
 
 
     print '\n[*] Compiling hostapd...\n'
-    os.system("cd %s && make" % config.hostapd_dir)
+    os.system("cd %s && make" % settings.dict['paths']['directories']['hostapd'])
     print '\n[*] complete!\n'
 
     print '\n[*] Downloading default wordlist...\n'
-    os.system("wget %s -O %s.tar.gz" % (config.wordlist_source, config.default_wordlist))
+    os.system("wget %s -O %s.tar.gz" % (wordlist_source, default_wordlist))
     print '\n[*] complete!\n'
 
     print '\n[*] Extracting default wordlist...\n'
-    os.system("cd %s && tar xzf %s.tar.gz" % (config.wordlist_dir, config.default_wordlist))
+    os.system("cd %s && tar xzf %s.tar.gz" % (settings.dict['paths']['directories']['wordlists'], default_wordlist))
     print '\n[*] complete!\n'

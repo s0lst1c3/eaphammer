@@ -45,6 +45,7 @@
 #include "mbo_ap.h"
 #include "rrm.h"
 #include "taxonomy.h"
+#include "eaphammer_wpe/eaphammer_wpe.h"
 
 
 u8 * hostapd_eid_supp_rates(struct hostapd_data *hapd, u8 *eid)
@@ -1421,7 +1422,8 @@ static u16 check_ssid(struct hostapd_data *hapd, struct sta_info *sta,
 	// begin karma
 	if ((ssid_ie_len != hapd->conf->ssid.ssid_len ||
 	    os_memcmp(ssid_ie, hapd->conf->ssid.ssid, ssid_ie_len) != 0) &&
-		!hapd->conf->use_karma) {
+		//!hapd->conf->use_karma) {
+		!eaphammer_global_conf.use_karma) {
 
 			hostapd_logger(hapd, sta->addr, HOSTAPD_MODULE_IEEE80211,
 				       HOSTAPD_LEVEL_INFO,

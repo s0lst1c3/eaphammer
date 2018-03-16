@@ -1,6 +1,7 @@
 import os
-import config
 import cnf_templates
+
+from settings import settings
 
 class cert_cnf(object):
 
@@ -19,20 +20,20 @@ class cert_cnf(object):
 
 class client_cnf(cert_cnf):
 
-    path = config.client_cnf
+    path = settings.dict['paths']['hostapd']['client_cnf']
     template = cnf_templates.client_cnf
 
 class server_cnf(cert_cnf):
 
-    path = config.server_cnf
+    path = settings.dict['paths']['hostapd']['server_cnf']
     template = cnf_templates.server_cnf
 
 class ca_cnf(cert_cnf):
 
-    path = config.ca_cnf
+    path = settings.dict['paths']['hostapd']['ca_cnf']
     template = cnf_templates.ca_cnf
 
 def bootstrap():
     
-    os.system(config.bootstrap_file)
+    os.system(settings.dict['paths']['hostapd']['bootstrap'])
 

@@ -12,13 +12,14 @@ import time
 import subprocess
 import select
 import json
-import config
+import core.utils
 
 from multiprocessing import Process
+from settings import settings
 
 remote_rig = False
 
-ASLEAP_CMD = 'asleap -C %s -R %s -W %s | grep -v asleap | grep password'
+ASLEAP_CMD = '/opt/asleap/asleap -C %s -R %s -W %s | grep -v asleap | grep password'
 EAP_USERS_ENTRY =  '"%s"\tTTLS-PAP,TTLS-CHAP,TTLS-MSCHAP,MSCHAPV2,MD5,GTC,TTLS,TTLS-MSCHAPV2\t"%s"\t[2]'
 
 def crack_locally(username, challenge, response, wordlist):
@@ -35,13 +36,14 @@ def append2eap_users(username, password):
     line = EAP_USERS_ENTRY % (username, password)
     
     # append the entry to the file
-    with open(config.eap_users_file, 'a') as fd:
+    with open(settings.dict['paths']['hostapd']['eap_user'], 'a') as fd:
         fd.write('%s\n' % line)
 
 def run_autocrack(wordlist):
 
+
     try:
-        os.mkfifo(config.fifo_path)
+        os.mkfifo(settings.dict['paths']['hostapd']['fifo'])
     except OSError as e:
         if e.errno != errno.EEXIST:
             raise
@@ -49,7 +51,7 @@ def run_autocrack(wordlist):
     # this is basically a primative event loop
     while True:
 
-        with open(config.fifo_path) as fifo:
+        with open(settings.dict['paths']['hostapd']['fifo']) as fifo:
             
             print '[fifo reader] FIFO opened'
             while True:
@@ -91,6 +93,7 @@ class Autocrack(object):
         assert wordlist is not None
 
         self.wordlist = wordlist
+        self.fifo_path = settings.dict['paths']['hostapd']['fifo']
 
         print '[8] Using wordlist:', self.wordlist
 

@@ -8,14 +8,18 @@ import core.utils
 
 class HostapdEaphammer(object):
 
-    def __init__(self, config):
+    def __init__(self, settings, options):
 
-        self.exec_path = config.dict['paths']['hostapd']['bin']
-        self.debug = core.utils.parse_boolean(config.dict['core']['hostapd']['general']['debug'])
-        self.runtime_config_path = config.dict['paths']['hostapd']['conf']
-        self.lib_path = config.dict['paths']['hostapd']['lib']
+        self.exec_path = settings.dict['paths']['hostapd']['bin']
+        self.debug = core.utils.parse_boolean(settings.dict['core']['hostapd']['args']['debug'])
+        self.lib_path = settings.dict['paths']['hostapd']['lib']
 
-        self.sleep_time = int(config.dict['core']['hostapd']['general']['sleep_time'])
+        if options['manual_config'] is None:
+            self.runtime_config_path = settings.dict['paths']['hostapd']['conf']
+        else:
+            self.runtime_config_path = options['manual_config']
+
+        self.sleep_time = int(settings.dict['core']['hostapd']['wrapper']['sleep_time'])
 
     def start(self):
 

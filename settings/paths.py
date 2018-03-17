@@ -23,6 +23,7 @@ class OutputFile(object):
 # define directories
 ROOT_DIR = os.path.split(os.path.dirname(os.path.abspath(__file__)))[0]
 CONF_DIR = os.path.join(ROOT_DIR, 'settings')
+SAVE_DIR = os.path.join(ROOT_DIR, 'saved-configs')
 LOG_DIR = os.path.join(ROOT_DIR, 'logs')
 SCRIPT_DIR = os.path.join(ROOT_DIR, 'scripts')
 DB_DIR = os.path.join(ROOT_DIR, 'db')
@@ -38,7 +39,9 @@ HOSTAPD_BIN = os.path.join(HOSTAPD_DIR, 'hostapd-eaphammer')
 HOSTAPD_LIB = os.path.join(HOSTAPD_DIR, 'libhostapd-eaphammer.so')
 HOSTAPD_LOG = os.path.join(LOG_DIR, 'hostapd-eaphammer.log')
 
-HOSTAPD_CONF = os.path.join(TMP_DIR, OutputFile(name='hostapd', ext='conf').string())
+output_file = OutputFile(name='hostapd', ext='conf').string()
+HOSTAPD_CONF = os.path.join(TMP_DIR, output_file)
+HOSTAPD_SAVE = os.path.join(SAVE_DIR, output_file)
 FIFO_PATH = os.path.join(TMP_DIR, OutputFile(ext='fifo').string())
 
 EAP_USER_FILE = os.path.join(DB_DIR, 'eaphammer.eap_user')
@@ -75,6 +78,7 @@ paths = {
         'wordlists' : WORDLIST_DIR,
         'hostapd' : HOSTAPD_DIR,
         'certs' : CERTS_DIR,
+        'saves' : SAVE_DIR,
     },
 
     'hostapd' : {
@@ -94,6 +98,7 @@ paths = {
         'dh' : DH_FILE,
         'fifo' : FIFO_PATH,
         'conf' : HOSTAPD_CONF,
+        'save' : HOSTAPD_SAVE,
     },
 
     'dnsmasq' : {

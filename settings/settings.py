@@ -27,7 +27,6 @@ class EaphammerSettings(object):
 
         for config_dir in config_dirs:
 
-
             category = os.path.basename(os.path.normpath(config_dir))
             self.dict[category] = {}
 

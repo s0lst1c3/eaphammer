@@ -80,7 +80,6 @@ def RespondToThisHost(ClientIp, Name):
 	return RespondToThisIP(ClientIp) and RespondToThisName(Name)
 
 def OsInterfaceIsSupported():
-	print 'in OsInterfacveIsSupported:', responder_settings.Config.Interface
 	if responder_settings.Config.Interface != "Not set":
 		return not IsOsX()
 	return False

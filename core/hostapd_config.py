@@ -49,7 +49,6 @@ class HostapdConfig(object):
         with open(self.path, 'w') as output_handle:
 
             for section in self.dict:
-                print section
     
                 output_handle.write('# %s ---\n\n' % section)
                 for key,value in self.dict[section].items():
@@ -66,7 +65,7 @@ class HostapdConfig(object):
 
         
         return {
-            'eap_user' : settings.dict['paths']['hostapd']['eap_user'],
+            'eap_user_file' : settings.dict['paths']['hostapd']['eap_user'],
             'ca_cert' : settings.dict['paths']['hostapd']['ca_pem'],
             'server_cert' : settings.dict['paths']['hostapd']['server_pem'],
             'private_key' : settings.dict['paths']['hostapd']['private_key'],

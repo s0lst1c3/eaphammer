@@ -19,6 +19,8 @@ class HostapdEaphammer(object):
         else:
             self.runtime_config_path = options['manual_config']
 
+        self.debug = options['debug']
+
         self.sleep_time = int(settings.dict['core']['hostapd']['wrapper']['sleep_time'])
 
     def start(self):

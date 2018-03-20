@@ -31,7 +31,6 @@ from core.responder import responder_settings
 class ThreadingUDPServer(ThreadingMixIn, UDPServer):
 	def server_bind(self):
 		if utils.OsInterfaceIsSupported():
-			print 'Bind to:',responder_settings.Config.Bind_To 
 			try:
 				self.socket.setsockopt(socket.SOL_SOCKET, 25, responder_settings.Config.Bind_To+'\0')
 			except:

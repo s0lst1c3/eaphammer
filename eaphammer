@@ -121,7 +121,8 @@ def hostile_portal():
         services.Dnsmasq.kill()
         rs.stop()
         resp.stop()
-        autocrack.stop()
+        if options['autocrack']:
+            autocrack.stop()
 
         # remove hostapd conf file from tmp directory
         if options['save_config']:
@@ -145,7 +146,8 @@ def hostile_portal():
         services.Dnsmasq.kill()
         rs.stop()
         resp.stop()
-        autocrack.stop()
+        if options['autocrack']:
+            autocrack.stop()
 
         # remove hostapd conf file from tmp directory
         if options['save_config']:
@@ -212,7 +214,8 @@ def captive_portal():
         hostapd.stop()
         services.Dnsmasq.kill()
         services.Httpd.stop()
-        autocrack.stop()
+        if options['autocrack']:
+            autocrack.stop()
 
         # remove hostapd conf file from tmp directory
         if options['save_config']:
@@ -234,7 +237,8 @@ def captive_portal():
         hostapd.stop()
         services.Dnsmasq.kill()
         services.Httpd.stop()
-        autocrack.stop()
+        if options['autocrack']:
+            autocrack.stop()
 
         # remove hostapd conf file from tmp directory
         if options['save_config']:
@@ -276,7 +280,8 @@ def reap_creds():
         raw_input('\n\nPress enter to quit...\n\n')
 
         hostapd.stop()
-        autocrack.stop()
+        if options['autocrack']:
+            autocrack.stop()
 
         # remove hostapd conf file from tmp directory
         if options['save_config']:
@@ -289,7 +294,8 @@ def reap_creds():
     except KeyboardInterrupt:
 
         hostapd.stop()
-        autocrack.stop()
+        if options['autocrack']:
+            autocrack.stop()
 
         # remove hostapd conf file from tmp directory
         if options['save_config']:
@@ -316,6 +322,8 @@ _/ __ \\\\__  \\ \\____ \\|  |  \\\\__  \\  /     \\ /     \\_/ __ \\_  __ \\
 \\  ___/ / __ \\|  |_> >   Y  \\/ __ \\|  Y Y  \\  Y Y  \\  ___/|  | \\/
  \\___  >____  /   __/|___|  (____  /__|_|  /__|_|  /\\___  >__|   
      \\/     \\/|__|        \\/     \\/      \\/      \\/     \\/       
+
+                            "Qui vivra verra"
 
                                 v%s
     ''' % (__version__)

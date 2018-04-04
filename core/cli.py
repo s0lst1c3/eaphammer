@@ -380,4 +380,16 @@ def set_options():
 
         raise
 
+    if options['manual_config'] is not None:
+
+        with open(options['manual_config']) as fd:
+
+            for line in fd:
+                if 'interface' in line:
+                    options['interface'] = line.strip().split('=')[1]
+        if options['interface'] is None:
+            print
+            print '[!] Please specify a valid PHY interface in your config file.'
+            sys.exit()
+
     return options

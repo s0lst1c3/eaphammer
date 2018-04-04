@@ -241,8 +241,6 @@ struct hostapd_bss_config {
 
 	enum hostapd_logger_level logger_syslog_level, logger_stdout_level;
 
-	u8 use_karma; // karma
-
 	unsigned int logger_syslog; /* module bitfield */
 	unsigned int logger_stdout; /* module bitfield */
 
@@ -611,10 +609,6 @@ struct hostapd_bss_config {
 struct hostapd_config {
 	struct hostapd_bss_config **bss, *last_bss;
 	size_t num_bss;
-
-	// begin karma
-	u8 use_karma;
-	// end karma
 
 	u16 beacon_int;
 	int rts_threshold;

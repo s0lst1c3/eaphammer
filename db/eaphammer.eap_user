@@ -47,43 +47,14 @@
 # flag. Non-EAP methods can be enabled by following method names: TTLS-PAP,
 # TTLS-CHAP, TTLS-MSCHAP, TTLS-MSCHAPV2. TTLS-PAP and TTLS-CHAP require a
 # plaintext password while TTLS-MSCHAP and TTLS-MSCHAPV2 can use NT password
-# hash.
+# hash
+
 
 # Phase 1 users
-#"user"		MD5	"password"
-#"test user"	MD5	"secret"
-#"example user"	TLS
-#"DOMAIN\user"	MSCHAPV2	"password"
-#"gtc user"	GTC	"password"
-#"psk user"	PSK	"unknown"
-#"psk.user@example.com"	PSK	0123456789abcdef0123456789abcdef
-#"sake.user@example.com"	SAKE	0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
-#"ttls"		TTLS
-#"not anonymous"	PEAP
+
+# WPE - DO NOT REMOVE the next two lines
+*	PEAP,TTLS,TLS,FAST
+"t"	TTLS-PAP,TTLS-CHAP,TTLS-MSCHAP,MSCHAPV2,MD5,GTC,TTLS,TTLS-MSCHAPV2	"t"	[2]
 
 
-# Default to EAP-SIM and EAP-AKA based on fixed identity prefixes
-#"0"*		AKA,TTLS,TLS,PEAP,SIM
-#"1"*		SIM,TTLS,TLS,PEAP,AKA
-#"2"*		AKA,TTLS,TLS,PEAP,SIM
-#"3"*		SIM,TTLS,TLS,PEAP,AKA
-#"4"*		AKA,TTLS,TLS,PEAP,SIM
-#"5"*		SIM,TTLS,TLS,PEAP,AKA
-
-# Wildcard for all other identities
-#"brad"  PEAP
-#"brad"  MSCHAPV2    "testtest" [2]
-#
-# WPE - DO NOT REMOVE - These entries are specifically in here
-*		PEAP,TTLS,TLS,FAST
-"t"	    TTLS-PAP,TTLS-CHAP,TTLS-MSCHAP,MSCHAPV2,MD5,GTC,TTLS,TTLS-MSCHAPV2  "t"	[2]
-
-
-#   Not valid: PEAP-GTC, PEAP-MD5, TTLS-OTP, TTLS-GTC
-# Default to EAP-SIM and EAP-AKA based on fixed identity prefixes in phase 2
-#"0"*		AKA	[2]
-#"1"*		SIM	[2]
-#"2"*		AKA	[2]
-#"3"*		SIM	[2]
-#"4"*		AKA	[2]
-#"5"*		SIM	[2]
+# Phase 2 users

@@ -6,7 +6,10 @@ import sys
 import json
 
 from argparse import ArgumentParser
-from config import eap_user_file, eap_user_header, wildcard, hardcoded_fuckery
+from settings import settings
+
+WILDCARD = '*\tPEAP,TTLS,TLS,FAST'
+HARDCODED_FUCKERY = '"t"\tTTLS-PAP,TTLS-CHAP,TTLS-MSCHAP,MSCHAPV2,MD5,GTC,TTLS,TTLS-MSCHAPV2\t"t"\t[2]'
 
 def parse_eap_user_file():
 
@@ -14,7 +17,7 @@ def parse_eap_user_file():
 
 	phase1_users = []
 	phase2_users = []
-	with open(eap_user_file) as input_handle:
+	with open(settings.dict['paths']['hostapd']['eap_user']) as input_handle:
 	
 		for line_number,line in enumerate(input_handle):
 			
@@ -381,9 +384,9 @@ def add_user(users, identity, methods, phase, password=None, nt_hash=None):
 
 def write_users(users):
 
-	with open(eap_user_file, 'w') as output_handle:
+	with open(settings.dict['paths']['hostapd']['eap_user'], 'w') as output_handle:
 
-		with open(eap_user_header) as input_handle:
+		with open(settings.dict['paths']['hostapd']['eap_user_header']) as input_handle:
 			output_handle.write(input_handle.read())
 
 		output_handle.write('\n\n# Phase 1 users\n')
@@ -391,13 +394,13 @@ def write_users(users):
 			output_handle.write('%s\n' % create_user_string(user))
 
 		output_handle.write('\n# WPE - DO NOT REMOVE the next two lines\n')
-		output_handle.write('%s\n' % wildcard)
-		output_handle.write('%s\n' % hardcoded_fuckery)
+		output_handle.write('%s\n' % WILDCARD)
+		output_handle.write('%s\n' % HARDCODED_FUCKERY) # blame brad 
 
 		output_handle.write('\n\n# Phase 2 users\n')
 		for user in users['phase2']:
 			user_string = create_user_string(user)
-			if user_string != hardcoded_fuckery:
+			if user_string != HARDCODED_FUCKERY:
 				output_handle.write('%s\n' % user_string)
 
 def set_options():

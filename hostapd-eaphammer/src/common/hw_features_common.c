@@ -195,7 +195,12 @@ int check_40mhz_5g(struct hostapd_hw_modes *mode,
 		else if (bss->freq == sec_freq)
 			sec_bss++;
 	}
+#ifdef CONFIG_EAPHAMMER
+	//if (sec_bss && !(pri_bss || config->allow_bss_overlap)) {
+	if (sec_bss && !(pri_bss || 1)) {
+#else
 	if (sec_bss && !pri_bss) {
+#endif
 		wpa_printf(MSG_INFO,
 			   "Switch own primary and secondary channel to get secondary channel with no Beacons from other BSSes");
 		return 2;
@@ -216,7 +221,12 @@ int check_40mhz_5g(struct hostapd_hw_modes *mode,
 			break;
 		}
 	}
+#ifdef CONFIG_EAPHAMMER
+	//if (!(match || config->allow_bss_overlap)) {
+	if (!(match || 1)) {
+#else
 	if (!match) {
+#endif
 		for (i = 0; i < scan_res->num; i++) {
 			struct wpa_scan_res *bss = scan_res->res[i];
 			get_pri_sec_chan(bss, &bss_pri_chan, &bss_sec_chan);

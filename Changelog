@@ -62,3 +62,29 @@ EAPHammer now displays captured MS-CHAPv2 challenge / response pairs in Hashcat 
 
 0.1.4 - Gabriel Ryan <gabriel@solstice.me>
 Fixed issue where setup script was unable to download rockyou wordlist due to: https://github.com/danielmiessler/SecLists/issues/166
+
+0.1.5 - Gabriel Ryan <gabriel@digitalsilence.com>
+- Fixed an issue where iptables rules were being saved unnecessarily on startup
+- Updated CLI
+- Enhancement: granular configuration and AP management options
+- New feature: manually specify a config file
+- New feature: save config files
+- Enhancement: multiple instances of eaphammer can now be run concurrently
+- New feature: Added 802.11a and 5GHz support
+- New featuer: Added out-of-the-box support for 802.11n
+- Temporary files are now written to tmp dir
+- Removed the web_delivery server since it's not currently being used.
+- Hostapd is no longer started as a daemon process and controlled by core.services. Instead, it is loaded as a library within eaphammer and run in a separate thread (rather than its own child process).  
+- Hostapd itself has been modified to ignore BSS conflicts when operating in 802.11n mode, which is necessary in order to successfully perform evil twin attacks in 802.11n mode (patch heavily derived from Mike Kazantsev's version (github.com/mk-fg)). Future versions will make this a feature that can be enabled or disabled based on user input.
+- Added apache2 as a dependency for Kali / Ubuntu / Debian.
+- Hostapd no longer user conf_manager. Instead, it is managed using the HostapdConfig class found in core/hostapd_config.py. The HostapdConfig class draws values from both the command line interface and settings/core/hostapd.ini. See README.md for details on how this works.
+- The command line interface has been updated to include 802.11n options, as well as both basic and advanced help output.
+- Command line interface has also been moved to a dedicated module found in core.cli.py.
+- Performed some code refactoring
+- Updated README.md
+
+
+
+
+
+

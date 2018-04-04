@@ -9,6 +9,8 @@
 # be modified from here. In most cass, these lines should use += in order not
 # to override previous values of the variables.
 
+CONFIG_EAPHAMMER=y
+
 # Driver interface for Host AP driver
 CONFIG_DRIVER_HOSTAP=y
 

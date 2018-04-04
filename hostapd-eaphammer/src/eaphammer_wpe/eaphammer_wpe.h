@@ -18,16 +18,17 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-struct wpe_config {
-    char *wpe_logfile;
-    FILE *wpe_logfile_fp;
-	char *eaphammer_fifo; // eaphammer
-	FILE *eaphammer_fifo_fp; // eaphammer
-	unsigned int eaphammer_use_autocrack; // eaphammer
-    unsigned int wpe_enable_return_success;
+struct eaphammer_global_config {
+    char *logfile;
+    FILE *logfile_fp;
+	char *autocrack_fifo; // eaphammer
+	FILE *autocrack_fifo_fp; // eaphammer
+	unsigned int use_autocrack; // eaphammer
+    unsigned int always_return_success;
+	u8 use_karma;
 };
 
-extern struct wpe_config wpe_conf;
+extern struct eaphammer_global_config eaphammer_global_conf;
 
 #define n2s(c,s)((s=(((unsigned int)(c[0]))<< 8)| \
        (((unsigned int)(c[1]))    )),c+=2)

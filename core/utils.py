@@ -1,10 +1,23 @@
 import os
 import time
-import config
 
+from settings import settings
 from tqdm import tqdm
 
+def parse_boolean(raw_str):
+
+    raw_str = raw_str.strip().lower()
+    if raw_str == 'false':
+        return False
+    if raw_str == '0':
+        return False
+    if raw_str == 'no':
+        return False
+    return True
+
 def sleep_bar(sleep_time, text=''):
+
+    sleep_time = int(sleep_time)
 
     print
     
@@ -24,22 +37,26 @@ def sleep_bar(sleep_time, text=''):
         time.sleep(interval)
 
     print
+
         
 class nmcli(object):
 
     @staticmethod
     def set_managed(iface):
         os.system('nmcli device set %s managed yes' % iface)
-        sleep_bar(1, '[*] Reticulating radio frequency splines...')
+        sleep_bar(1, '[*] Using nmcli to give NetworkManager control of %s...' % iface)
+        print '[*] Success: %s is now managed by NetworkManager.' % iface
 
     @staticmethod
     def set_unmanaged(iface):
+        print '[*] Reticulating radio frequency splines...'
         os.system('nmcli device set %s managed no' % iface)
-        sleep_bar(1, '[*] Reticulating radio frequency splines...')
+        sleep_bar(1, '[*] Using nmcli to tell NetworkManager not to manage %s...' % iface) 
+        print '[*] Success: %s no longer controlled by NetworkManager.' % iface
 
 def set_ipforward(value):
 
-    with open(config.proc_ipforward, 'w') as fd:
+    with open(settings.dict['core']['eaphammer']['general']['proc_ipforward'], 'w') as fd:
         fd.write('%d' % int(value))
 
 class Iptables(object):

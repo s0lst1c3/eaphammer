@@ -1,6 +1,8 @@
 import os
-import config
 import cnf_templates
+import core.utils
+
+from settings import settings
 
 def hostapd_parse_essid_cloaking(cloaking):
 
@@ -16,18 +18,18 @@ def responder_parse_on_off(s):
 
 class hostapd_wpe_cnf(object):
 
-    path = config.hostapd_cnf
+    path = settings.dict['paths']['hostapd']['conf']
     template = cnf_templates.hostapd_wpe_cnf
 
     @classmethod
     def configure(cls,
             interface=None,
-            ca_pem=config.ca_pem,
-            eap_user_file=config.eap_user_file, 
-            server_pem=config.server_pem,
-            private_key=config.private_key,
-            dh_file=config.dh_file,
-            logpath=config.hostapd_log,
+            ca_pem=settings.dict['paths']['hostapd']['ca_pem'],
+            eap_user_file=settings.dict['paths']['hostapd']['eap_user'],
+            server_pem=settings.dict['paths']['hostapd']['server_pem'],
+            private_key=settings.dict['paths']['hostapd']['private_key'],
+            dh_file=settings.dict['paths']['hostapd']['dh'],
+            logpath=settings.dict['paths']['hostapd']['log'],
             ssid=None,
             hw_mode=None,
             channel=None,
@@ -36,7 +38,7 @@ class hostapd_wpe_cnf(object):
             karma=False,
             cloaking=None,
             use_autocrack=False,
-            eaphammer_fifo_path=None):
+            eaphammer_fifo_path=settings.dict['paths']['hostapd']['fifo']):
 
         assert interface is not None
         assert ca_pem is not None
@@ -64,7 +66,7 @@ class hostapd_wpe_cnf(object):
 
 class hostapd_open_cnf(object):
 
-    path = config.hostapd_cnf
+    path = settings.dict['paths']['hostapd']['conf']
     template = cnf_templates.hostapd_open_cnf
 
     @classmethod
@@ -93,14 +95,14 @@ class hostapd_open_cnf(object):
 
 class dnsmasq_dhcp_only_cnf(object):
 
-    path = config.dnsmasq_cnf
+    path = settings.dict['paths']['dnsmasq']['conf']
     template = cnf_templates.dnsmasq_dhcp_only
 
     @classmethod
     def configure(cls,
             interface=None,
-            log_file=None,
-            dhcp_script=None):
+            log_file=settings.dict['paths']['dnsmasq']['log'],
+            dhcp_script=settings.dict['paths']['dhcp']['script']):
 
         assert interface is not None
         assert log_file is not None
@@ -112,14 +114,14 @@ class dnsmasq_dhcp_only_cnf(object):
 
 class dnsmasq_captive_portal_cnf(object):
 
-    path = config.dnsmasq_cnf
+    path = settings.dict['paths']['dnsmasq']['conf']
     template = cnf_templates.dnsmasq_captive_portal
 
     @classmethod
     def configure(cls,
             interface=None,
-            log_file=None,
-            dhcp_script=None):
+            log_file=settings.dict['paths']['dnsmasq']['log'],
+            dhcp_script=settings.dict['paths']['dhcp']['script']):
 
         assert interface is not None
         assert log_file is not None
@@ -132,7 +134,7 @@ class dnsmasq_captive_portal_cnf(object):
 
 class responder_cnf(object):
 
-    path = config.responder_cnf
+    path = settings.dict['paths']['responder']['conf']
     template = cnf_templates.responder_cnf
 
     @classmethod
@@ -148,7 +150,7 @@ class responder_cnf(object):
             https=False,
             dns=False,
             ldap=True,
-            db_file=config.responder_db):
+            db_file=settings.dict['core']['responder']['Responder Core']['database']):
 
         f = responder_parse_on_off
 

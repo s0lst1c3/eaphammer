@@ -232,7 +232,7 @@ channel=%d
 
 # WPE Options - Dont need to change these to make it all work 
 #
-wpe_logfile=%s
+eaphammer_logfile=%s
 # wpe_hb_send_before_handshake=0    # Heartbleed True/False (Default: 1)
 # wpe_hb_send_before_appdata=0      # Heartbleed True/False (Default: 0) 
 # wpe_hb_send_after_appdata=0       # Heartbleed True/False (Default: 0)
@@ -2016,8 +2016,8 @@ bssid=%s
 # ...
 
 use_karma=%d
-eaphammer_use_autocrack=%d
-eaphammer_fifo_path=%s
+use_autocrack=%d
+autocrack_fifo_path=%s
 '''
 
 dnsmasq_dhcp_only = '''

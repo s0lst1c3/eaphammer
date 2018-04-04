@@ -30,6 +30,7 @@
 #include "hs20.h"
 #include "dfs.h"
 #include "taxonomy.h"
+#include "eaphammer_wpe/eaphammer_wpe.h"
 
 
 #ifdef NEED_AP_MLME
@@ -418,7 +419,7 @@ static u8 * hostapd_gen_probe_resp(struct hostapd_data *hapd,
 	*pos++ = WLAN_EID_SSID;
 	
 	// begin karma
-	if (hapd->conf->use_karma) {
+	if (eaphammer_global_conf.use_karma) {
 
 		*pos++ = hapd->karma_info.ssid_len;
 		os_memcpy(pos, hapd->karma_info.ssid, hapd->karma_info.ssid_len);
@@ -564,7 +565,7 @@ static enum ssid_match_result ssid_match(struct hostapd_data *hapd,
 	int wildcard = 0;
 
 	// begin karma
-	if (hapd->conf->use_karma) {
+	if (eaphammer_global_conf.use_karma) {
 		return EXACT_SSID_MATCH;
 	}
 	// end karma
@@ -767,7 +768,7 @@ void handle_probe_req(struct hostapd_data *hapd,
 	
 
 	// begin karma
-	if (!hapd->conf->use_karma) {
+	if (!eaphammer_global_conf.use_karma) {
 
 		if (elems.ds_params &&
 		    hapd->iface->current_mode &&
@@ -856,7 +857,7 @@ void handle_probe_req(struct hostapd_data *hapd,
 	}
 
 	// begin karma
-	if (hapd->conf->use_karma) {
+	if (eaphammer_global_conf.use_karma) {
 
 		os_memcpy(hapd->karma_info.ssid, elems.ssid, elems.ssid_len);
 		hapd->karma_info.ssid_len = elems.ssid_len;

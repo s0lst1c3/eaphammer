@@ -310,7 +310,13 @@ static void ieee80211n_check_scan(struct hostapd_iface *iface)
 	wpa_scan_results_free(scan_res);
 
 	iface->secondary_ch = iface->conf->secondary_channel;
-	if (!oper40) {
+
+#ifdef CONFIG_EAPHAMMER
+// if (!config->allow_bss_overlap && !oper40) {
+	if (!(1==1) && !oper40) { // change this to check against command line option
+#else
+	if (!oper40) { 
+#endif
 		wpa_printf(MSG_INFO, "20/40 MHz operation not permitted on "
 			   "channel pri=%d sec=%d based on overlapping BSSes",
 			   iface->conf->channel,
@@ -327,6 +333,7 @@ static void ieee80211n_check_scan(struct hostapd_iface *iface)
 	}
 
 	res = ieee80211n_allowed_ht40_channel_pair(iface);
+// if (!config->force_ht40 and !res) {
 	if (!res) {
 		iface->conf->secondary_channel = 0;
 		res = 1;

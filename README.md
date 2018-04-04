@@ -14,7 +14,7 @@ EAPHammer is a toolkit for performing targeted evil twin attacks against WPA2-En
 	./eaphammer --cert-wizard
 
 	# launch attack
-	./eaphammer -i wlan0 --channel 4 --auth ttls --wpa 2 --essid CorpWifi --creds
+	./eaphammer -i wlan0 --channel 4 --auth wpa --essid CorpWifi --creds
 
 Leverages a [lightly modified](https://github.com/s0lst1c3/hostapd-eaphammer) version of [hostapd-wpe](https://github.com/opensecurityresearch/hostapd-wpe) (shoutout to [Brad Anton](https://github.com/brad-anton) for creating the original), _dnsmasq_, [Responder](https://github.com/SpiderLabs/Responder), and _Python 2.7_.
 
@@ -34,10 +34,25 @@ Features
 - Integrated HTTP server for Hostile Portal attacks
 - Support for SSID cloaking
 
+New (as of Version 0.1.5) 
+----------------------------------
+
+EAPHammer now supports attacks against 802.11a and 802.11n networks. This includes the ability to create access points that support the following features:
+
+- Both 2.4 GHz and 5 GHz channel support
+- Full MIMO support (multiple input, multiple output)
+- Frame  aggregation
+- Support for 40 MHz channel widths using channel bonding
+- High Throughput Mode
+- Short Guard Interval (Short GI)
+- Modulation & coding scheme (MCS)
+- RIFS
+- HT power management
+
 Upcoming Features
 -----------------
 
-- Perform seemeless MITM attacks with partial HSTS bypasses
+- Perform seamless MITM attacks with partial HSTS bypasses
 - Support attacks against WPA-PSK/WPA2-PSK
 - directed rogue AP attacks (deauth then evil twin from PNL, deauth then karma + ACL)
 - Integrated website cloner for cloning captive portal login pages
@@ -57,20 +72,26 @@ Table of Contents
          * [IV.1 - Performing Indirect Wireless Pivots Using Hostile Portal Attacks](#iv1---performing-indirect-wireless-pivots-using-hostile-portal-attacks)
          * [IV.2 - Indirect Wireless Pivots - A Generalized Strategy](#iv2---indirect-wireless-pivots---a-generalized-strategy)
       * [V - Performing Captive Portal Attacks](#v---performing-captive-portal-attacks)
-      * [VI - Attacking WPA2-EAP Networks](#vi---attacking-wpa2-eap-networks)
-         * [VI.1 - Using AutoCrack](#vi1---using-autocrack)
-         * [VI.2 - EAPHammer User Database](#vi2---eaphammer-user-database)
-            * [VI.2.a - Basic Usage](#vi2a---basic-usage)
-               * [VI.2.aa - Listing Users](#vi2aa---listing-users)
-               * [VI.2.ab - Adding Users](#vi2ab---adding-users)
-               * [VI.2.ac - Deleting Users](#vi2ac---deleting-users)
-               * [VI.2.ad - Updating Users](#vi2ad---updating-users)
-               * [VI.2.ae - Search Filters](#vi2ae---search-filters)
-            * [VI.2.b - Advanced Usage](#vi2b---advanced-usage)
-      * [VII - ESSID Cloaking](#vii---essid-cloaking)
-      * [VIII - Using Karma](#viii---using-karma)
-      * [IX - Additional EAPHammer Options](#ix---additional-eaphammer-options)
-
+      * [VI - Attacking 802.11n Networks](#vi---attacking-80211n-networks)
+         * [VI.1 - 802.11n Basics - Creating Rogue APs with 20Mhz Channel Widths](#vi1---80211n-basics---creating-rogue-aps-with-20mhz-channel-widths)
+         * [VI.2 - Controlling Channel Width, Enabling MIMO / Channel Bonding](#vi2---controlling-channel-width-enabling-mimo--channel-bonding)
+         * [VI.3 - Advanced Usage: Specifying Primary and Secondary Channels, Channel Bonding](#vi3---advanced-usage-specifying-primary-and-secondary-channels-channel-bonding)
+         * [VI.4 - Advanced Usage: Max Spatial Streams, SMPS, and More](#vi4---advanced-usage-max-spatial-streams-smps-and-more)
+      * [VII - Hardware Modes: 802.11b / 802.11g / 802.11a / 802.11n / etc](#vii---hardware-modes-80211b--80211g--80211a--80211n--etc)
+      * [VIII - Attacking WPA-EAP and WPA2-EAP Networks](#viii---attacking-wpa-eap-and-wpa2-eap-networks)
+         * [VIII.1 - Considerations When Attacking WPA2-EAP Networks](#viii1---considerations-when-attacking-wpa2-eap-networks)
+         * [VIII.2 - Using AutoCrack](#viii2---using-autocrack)
+         * [VIII.3 - EAPHammer User Database](#viii3---eaphammer-user-database)
+            * [VIII.3.a - Basic Usage](#viii3a---basic-usage)
+               * [VIII.3.aa - Listing Users](#viii3aa---listing-users)
+               * [VIII.3.ab - Adding Users](#viii3ab---adding-users)
+               * [VIII.3.ac - Deleting Users](#viii3ac---deleting-users)
+               * [VIII.3.ad - Updating Users](#viii3ad---updating-users)
+               * [VIII.3.ae - Search Filters](#viii3ae---search-filters)
+            * [VIII.4.b - Advanced Usage](#viii4b---advanced-usage)
+      * [IX - ESSID Cloaking](#ix---essid-cloaking)
+      * [X - Using Karma](#x---using-karma)
+      * [XI - Advanced Granular Controls](#xi---advanced-granular-controls)
 
 Setup Guide
 ===========
@@ -110,10 +131,10 @@ Once you have installed each of the dependencies listed in `kali-dependencies.tx
 
 Compile hostapd using the following commands:
 
-	cd hostapd-eaphammer
-	make
+	cd hostapd-eaphammer/hostapd
+	make hostapd-eaphammer_lib
 
-Open config.py in the text editor of your choice and edit the following lines so that to values that work for your distro:
+Open settings/core/eaphammer.ini in the text editor of your choice and edit the following lines so that to values that work for your distro:
 
 	# change this to False if you cannot/will not use systemd
 	use_systemd = True
@@ -124,7 +145,26 @@ Open config.py in the text editor of your choice and edit the following lines so
 	# change this 'httpd' if necessary
 	httpd = 'apache2'
 
-# Usage Guide
+
+Usage Guide
+==========
+
+EAPHammer is designed to be easy to use, so you should be able to get pretty far using the example based documenation that makes up most of this Readme. 
+
+EAPHammer has four modes of operation:
+
+- __--cert-wizard__ - Use this flag to create a new RADIUS cert for your AP (needed for any attack that involves EAP). See: [I - x.509 Certificate Generation](#i---x509-certificate-generation)
+- __--creds__ - Harvest RADIUS credentials using rogue access point attack. See: [II - Stealing RADIUS Credentials Using EAPHammer](#ii---stealing-radius-credentials-using-eaphammer)
+- __--hostile-portal__ - Rapidly steal active directory credentials, perform indirect wireless pivots. See: [III - Stealing AD Credentials Using Hostile Portal Attacks](#iii---stealing-ad-credentials-using-hostile-portal-attacks) and [IV - Indirect Wireless Pivots](#iv---indirect-wireless-pivots)
+- __--captive-portal__ - Force clients to connect to a captive portal. See: [V - Performing Captive Portal Attacks](#v---performing-captive-portal-attacks).
+
+Further documentation for each one of these modes can be found in the sections referenced in the list above. You can access EAPHammer's built in help menus by using either the -h or -hh flags as shown below:
+
+	# display basic help
+	./eaphammer -h
+
+	# display advanced help
+	./eaphammer -hh
 
 ## I - x.509 Certificate Generation
 
@@ -138,23 +178,17 @@ Certificates are required to perform any attack against networks that use EAP-PE
 
 To steal RADIUS credentials by executing an evil twin attack against an EAP network, use the --creds flag as shown below.
 
-	./eaphammer --bssid 1C:7E:E5:97:79:B1 --essid Example --channel 2 --interface wlan0 --auth ttls --creds
-
-The flags shown above are self explanatory. For more granular control over the attack, you can use the --wpa flag to specify WPA vs WPA2 and the --auth flag to specify the eap type. Note that for cred reaping attacks, you should always specify an auth type manually since the the --auth flag defaults to "open" when omitted.
-
-	./eaphammer --bssid 00:11:22:33:44:00 --essid h4x0r --channel 4 --wpa 2 --auth ttls --interface wlan0 --creds
-
-Please refer to the options described in [VIII - Additional EAPHammer Options](#vii---additional-eaphammer-options) section of this document for additional details about these flags.
+	./eaphammer --bssid 1C:7E:E5:97:79:B1 --essid Example --channel 2 --interface wlan0 --creds
 
 ## III - Stealing AD Credentials Using Hostile Portal Attacks
 
 *Note: you will need to generate a certificate in order to perform this attack against most EAP networks. Please refer to* [I - x.509 Certificate Generation](#i---x509-certificate-generation) *for instructions on how to do this.*
 
-*Note: you will need RADIUS creds in order to perform this attack against EAP implementations that use mutual authentication protocols such as MS-CHAPv2 for inner authentication. Please refer to* [VI - Attacking WPA2-EAP Networks](#vi---attacking-wpa2-eap-networks) *for additional information.*
+*Note: you will need RADIUS creds in order to perform this attack against EAP implementations that use mutual authentication protocols such as MS-CHAPv2 for inner authentication. Please refer to* [VIII.1 - Considerations When Attacking WPA2-EAP Networks](#VIII.1---Considerations-When-Attacking-WPA2-EAP-Networks) *for additional information.*
 
 Hostile Portal Attacks are a weaponization of the captive portals typically used to restrict access to open networks in environments such as hotels and coffee shops. Instead of redirecting HTTP traffic to a login page, as with a captive portal, the hostile portal redirects HTTP traffic to an SMB share located on the attacker's machine. The result is that after the victim is forced to associate with the attacker using a rogue access point attack, any HTTP traffic generated by the victim will cause the victim's device to attempt NTLM authentication with the attacker. This is, in essence, an assisted [Redirect To SMB](https://www.cylance.com/redirect-to-smb) attack. The attacker also performs LLMNR/NBT-NS poisoning against the victim.
 
-This attack gets you lots and lots of Active Directory credentials, simply by forcing clients to connect and authenticate with you. The results are similar to what you'd get using a tool such as [Responder](https://github.com/lgandx/Responder), with some disctict advantages:
+This attack gets you lots and lots of Active Directory credentials, simply by forcing clients to connect and authenticate with you. The results are similar to what you'd get using a tool such as [Responder](https://github.com/lgandx/Responder), with some distinct advantages:
 
 - __Stealthy__: This is a rogue AP attack, so no direct network is required
 - __Large Area of Effect__: This is an attack that works across multiple subnets -- you can pwn everything that is connected to the wireless network.
@@ -162,25 +196,26 @@ This attack gets you lots and lots of Active Directory credentials, simply by fo
 
 The --hostile-portal flag can be used to execute a hostile portal attack, as shown in the examples below.
 
-	./eaphammer --interface wlan0 --bssid 1C:7E:E5:97:79:B1 --essid EvilC0rp --channel 6 --auth peap --wpa 2 --hostile-portal
+	./eaphammer --interface wlan0 --bssid 1C:7E:E5:97:79:B1 --essid EvilC0rp --channel 6 --auth wpa --hostile-portal
 
-	./eaphammer --interface wlan0 --essid TotallyLegit --channel 1 --auth open --hostile-portal
+	./eaphammer --interface wlan0 --essid TotallyLegit --hw-mode n --channel 36 --auth open --hostile-portal
+
 
 ## IV - Indirect Wireless Pivots
 
 *Note: you will need to generate a certificate in order to perform this attack against most EAP networks. Please refer to* [I - x.509 Certificate Generation](#i---x509-certificate-generation) *for instructions on how to do this.*
 
-*Note: you will need RADIUS creds in order to perform this attack against EAP implementations that use mutual authentication protocols such as MS-CHAPv2 for inner authentication. Please refer to* [VI - Attacking WPA2-EAP Networks](#vi---attacking-wpa2-eap-networks) *for additional information.*
+*Note: you will need RADIUS creds in order to perform this attack against EAP implementations that use mutual authentication protocols such as MS-CHAPv2 for inner authentication. Please refer to* [VIII.1 - Considerations When Attacking WPA2-EAP Networks](#VIII.1---Considerations-When-Attacking-WPA2-EAP-Networks) *for additional information.*
 
 An Indirect Wireless Pivot is a technique for bypassing port-based access control mechanisms using rogue access point attacks. The attack requires the attacker to use two wireless network interfaces. The first network interface is used to obtain an IP address on the target network. Presumably, this first network interface is placed in quarantine by the NAC when this occurs. The attacker then uses a rogue AP attack to coerce a victim into connecting to the attacker's second wireless interface. The attacker then exploits the victim in some way, allowing the attacker to place a timed payload on the victim's device. The attacker then shuts down the rogue access point, allowing the victim to reassociate with the target network. The attacker then waits for the timed payload to execute and send a reverse shell back to the first interface, allowing the attacker to escape the quarantine.
 
-EAPHammer can be used to perform Indirect Wireless Piviots, as described in the following sections.
+EAPHammer can be used to perform Indirect Wireless Pivots, as described in the following sections.
 
 ### IV.1 - Performing Indirect Wireless Pivots Using Hostile Portal Attacks
 
 Before you begin the attack, make sure you have the following:
 
-1. RADIUS creds for a number of victim devices (see [VI - Attacking WPA2-EAP Networks](#vi---attacking-wpa2-eap-networks))
+1. RADIUS creds for a number of victim devices (see [VIII.1 - Considerations When Attacking WPA2-EAP Networks](#VIII.1---Considerations-When-Attacking-WPA2-EAP-Networks))
 2. Two network interfaces: we will call these **Interface A** and **Interface B**.
 
 __Step 1__ - Connect to the target network using **Interface A**
@@ -213,53 +248,167 @@ Be creative. The specific details of this attack aren't important, and the steps
 
 The takeaway here is that you are removing an authorized device from its protected environment, exploiting it in some way, then allowing it to reassociate with the target network.
 
+
 ## V - Performing Captive Portal Attacks
 
 *Note: you will need to generate a certificate in order to perform this attack against most EAP networks. Please refer to* [I - x.509 Certificate Generation](#i---x509-certificate-generation) *for instructions on how to do this.*
 
-*Note: you will need RADIUS creds in order to perform this attack against EAP implementations that use mutual authentication protocols such as MS-CHAPv2 for inner authentication. Please refer to* [VI - Attacking WPA2-EAP Networks](#vi---attacking-wpa2-eap-networks) *for additional information.*
+*Note: you will need RADIUS creds in order to perform this attack against EAP implementations that use mutual authentication protocols such as MS-CHAPv2 for inner authentication. Please refer to* [VIII.1 - Considerations When Attacking WPA2-EAP Networks](#VIII.1---Considerations-When-Attacking-WPA2-EAP-Networks) *for additional information.*
 
 To perform a captive portal attack using eaphammer, use the --captive-portal flag as shown below.
 
-	./eaphammer --bssid 1C:7E:E5:97:79:B1 --essid HappyMealz --channel 6 --interface wlan0 --captive-portal
+	./eaphammer --bssid 1C:7E:E5:97:79:B1 --essid HappyMealz --channel 149 --interface wlan0 --captive-portal
 
 This will cause eaphammer to execute an evil twin attack in which the HTTP(S) traffic of all affected wireless clients are redirected to a website you control. Eaphammer will leverage Apache2 to serve web content out of /var/www/html if used with the default Apache2 configuration. Future iterations of eaphammer will provide an integrated HTTP server and website cloner for attacks against captive portal login pages.
 
-## VI - Attacking WPA2-EAP Networks
+## VI - Attacking 802.11n Networks
 
-For the most part, attacks against WPA2-EAP networks require creds in order to work. The exception for this that you don't need creds to steal creds (because that's just redundant). The reason for this is that the more advanced forms of WPA2-EAP use MS-CHAPv2, which requires mutual authentication between the wireless client and the access point. In other words, if you cannot prove knowldge of the victim's password, you will not be able to get the victim to fully associate with you.
+*Note: It is highly recommended to read  [VII - Hardware Modes: 802.11b / 802.11g / 802.11a / 802.11n / etc](#vii---hardware-modes-80211b--80211g--80211a--80211n--etc) prior to this section.*
+*Note: at the moment, EAPHammer does not support DSSS. This section is written with the implicit understanding that OFDM is being used. If you don't know what any of this means, that's totally fine. I just added this note to save myself time answering nitpicky Github issues.*
 
-Fortunately, you have a couple of options available to you. The first option is to simply steal a bunch of RADIUS creds using the --creds flag (see [II - Stealing RADIUS Credentials Using EAPHammer](#ii---stealing-radius-credentials-using-eaphammer) for instructions on how to do this. You can then crack the creds offline, then return and finish the attack later. This method will work regardless of the strength of the user's password due to weaknesses found in MS-CHAPv2 (see [Defeating PPTP VPNs and WPA2 Enterprise with MS-CHAPv2 | DC20 | Moxie Marlinspike and David Hulton](https://www.youtube.com/watch?v=sIidzPntdCM)). You will also have to add the cracked RADIUS creds to EAPHammer's database. Please refer to [VI.2 - EAPHammer User Database](#vi2---eaphammer-user-database) for instructions on how to do this.
+This section describes how to use EAPHammer to attack networks that use 802.11n. Since attacking these networks effectively requires a basic understanding of 802.11n concepts such as MIMO and channel bonding, it's probably a good idea to give yourself a crash course on 802.11n by reading this short article (or similar):
 
-For victims with weak passwords, you can use the --local-autocrack flag in order to perform an auto crack 'n add attack (see [VI.1 - Using AutoCrack](#vi1---using-autocrack) for usage instructions, see [Improvements In Rogue AP Attacks - MANA 1/2](https://sensepost.com/blog/2015/improvements-in-rogue-ap-attacks-mana-1%2F2/) for details on how this attack works).
+- [https://www.computerworld.com/article/2481909/emerging-technology/what-every-it-professional-should-know-about-802-11n--part-1-.html](https://www.computerworld.com/article/2481909/emerging-technology/what-every-it-professional-should-know-about-802-11n--part-1-.html)
 
-### VI.1 - Using AutoCrack
+There are more in-depth tutorials on 802.11n out there, but the one referenced above will get you by. If you're already familiar with 802.11n, feel free to skip it.
+
+### VI.1 - 802.11n Basics - Creating Rogue APs with 20Mhz Channel Widths
+
+To perform a basic rogue AP attack using 802.11n, use the --hw-mode n flag as shown below:
+
+	./eaphammer -i wlan0 --essid lulz0rz --hw-mode n --channel 1
+
+This will spawn a rogue access point that uses 802.11n with a 20MHz channel width. The actual hardware mode used by the rogue AP will automatically be set to one of the following values:
+
+- __a__ - Used when you select a 2.4GHz channel
+- __g__ - Used when you select a 5GHz channel
+
+### VI.2 - Controlling Channel Width, Enabling MIMO / Channel Bonding
+
+The --channel-width flag is used to manually specify the access point's channel width when 802.11n mode is enabled. The access point's channel width can be set to either 20MHz or 40Mhz, as shown in the next two examples.
+
+To create a rogue 802.11n AP with a 20Mhz channel width:
+
+	./eaphammer -i wlan0 --essid lulz0rz --hw-mode n --channel 1 --channel-width 20
+
+To create a rogue 892.11n AP with a 40MHz channel width:
+
+	./eaphammer -i wlan0 --essid lulz0rz --hw-mode n --channel 1 --channel-width 40
+
+If 802.11n mode is enabled and the --channel-width flag is not used, eaphammer will create a rogue AP with a default 20MHz channel width.
+
+### VI.3 - Advanced Usage: Specifying Primary and Secondary Channels, Channel Bonding
+
+*Note: this is an Advanced Usage section. The command line options demonstrated in this section can be revealed using eaphammer's advanced help module: ./eaphammer -hh*
+
+As we described in [VI.1 - 802.11n Basics - Creating Rogue APs with 20Mhz Channel Widths](#VI.1---802.11n-Basics---Creating-Rogue-APs-with-20Mhz-Channel-Widths), access points with a channel width greater than 20MHz are created using a process known as Channel Bonding. Simply put: Channel Bonding is the process of combining two 20MHz channels to create a channel that is 40MHz wide. This allows for greater throughput. The two 20MHz channels are referred to as the primary and secondary channel, respectively.
+
+The primary channel is specified using the --channel flag. The secondary channel is automatically calculated at a 20MHz offset from the primary channel. 
+
+You can use the --ht40 flag to manually place the secondary channel either above or below the primary channel on the frequency spectrum.
+
+	# secondary channel above primary channel
+	./eaphammer -e spikeyfruit -i wlan0 -c 1 --hw-mode n --ht40 plus
+
+	# secondary channel below primary channel
+	./eaphammer -e spikeyfruit -i wlan0 -c 6 --hw-mode n --ht40 minus
+
+The primary and secondary channel that you choose must combine to create a valid 40Mhz channel. For example, the following command will fail because resulting 40Mhz channel would fall below the 2.4GHz spectrum:
+
+	# this will not work: can't have a secondary channel less that 1
+	./eaphammer -e oops --hw-mode n --channel 1 --channel-width 40 --ht40 minus
+
+To make things easier, you can let eaphammer choose a valid secondary channel for you. This is done either by using --ht40 auto or by omitting the --ht40 flag completely:
+
+	# automatically selects a valid secondary channel
+	./eaphammer -e easyPeasy --hw-mode n --channel 1 --channel-width 40 --ht40 auto
+
+	# also automatically selects a valid secondary channel (with less typing)
+	./eaphammer -e ezpz --hw-mode n --channel 1 --channel-width 40 
+
+### VI.4 - Advanced Usage: Max Spatial Streams, SMPS, and More
+
+There is a more complete list of 802.11n options intended for advanced users that offer more granular control over eaphammer. To see them, as well as brief descriptions of what they do, use the -hh flag as shown in the following command:
+
+	./eaphammer -hh
+
+Note that if you plan on using these advanced options, you should also read the [XI - Advanced Granular Controls](#xi---advanced-granular-controls) section of this document.  
+
+## VII - Hardware Modes: 802.11b / 802.11g / 802.11a / 802.11n / etc
+
+The --hw-mode flag can be used to manually select a hardware mode for eaphammer to use. For example, the following command creates a rogue access point that uses 802.11b:
+
+	./eaphammer -i wlan0 -e oldskool --creds --hw-mode b
+
+The primary modes you'll most likely need to concern yourself with are:
+	
+- __802.11b__ - Older specification, 2.4GHz only
+- __802.11a__ - Used for creating 5GHz access points
+- __802.11g__ - Used for creating 2.4GHz access points
+- __802.11n__ - Can be used on both the 2.4GHz and 5GHz spectrums. 
+
+802.11n is complicated enough that it has been given its own section within this document, which you should read if you plan to use it. See: [VI - Attacking 802.11n Networks](#vi---attacking-80211n-networks)
+
+If the --hw-mode flag is not used, eaphammer will automatically select 802.11a or 802.11g depending on whether you have specified a 2.4GHz or 5GHz channel. For example:
+
+	# --hw-mode flag omitted, 2.4GHz channel selected. EAPHammer will automatically set hw_mode to g
+	./eaphammer -i wlan0 -e safewifis --creds --channel 2
+
+	# --hw-mode flag omitted, 5GHz channel selected. EAPHammer will automatically set hw_mode to a
+	./eaphammer -i wlan0 -e safewifis --creds --channel 36
+
+## VIII - Attacking WPA-EAP and WPA2-EAP Networks
+
+To execute a rogue access point attack against a network that uses WPA2-EAP, just use the --auth flag as shown below:
+
+	./eaphammer -i wlan0 -e mysecurenetwork --auth wpa
+
+By default, eaphammer will use WPA2 rather than WPA. However, you can specify the WPA version manually using the ---wpa-version flag as shown below:
+
+	# use WPA2
+	./eaphammer -i wlan0 -e equihax --auth wpa --wpa-version 2
+
+	# use WPA
+	./eaphammer -i wlan0 -e panera --auth wpa --wpa-version 1
+
+There is no need to specify an EAP type, as eaphammer will negotiate the EAP type on a victim-by-victim basis as they connect to the rogue AP. EAPHammer will automatically use the least secure EAP type supported by the client in order to make cracking attempts easier.
+
+
+### VIII.1 - Considerations When Attacking WPA2-EAP Networks
+
+For the most part, attacks against WPA2-EAP networks require creds in order to work. The exception for this that you don't need creds to steal creds (because that's just redundant). The reason for this is that the more advanced forms of WPA2-EAP use MS-CHAPv2, which requires mutual authentication between the wireless client and the access point. In other words, if you cannot prove knowledge of the victim's password, you will not be able to get the victim to fully associate with you.
+
+Fortunately, you have a couple of options available to you. The first option is to simply steal a bunch of RADIUS creds using the --creds flag (see [II - Stealing RADIUS Credentials Using EAPHammer](#ii---stealing-radius-credentials-using-eaphammer) for instructions on how to do this. You can then crack the creds offline, then return and finish the attack later. This method will work regardless of the strength of the user's password due to weaknesses found in MS-CHAPv2 (see [Defeating PPTP VPNs and WPA2 Enterprise with MS-CHAPv2 | DC20 | Moxie Marlinspike and David Hulton](https://www.youtube.com/watch?v=sIidzPntdCM)). You will also have to add the cracked RADIUS creds to EAPHammer's database. Please refer to [VI.2 - EAPHammer User Database](#viii3---eaphammer-user-database) for instructions on how to do this.
+
+For victims with weak passwords, you can use the --autocrack flag in order to perform an auto crack 'n add attack (see [VI.1 - Using AutoCrack](#vi1---using-autocrack) for usage instructions, see [Improvements In Rogue AP Attacks - MANA 1/2](https://sensepost.com/blog/2015/improvements-in-rogue-ap-attacks-mana-1%2F2/) for details on how this attack works).
+
+### VIII.2 - Using AutoCrack
 
 "Autocrack 'n add" is a technique introduced by Dominic White and Ian de Villiers in 2014 which was first introduced into their [Mana Toolkit](https://github.com/sensepost/mana). When autocrack ‘n add is used, the captured MS-CHAPv2 challenge and response is immediately sent to a cracking rig (local or remote) before the authentication response is sent to the victim. The cracked credentials are then appended to the end of the eap\_user file. If the challenge and response are cracked fast enough, the cracked credentials are added to eap\_user file before hostapd attempts to retrieve them. Even if the challenge and response cannot be cracked in time, the attack will succeed when the client attempts to reauthenticate provided the password can be cracked within a short period of time. When weak passwords are used, this process can take seconds. See the original [Improvements In Rogue AP Attacks - MANA 1/2](https://sensepost.com/blog/2015/improvements-in-rogue-ap-attacks-mana-1%2F2/) blog post for a more detailed explanation of this attack.
 
-To use EAPHammer's builtin AutoCrack capability, just include the --local-autocrack flag with whatever attack you are attempting to perform. For example, to enable AutoCrack while performing a Hostile Portal attack, you can use the following command:
+To use EAPHammer's builtin AutoCrack capability, just include the --autocrack flag with whatever attack you are attempting to perform. For example, to enable AutoCrack while performing a Hostile Portal attack, you can use the following command:
 
-	./eaphammer -i wlan0 --essid EvilC0rp -c 6 --auth peap  --hostile-portal --local-autocrack
+	./eaphammer -i wlan0 --essid EvilC0rp -c 6 --auth peap  --hostile-portal --autocrack
 
-Note that at this time, EAPHammer only supports performing an autocrack 'n add using EAPHammer's internal hash cracking capability. Unless you're using a cracking rig to run EAPHammer, this is going to be very slow. Support for sending hashes to a remote cracking rig will be added in the near future.
+Note that at this time, EAPHammer only supports performing an autocrack 'n add using EAPHammer's internal hash cracking capability. Unless you're using a cracking rig to run EAPHammer, this is going to be very slow. Support for sending hashes to a remote cracking rig will be added in the future.
 
-### VI.2 - EAPHammer User Database
+### VIII.3 - EAPHammer User Database
 
 For now, EAPHammer's database is really just an interface to hostapd's eap\_user file. This will change in subsequent versions.
 
-For most use cases, just stick with the [VI.2.a - Basic Usage](#vi2a---basic-usage) section found below.
+For most use cases, just stick with the [VIII.3.a - Basic Usage](#viii3a---basic-usage) section found below.
 
-#### VI.2.a - Basic Usage
+#### VIII.3.a - Basic Usage
 
-##### VI.2.aa - Listing Users
+##### VIII.3.aa - Listing Users
 
 To list entries in the database, use the --list flag as shown below:
 
 	./ehdb --list
 
-You can also filter for users that match specific attributes. Please see [VI.2.ae - Search Filters](#vi2ae---search-filters) for additional information.
+You can also filter for users that match specific attributes. Please see [VIII.3.ae - Search Filters](#viii3ae---search-filters) for additional information.
 
-##### VI.2.ab - Adding Users
+##### VIII.3.ab - Adding Users
 
 At minimum, each user that you add to the database needs to have the following attributes:
 
@@ -274,11 +423,11 @@ To add an identity and NT password hash to the database:
 
 	./ehdb --add --identity USERNAME --password Passw0rd!
 
-There are other attributes that you can specify as well (see [VI.2.b - Advanced Usage](#vi2b---advanced-usage)). However,
+There are other attributes that you can specify as well (see [VIII.3.b - Advanced Usage](#viii3b---advanced-usage)). However,
 the default attributes will work in the vast majority of situations, so try not to worry about those
 unless you absolutely have to.
 
-##### VI.2.ac - Deleting Users
+##### VIII.3.ac - Deleting Users
 
 To remove an identity from the database:
 
@@ -288,13 +437,13 @@ To remove all identities from the datbase:
 
 	./ehdb --delete --delete-all
 
-You can also delete multiple users at once by using search filters. Please see [VI.2.ae - Search Filters](#vi2ae---search-filters) for additional information.
+You can also delete multiple users at once by using search filters. Please see [VIII.3.ae - Search Filters](#viii3ae---search-filters) for additional information.
 
-##### VI.2.ad - Updating Users
+##### VIII.3.ad - Updating Users
 
 To update a user's password (or other attribute), just use the --add flag. The existing user entry will be updated to reflect your modifications.
 
-##### VI.2.ae - Search Filters
+##### VIII.3.ae - Search Filters
 
 You can use search filters to narrow the output of the --list flag and to delete multiple users using the --delete flag.
 
@@ -309,7 +458,7 @@ Filter options for --list and --delete:
  - __--has-nt-hash__ - Filter for users that have a nt hash in the database.
  - __--invert__ - Invert the results of the search.
 
-#### VI.2.b - Advanced Usage
+#### VIII.4.b - Advanced Usage
 
 Aside from --identity, --password, and --nt-hash, you probably won't need to use these options except for rare edge cases. However, they are there if you need them.
 
@@ -321,9 +470,11 @@ Options for adding a user to database:
  - __--methods METHODS__ - Leave this as the default unless you really know what you are doing. A comma seperated list of the authentication methods that should be used when the user attempts to connect. EAPHammer will attempt to use each of these methods one by one until the victim accepts one.
  - __--phase {1,2}__ - You should probably leave this as the default.
 
-## VII - ESSID Cloaking
 
-EAPHammer supports the creation of hidden wireles networks. Just add one of the following three flags to whatever attack you're performing:
+
+## IX - ESSID Cloaking
+
+EAPHammer supports the creation of hidden wireless networks. Just add one of the following three flags to whatever attack you're performing:
 
  - __--cloaking full__ - Send empty string as ESSID in beacons and ignore broadcast probes.
  - __--cloaking zeroes__ - Replace all characters in ESSID with ASCII 0 in becaons and ignore broadcast probes.
@@ -338,7 +489,7 @@ There are a couple of reason why you might want to use ESSID cloaking:
 1. The network you are targeting uses ESSID cloaking (although in a lot of cases you'll get better results without cloaking your rogue access point. Try it without cloaking first).
 2. You are performing a Karma attack and trying to be stealthy.
 
-## VIII - Using Karma
+## X - Using Karma
 
 EAPHammer supports Karma attacks. Just add the --karma flag to whatever attack you're performing.
 
@@ -347,20 +498,27 @@ Warning: EAPHammer does not yet support the use of ACLs to limit the scope of Ka
 With that out of the way, here's a usage example:
 
 	./eaphammer -i wlan0 --essid lulz --cloaking full -c 1 --auth open --hostile-portal --karma
+	
+## XI - Advanced Granular Controls
 
-## IX - Additional EAPHammer Options
+To view a complete list of granular configuration options supported by eaphammer, use the -hh flag as shown below:
 
-- __--cert-wizard__ - Use this flag to create a new RADIUS cert for your AP.
-- __-h, --help__ - Display detailed help message and exit.
-- __-i, --interface__ - Specify the a PHY interface on which to create your AP.
-- __-e ESSID, --essid ESSID__ - Specify access point ESSID.
-- __-b BSSID, --bssid BSSID__ - Specify access point BSSID.
-- __--hw-mode HW-MODE__ - Specify access point hardware mode (default: g).
-- __-c CHANNEL, --channel CHANNEL__ - Specify access point channel.
-- __--wpa {1,2}__ - Specify WPA type (default: 2).
-- __--auth {peap,ttls,open}__ - Specify auth type (default: open).
-- __--creds__ - Harvest EAP creds using an evil twin attack.
-- __--hostile-portal__ - Force clients to connect to hostile portal.
-- __--captive-portal__ - Force clients to connect to a captive portal.
-- __--cloaking__ - Use ESSID cloaking (see [VII - ESSID Cloaking](#vii---essid-cloaking))
-- __--karma__ - Enable Karma (see [VIII - Using Karma](#viii---using-karma))
+	./eaphammer -hh
+
+If these configuration files are not enough, eaphammer can also be configured using the .ini files found in the project's settings directory. Some important things to know about how eaphammer handles config files:
+
+- Command line options _always_ take precedence over parameters set in eaphammer's config files. What this means is that if you try to specify a particular config value, such as the access point's ESSID, using both command line options and a config file, the value passed through the command line interface will take precedence. 
+- The parameters set in the config files serve as default values each corresponding command line option.
+
+You can also load a hostapd config file manually using the --manual-config flag. When the --manual-config flag is used, eaphammer will completely ignore both command line options and config file parameters. Example:
+
+	./eaphammer -i wlan0 --manual-config hostapd.conf
+
+You can also save hostapd configurations for reuse using the --save-config flag. You can then reuse the config file using the --manual-config flag as shown in the previous example. The following command executes a rogue access point and saves the config for later use:
+ 
+	./eaphammer -i wlan0 -e pleaseRecycle --creds --save-config myconfig.conf
+
+You can even use the --save-config-only flag to generate a config file without actually executing an attack:
+
+	./eaphammer -i wlan0 -e saveForLater --creds --save-config-only myconfig.conf
+

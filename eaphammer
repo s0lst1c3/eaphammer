@@ -54,6 +54,7 @@ def hostile_portal():
     global responder
 
     try:
+        utils.Iptables.save_rules()
     
         # start autocrack if enabled
         if options['autocrack']:
@@ -168,6 +169,8 @@ def captive_portal():
 
     try:
 
+        utils.Iptables.save_rules()
+
         # prepare environment
         utils.set_ipforward(1)
         utils.nmcli.set_unmanaged(options['interface'])
@@ -259,6 +262,8 @@ def reap_creds():
 
     try:
 
+        utils.Iptables.save_rules()
+
         # start autocrack if enabled
         if options['autocrack']:
 
@@ -331,7 +336,6 @@ _/ __ \\\\__  \\ \\____ \\|  |  \\\\__  \\  /     \\ /     \\_/ __ \\_  __ \\
 if __name__ == '__main__':
 
     print_banner()
-    utils.Iptables.save_rules()
 
     #options = set_options()
     options = core.cli.set_options()

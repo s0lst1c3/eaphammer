@@ -35,7 +35,7 @@ if __name__ == '__main__':
 
 
     print '\n[*] Compiling hostapd...\n'
-    os.system("cd %s && make" % settings.dict['paths']['directories']['hostapd'])
+    os.system("cd %s && make hostapd-eaphammer_lib" % settings.dict['paths']['directories']['hostapd'])
     print '\n[*] complete!\n'
 
     print '\n[*] Downloading default wordlist...\n'

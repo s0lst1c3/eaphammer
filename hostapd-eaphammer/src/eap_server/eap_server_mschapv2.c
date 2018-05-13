@@ -332,11 +332,6 @@ static void eap_mschapv2_process_response(struct eap_sm *sm,
 	wpa_printf(MSG_MSGDUMP, "EAP-MSCHAPV2: Flags 0x%x", flags);
 	wpa_hexdump_ascii(MSG_MSGDUMP, "EAP-MSCHAPV2: Name", name, name_len);
 
-	// wpe
-	challenge_hash(peer_challenge, data->auth_challenge, name, name_len, wpe_challenge_hash);
-	wpe_log_chalresp("mschapv2", name, name_len, wpe_challenge_hash, 8, nt_response, 24);
- 
-
 	buf = os_malloc(name_len * 4 + 1);
 	if (buf) {
 		printf_encode(buf, name_len * 4 + 1, name, name_len);
@@ -366,6 +361,10 @@ static void eap_mschapv2_process_response(struct eap_sm *sm,
 			break;
 		}
 	}
+
+	// wpe
+	challenge_hash(peer_challenge, data->auth_challenge, user, user_len, wpe_challenge_hash);
+	wpe_log_chalresp("mschapv2", user, user_len, wpe_challenge_hash, 8, nt_response, 24);
 
 #ifdef CONFIG_TESTING_OPTIONS
 	{

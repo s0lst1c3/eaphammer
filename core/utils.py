@@ -82,7 +82,7 @@ class Iptables(object):
                             '--to-destination  %s:80') % (iface, addr))
         os.system('iptables -t nat -A PREROUTING -i %s '
                         '-p tcp --dport 443 -j DNAT '
-                            '--to-destination  %s:80' % (iface, addr))
+                            '--to-destination  %s:443' % (iface, addr))
         os.system('iptables -t nat -A POSTROUTING -j MASQUERADE')
 
     @staticmethod

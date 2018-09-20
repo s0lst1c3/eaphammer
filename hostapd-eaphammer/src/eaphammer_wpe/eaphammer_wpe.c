@@ -98,30 +98,35 @@ void eaphammer_write_fifo(const u8 *username,
 }
 // end eaphammer fifo
 
-void wpe_log_chalresp(char *type, const u8 *username, size_t username_len, const u8 *challenge, size_t challenge_len, const u8 *response, size_t response_len) {
+void wpe_log_chalresp(char *type, const u8 *full_username, size_t full_username_len, const u8 *username, size_t username_len, const u8 *challenge, size_t challenge_len, const u8 *response, size_t response_len) {
     time_t nowtime;
     int x; 
 
     nowtime = time(NULL);
 
     wpe_log_file_and_stdout("\n\n%s: %s", type, ctime(&nowtime));
-    wpe_log_file_and_stdout("\t username:\t\t");
+    wpe_log_file_and_stdout("\t domain\\username:\t\t");
+    for (x=0; x<full_username_len; x++) {
+        wpe_log_file_and_stdout("%c",full_username[x]);
+	}
+    wpe_log_file_and_stdout("\n");
+    wpe_log_file_and_stdout("\t username:\t\t\t");
     for (x=0; x<username_len; x++) {
         wpe_log_file_and_stdout("%c",username[x]);
 	}
     wpe_log_file_and_stdout("\n");
 
-    wpe_log_file_and_stdout("\t challenge:\t\t");
+    wpe_log_file_and_stdout("\t challenge:\t\t\t");
     for (x=0; x<challenge_len - 1; x++) {
         wpe_log_file_and_stdout("%02x:",challenge[x]);
 	}
     wpe_log_file_and_stdout("%02x\n",challenge[x]);
 
-    wpe_log_file_and_stdout("\t response:\t\t");
+    wpe_log_file_and_stdout("\t response:\t\t\t");
     for (x=0; x<response_len - 1; x++) {
         wpe_log_file_and_stdout("%02x:",response[x]);
 	}
-    wpe_log_file_and_stdout("%02x\n",response[x]);
+    wpe_log_file_and_stdout("%02x\n\n",response[x]);
 
 	// begin eaphammer
 	if ( eaphammer_global_conf.use_autocrack != 0 ) {
@@ -136,7 +141,7 @@ void wpe_log_chalresp(char *type, const u8 *username, size_t username_len, const
 	// end eaphammer
 
     if (strncmp(type, "mschapv2", 8) == 0 || strncmp(type, "eap-ttls/mschapv2", 17) == 0) {
-        wpe_log_file_and_stdout("\t jtr NETNTLM:\t\t");
+        wpe_log_file_and_stdout("\t jtr NETNTLM:\t\t\t");
         for (x=0; x<username_len; x++)
             wpe_log_file_and_stdout("%c",username[x]);
         wpe_log_file_and_stdout(":$NETNTLM$");
@@ -146,12 +151,12 @@ void wpe_log_chalresp(char *type, const u8 *username, size_t username_len, const
         wpe_log_file_and_stdout("$");
         for (x=0; x<response_len; x++)
             wpe_log_file_and_stdout("%02x",response[x]);
-        wpe_log_file_and_stdout("\n");
+        wpe_log_file_and_stdout("\n\n");
     }
 
 	// begin eaphammer
     if (strncmp(type, "mschapv2", 8) == 0 || strncmp(type, "eap-ttls/mschapv2", 17) == 0) {
-        wpe_log_file_and_stdout("\t hashcat NETNTLM:\t");
+        wpe_log_file_and_stdout("\t hashcat NETNTLM:\t\t");
         for (x=0; x<username_len; x++)
             wpe_log_file_and_stdout("%c",username[x]);
         wpe_log_file_and_stdout("::::");
@@ -162,7 +167,7 @@ void wpe_log_chalresp(char *type, const u8 *username, size_t username_len, const
 
         for (x=0; x<challenge_len; x++)
             wpe_log_file_and_stdout("%02x",challenge[x]);
-        wpe_log_file_and_stdout("\n");
+        wpe_log_file_and_stdout("\n\n\n");
     }
 	
 

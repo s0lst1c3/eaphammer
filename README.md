@@ -34,7 +34,7 @@ Features
 - Integrated HTTP server for Hostile Portal attacks
 - Support for SSID cloaking
 
-New (as of Version 0.3.6)(latest)
+New (as of Version 0.3.7)(latest)
 ---------------------------------
 - EAPHammer now support fast and automated PMKID attacks against PSK networks using hcxtools
 

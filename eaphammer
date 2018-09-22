@@ -53,25 +53,18 @@ def cert_wizard():
 def hostile_portal():
     global responder
 
-    use_autocrack = options['autocrack']
-    wordlist = options['wordlist']
-    interface = core.interface.Interface(options['interface'])
-    use_pivot = options['pivot']
-    save_config = options['save_config']
-
     try:
         utils.Iptables.save_rules()
     
         # start autocrack if enabled
-        if use_autocrack:
+        if options['autocrack']:
 
             autocrack = Autocrack.get_instance()
-            autocrack.configure(wordlist=wordlist)
+            autocrack.configure(wordlist=options['wordlist'])
             autocrack.start()
-            time.sleep(4)
 
         # prepare environment
-        interface.nm_off()
+        utils.nmcli.set_unmanaged(options['interface'])
         utils.set_ipforward(1)
 
         # write hostapd config file to tmp directory
@@ -83,11 +76,12 @@ def hostile_portal():
         hostapd.start()
 
         # configure routing 
-        interface.set_ip_and_netmask('10.0.0.1', '255.255.255.0')
+        os.system('ifconfig %s 10.0.0.1 netmask 255.255.255.0' %\
+                                                         options['interface'])
         os.system('route add -net 10.0.0.0 netmask 255.255.255.0 gw 10.0.0.1')
 
         # configure dnsmasq
-        conf_manager.dnsmasq_captive_portal_cnf.configure(interface=str(interface))
+        conf_manager.dnsmasq_captive_portal_cnf.configure(interface=options['interface']) 
         services.Dnsmasq.hardstart('-C %s 2>&1' % settings.dict['paths']['dnsmasq']['conf'])
 
         # start RedirectServer
@@ -96,7 +90,7 @@ def hostile_portal():
         rs.start()
 
         # start Responder
-        if use_pivot:
+        if options['pivot']:
 
             print '[*] Pivot mode activated. Rogue SMB server disabled.'
             print ('[*] Run payload_generator to '
@@ -109,7 +103,7 @@ def hostile_portal():
             settings.dict['core']['responder']['Responder Core']['SMB'] = 'On'
 
         resp = responder.Responder.get_instance()
-        resp.configure(interface=str(interface))
+        resp.configure(interface=options['interface'])
         resp.start()
 
         # set iptables policy, flush all tables for good measure
@@ -118,8 +112,8 @@ def hostile_portal():
         utils.Iptables.flush('nat')
 
         # use iptables to redirect all DNS and HTTP(S) traffic to PHY
-        utils.Iptables.route_dns2_addr('10.0.0.1', interface)
-        utils.Iptables.route_http2_addr('10.0.0.1', interface)
+        utils.Iptables.route_dns2_addr('10.0.0.1', options['interface'])
+        utils.Iptables.route_http2_addr('10.0.0.1', options['interface'])
 
         # pause execution until user quits
         raw_input('\n\nPress enter to quit...\n\n')
@@ -128,11 +122,11 @@ def hostile_portal():
         services.Dnsmasq.kill()
         rs.stop()
         resp.stop()
-        if use_autocrack:
+        if options['autocrack']:
             autocrack.stop()
 
         # remove hostapd conf file from tmp directory
-        if save_config:
+        if options['save_config']:
             hostapd_conf.save()
         hostapd_conf.remove()
 
@@ -144,7 +138,7 @@ def hostile_portal():
         utils.Iptables.restore_rules()
 
         # cleanly allow network manager to regain control of interface
-        interface.nm_on()
+        utils.nmcli.set_managed(options['interface'])
 
 
     except KeyboardInterrupt:
@@ -153,11 +147,11 @@ def hostile_portal():
         services.Dnsmasq.kill()
         rs.stop()
         resp.stop()
-        if use_autocrack:
+        if options['autocrack']:
             autocrack.stop()
 
         # remove hostapd conf file from tmp directory
-        if save_config:
+        if options['save_config']:
             hostapd_conf.save()
         hostapd_conf.remove()
         
@@ -169,14 +163,9 @@ def hostile_portal():
         utils.Iptables.restore_rules()
 
         # cleanly allow network manager to regain control of interface
-        interface.nm_on()
+        utils.nmcli.set_managed(options['interface'])
 
 def captive_portal():
-
-    interface = core.interface.Interface(options['interface'])
-    use_autocrack = options['autocrack']
-    wordlist = options['wordlist']
-    save_config = options['save_config']
 
     try:
 
@@ -184,13 +173,13 @@ def captive_portal():
 
         # prepare environment
         utils.set_ipforward(1)
-        interface.nm_off()
+        utils.nmcli.set_unmanaged(options['interface'])
 
         # start autocrack if enabled
-        if use_autocrack:
+        if options['autocrack']:
 
             autocrack = Autocrack.get_instance()
-            autocrack.configure(wordlist=wordlist)
+            autocrack.configure(wordlist=options['wordlist'])
             autocrack.start()
 
         # write hostapd config file to tmp directory
@@ -202,11 +191,12 @@ def captive_portal():
         hostapd.start()
 
         # configure routing 
-        interface.set_ip_and_netmask('10.0.0.1', '255.255.255.0')
+        os.system('ifconfig %s 10.0.0.1 netmask 255.255.255.0' %\
+                                                     options['interface'])
         os.system('route add -net 10.0.0.0 netmask 255.255.255.0 gw 10.0.0.1')
 
         # configure dnsmasq
-        conf_manager.dnsmasq_captive_portal_cnf.configure(interface=str(interface))
+        conf_manager.dnsmasq_captive_portal_cnf.configure(interface=options['interface'])
         services.Dnsmasq.hardstart('-C %s 2>&1' % settings.dict['paths']['dnsmasq']['conf'])
 
         # start httpd
@@ -218,8 +208,8 @@ def captive_portal():
         utils.Iptables.flush('nat')
 
         # use iptables to redirect all DNS and HTTP(S) traffic to PHY
-        utils.Iptables.route_dns2_addr('10.0.0.1', interface)
-        utils.Iptables.route_http2_addr('10.0.0.1', interface)
+        utils.Iptables.route_dns2_addr('10.0.0.1', options['interface'])
+        utils.Iptables.route_http2_addr('10.0.0.1', options['interface'])
         
         # pause execution until user quits
         raw_input('\n\nPress enter to quit...\n\n')
@@ -227,11 +217,11 @@ def captive_portal():
         hostapd.stop()
         services.Dnsmasq.kill()
         services.Httpd.stop()
-        if use_autocrack:
+        if options['autocrack']:
             autocrack.stop()
 
         # remove hostapd conf file from tmp directory
-        if save_config:
+        if options['save_config']:
             hostapd_conf.save()
         hostapd_conf.remove()
         
@@ -243,18 +233,18 @@ def captive_portal():
         utils.Iptables.restore_rules()
 
         # cleanly allow network manager to regain control of interface
-        interface.nm_on()
+        utils.nmcli.set_managed(options['interface'])
 
     except KeyboardInterrupt:
 
         hostapd.stop()
         services.Dnsmasq.kill()
         services.Httpd.stop()
-        if use_autocrack:
+        if options['autocrack']:
             autocrack.stop()
 
         # remove hostapd conf file from tmp directory
-        if save_config:
+        if options['save_config']:
             hostapd_conf.save()
         hostapd_conf.remove()
         
@@ -266,27 +256,22 @@ def captive_portal():
         utils.Iptables.restore_rules()
 
         # cleanly allow network manager to regain control of interface
-        interface.nm_on()
+        utils.nmcli.set_managed(options['interface'])
 
 def reap_creds():
-
-    interface = core.interface.Interface(options['interface'])
-    use_autocrack = options['autocrack']
-    wordlist = options['wordlist']
-    save_config = options['save_config']
 
     try:
 
         utils.Iptables.save_rules()
 
         # start autocrack if enabled
-        if use_autocrack:
+        if options['autocrack']:
 
             autocrack = Autocrack.get_instance()
-            autocrack.configure(wordlist=wordlist)
+            autocrack.configure(wordlist=options['wordlist'])
             autocrack.start()
 
-        interface.nm_off()
+        utils.nmcli.set_unmanaged(options['interface'])
 
         # write hostapd config file to tmp directory
         hostapd_conf = HostapdConfig(settings, options)
@@ -300,30 +285,30 @@ def reap_creds():
         raw_input('\n\nPress enter to quit...\n\n')
 
         hostapd.stop()
-        if use_autocrack:
+        if options['autocrack']:
             autocrack.stop()
 
         # remove hostapd conf file from tmp directory
-        if save_config:
+        if options['save_config']:
             hostapd_conf.save()
         hostapd_conf.remove()
 
         # cleanly allow network manager to regain control of interface
-        interface.nm_on()
+        utils.nmcli.set_managed(options['interface'])
 
     except KeyboardInterrupt:
 
         hostapd.stop()
-        if use_autocrack:
+        if options['autocrack']:
             autocrack.stop()
 
         # remove hostapd conf file from tmp directory
-        if save_config:
+        if options['save_config']:
             hostapd_conf.save()
         hostapd_conf.remove()
 
         # cleanly allow network manager to regain control of interface
-        interface.nm_on()
+        utils.nmcli.set_managed(options['interface'])
 
 def save_config_only():
 
@@ -352,6 +337,7 @@ if __name__ == '__main__':
 
     print_banner()
 
+    #options = set_options()
     options = core.cli.set_options()
 
     if options['debug']:

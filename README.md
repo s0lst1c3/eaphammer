@@ -16,7 +16,7 @@ EAPHammer is a toolkit for performing targeted evil twin attacks against WPA2-En
 	# launch attack
 	./eaphammer -i wlan0 --channel 4 --auth wpa --essid CorpWifi --creds
 
-Leverages a [lightly modified](https://github.com/s0lst1c3/hostapd-eaphammer) version of [hostapd-wpe](https://github.com/opensecurityresearch/hostapd-wpe) (shoutout to [Brad Anton](https://github.com/brad-anton) for creating the original), _dnsmasq_, [asleap](https://github.com/joswr1ght/asleap), [Responder](https://github.com/SpiderLabs/Responder), and _Python 2.7_.
+Leverages a [lightly modified](https://github.com/s0lst1c3/hostapd-eaphammer) version of [hostapd-wpe](https://github.com/opensecurityresearch/hostapd-wpe) (shoutout to [Brad Anton](https://github.com/brad-anton) for creating the original), _dnsmasq_, [asleap](https://github.com/joswr1ght/asleap), [hcxpcaptool](https://github.com/ZerBea/hcxtools) and [hcxdumptool](https://github.com/ZerBea/hcxdumptool) for PMKID attacks, [Responder](https://github.com/SpiderLabs/Responder), and _Python 2.7_.
 
 Features
 --------
@@ -34,8 +34,12 @@ Features
 - Integrated HTTP server for Hostile Portal attacks
 - Support for SSID cloaking
 
-New (as of Version 0.1.5) 
-----------------------------------
+New (as of Version 0.3.6)(latest)
+---------------------------------
+- EAPHammer now support fast and automated PMKID attacks against PSK networks using hcxtools
+
+802.11a and 802.11n Support
+---------------------------
 
 EAPHammer now supports attacks against 802.11a and 802.11n networks. This includes the ability to create access points that support the following features:
 
@@ -53,7 +57,6 @@ Upcoming Features
 -----------------
 
 - Perform seamless MITM attacks with partial HSTS bypasses
-- Support attacks against WPA-PSK/WPA2-PSK
 - directed rogue AP attacks (deauth then evil twin from PNL, deauth then karma + ACL)
 - Integrated website cloner for cloning captive portal login pages
 - Integrated HTTP server for captive portals
@@ -91,7 +94,8 @@ Table of Contents
             * [VIII.4.b - Advanced Usage](#viii4b---advanced-usage)
       * [IX - ESSID Cloaking](#ix---essid-cloaking)
       * [X - Using Karma](#x---using-karma)
-      * [XI - Advanced Granular Controls](#xi---advanced-granular-controls)
+	  * [XI - PMKID Attacks Against WPA-PSK and WPA2-PSK Networks](#xi---pmkid-attacks-against-wpa-psk-and-wpa2-psk-networks)
+      * [XII - Advanced Granular Controls](#xii---advanced-granular-controls)
 
 Setup Guide
 ===========
@@ -498,8 +502,34 @@ Warning: EAPHammer does not yet support the use of ACLs to limit the scope of Ka
 With that out of the way, here's a usage example:
 
 	./eaphammer -i wlan0 --essid lulz --cloaking full -c 1 --auth open --hostile-portal --karma
+
+## XI - PMKID Attacks Against WPA-PSK and WPA2-PSK Networks
+
+The PMKID attack is a new technique, released in August 2018 by Jens Steube, that can be used to breach WPA-PSK and WPA2-PSK networks. It can be used against 802.11i/p/q/r networks that have roaming functions enabled, which essentially amounts to most modern wireless routers. The PMKID attack offers several advantages over the traditional 4-way handshake captures:
 	
-## XI - Advanced Granular Controls
+	- It's a client-less attack -- the attack is directed at the access point.
+	- It's fast (for several reason, see original post by Jens Steube)
+	- It works at longer ranges (lost EAPOL frames due to distance are no longer as much of a concern)
+
+More information about how this attack works is available here:
+
+	- [https://hashcat.net/forum/thread-7717.html](https://hashcat.net/forum/thread-7717.html)
+
+The PMKID attack can be executed using the --pmkid flag. To target a specific access point, use the --bssid flag as shown below:
+
+	./eaphammer --pmkid --interface wlan0 --bssid de:ad:13:37:be:ef 
+
+Notice how in the command shown above, we don't have to specify a channel. That's because EAPHammer will actually locate the AP's channel for you.
+
+With that said, if you want to specify the channel manually, you can do so using the --channel flag as follows:
+
+	./eaphammer --pmkid --interface wlan0 --bssid de:ad:13:37:be:ef --channel 10
+
+Alternatively, you can use the --essid flag to tell EAPHammer to target any access point that is part of a specific network. EAPHammer will automatically locate an in-scope access point and identify its BSSID and channel. To perform this style of attack, use the following command:
+
+	./eaphammer --pmkid --interface wlan0 --essid RED_WHEELBARROW
+	
+## XII - Advanced Granular Controls
 
 To view a complete list of granular configuration options supported by eaphammer, use the -hh flag as shown below:
 

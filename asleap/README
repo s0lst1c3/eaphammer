@@ -1,0 +1,274 @@
+asleap - recovers weak LEAP password.  Pronounced "asleep".
+
+Copyright(c) 2004-2008, Joshua Wright <jwright@hasborg.com>
+
+$Id: README,v 1.10 2007/05/10 19:29:06 jwright Exp $
+
+--------------------------------------------------------------------------------
+UPDATE - 2008-5-28
+
+Minor update to fix a problem with IFNAMSIZ errors in build on some platforms.
+
+UDPATE - 2007-7-13
+
+I updated asleap to include the "-C" and "-W" options, where you can specify
+the challenge value (in colon-delimited bytes) and the response (ditto) on the
+command-line.  This makes asleap more of a generic MS-CHAPv2 dictionary attack
+tool, which is fine by me.
+
+Why did I do this?  Because Jay "F***ing" Beale asked me to.  Nicely.
+
+UPDATE - 2007-5-10
+
+I spent some time updating asleap and came to the following conclusions:
+
+	+ My code is much better now than it was in 2003/2004
+	+ I was smoking crack when I wrote this the first time
+
+I removed a lot of functionality that I didnt't think was necessary any more in
+this version, specifically:
+
+	+ No more support for Airopeek NX files; if you want to read from a .apc
+	  file, install Wireshark, and run "tshark -r input.apc -w output.dump"
+	  to convert to libpcap format.
+	+ No more integration with Airjack to deauth users.  If you still want
+	  to deauth users to get their LEAP credentials without waiting, you
+	  can use a tool such as file2air, MDK2 or aireplay-ng.
+	+ I stopped caring about Windows a long time ago.  If you need this,
+	  and you only run Windows, try using a bootable Linux ISO like
+  	  Backtrack (www.remote-exploit.org) and VMWare.
+
+On the brighter side:
+	+ The code has 90% less teh suck
+	+ Fixed an awful bug where passwords > 64 characters caused genkeys
+	  to segfault.
+	+ Added code to handle QoS data frames
+	+ Can handle radiotap-formatted capture files now
+
+NB: The code to handle QoS data frames isn't tested.  Why you ask?  Because Zero_Chaos didn't send me the packet capture I asked for. pfppbbbbbbb
+
+What follows is the original README.  Please contact me with any questions,
+comments or QoS LEAP transactions.  jwright@hasborg.com
+
+--
+INTRO
+
+This tool is released as a proof-of-concept to demonstrate weaknesses in
+the LEAP and PPTP protocols.
+
+LEAP is the Lightweight Extensible Authentication Protocol, intellectual
+property of Cisco Systems, Inc.  LEAP is a security mechanism available
+only on Cisco access points to perform authentication of end-users
+and access points.  LEAP is written as a standard EAP-type, but is not
+compliant with the 802.1X specification since the access point modifies
+packets in transit, instead of simply passing them to a authentication
+server (e.g. RADIUS).
+
+PPTP is a Microsoft invention for deploying virual private networks (VPN).
+PPTP uses a tunneling method to transfer PPP frames over an insecure
+network such as a wireless LAN.  RFC 2637 documents the operation and
+functionality of the PPTP protocol.
+
+
+BACKGROUND
+
+LEAP utilizes a modified MS-CHAPv2 challenge/response in order to
+authenticate users on a wireless network.  The MS-CHAPv2 authentication
+method has been clearly identified as a weak method of authentication
+for several reasons.  A standard LEAP exchange is as follows:
+
+    1. STA requests authentication with 802.1X start message
+    2. AP issues a random 8-byte challenge
+    3. STA encrypts the 8-byte challenge 3 times, using the NT hash of their
+       password as seed material.  The STA then joins the 3 DES outputs as a
+       single 24-byte response.
+    4. AP issues a success or failure message.
+    5. STA issues a 8-byte challenge.
+    6. AP responds with a 24-byte response.
+    7. STA is able to send data to the distribution system.
+
+PPTP networks use a straight implementation of MS-CHAPv2 for authentication,
+which is slightly more complex than the LEAP example:
+
+    1. STA initiates PPP configuration negotiation options
+    2. PPTP server (SERVER) issues a random 16-byte challenge
+    3. STA generates a random 16-byte STA challenge
+    4. STA uses SHA1 to hash the SERVER 16-byte challenge, the ST challenge
+       and the STA's username.  The first 8-bytes become the 8-byte random
+       challenge (step 2 in LEAP).
+    5. STA encrypts the 8-byte challenge 3 times using the NT hash of their
+       password as see material.  The three 8-byte outputs are contcatenated
+       to generate a single 24-byte response.
+    6. STA transmits the 24-byte response, the 16-byte STA challenge and the
+       STA username to the SERVER.
+    7. SERVER decrypts the 24-byte response with the STA's stored NT password
+       hash.  If the decrypted response does not match the SERVER challenge,
+       the SERVER issues a PPP CHAP Failure message.
+    8. If the response does match the SERVER challenge, the SERVER hashes the
+       STA password hash to create a password-hash-hash.
+    9. The SERVER combines the password-hash-hash, the literal "Magic server
+       to client signing constant", and the 24-byte response and calculates a
+       SHA1 hash.
+    10.The SERVER calculates the 8-byte challenge using the same procedure in 
+       (4).
+    11.Combining the output from (9) and (10) with the literal constant "Pad
+       to make it do more than one iteration", the SERVER calculates another
+       SHA1 hash.
+    12.The output of (11) is converted to upper-case ASCII-hexadecimal
+       representation and transmitted back to the STA.
+    13.The STA uses steps (8-12) to authenticate* the SERVER.
+
+* If anyone can explain to me why the MS-CHAPv2 algorithm has all this
+  seemingly unnecessary complexity, please contact me.
+
+
+Unfortunately, the MS-CHAPv2 challenge/response suffers from several notable
+flaws:
+
+    + No salt in used in conjunction with the NT hash
+        - Permits pre-computed dictionary attacks
+    + Weak DES key selection for challenge/response
+        - Permits recovery of 2 bytes of the NT hash
+    + Username sent in clear-text
+
+With these flaws present, we are able to deduce enough information to
+mount a dictionary attack against a user's password after capturing their
+successful login to a LEAP or PPTP network.  Since we are attacking a
+wireless network exchange, this is a trivial task with a wireless sniffer.
+
+
+OUR ATTACK
+
+Since there is no salt in the NT hash, we can precalculate an indexed list
+of passwords and their associated NT hashes.  This is only marginally
+useful to us, since we would normally need to run three rounds of DES
+to encrypt the random challenge for each word in our dictionary.  Not an
+unreasonable task, but certainly time-consuming on a single mobile device
+like a laptop or a PDA.
+
+We can significantly reduce the amount of time needed to launch an attack
+against the LEAP or PPTP challenge/response by leveraging a second flaw in
+the MS-CHAPv2 protocol.  When a STA receives a challenge, they encrypt the
+challenge three times, using portions of their password hash as DES seeds.
+The DES algorithm requires a 7-byte seed value in this algorithm, so the
+STA splits their 16-byte NT hash into three portions:
+
+    seed1 = HB1 .. HB7
+    seed2 = HB8 .. HB14
+    seed3 = HB15, HB16, 0x00, 0x00, 0x00, 0x00, 0x00
+
+Where HBx is the bytes of the NT hash, and 0x00 is a standard NULL byte.
+
+The flaw with this method is that the third DES output is cryptographically
+weak, leaving only 2^16 possible permutations.  This can be calculated in
+a matter of seconds, even on older Pentium hardware.
+
+By calculating all 2^16 possibilities of the last 8 bytes of the response
+value, we can derive the last 2 bytes of the NT hash (HB15, HB16).  With the
+last two bytes of the NT hash, we can significantly reduce the number
+of potential matches in our dictionary file.  We can also utilize this
+information to perform highly optimized indexed lookups on our dictionary
+file, using the known 2 bytes of the users hash as a keying mechanism.
+
+Asleap will examine traffic to identify the LEAP or PPTP challenge/response
+process and will extract the username, challenge and response information.
+This can be done in a passive operation with a 802.11 card in RFMON mode,
+or through an active attack, where asleap impersonates the legitimate access
+point, and forces the victim to deauthenticate from the network.
+
+From the STA response and the challenge, asleap will calculate the last two
+bytes of the matching NT hash, and display that value.  After calculating the
+last two bytes of the NT hash, asleap will search the genkeys output file
+of dict+hashes for matching hash values.  With the matching hash value,
+asleap will use it to seed the DES operation and encrypt the challenge,
+comparing the output to the captured response from the STA.  If the
+calculated 24-byte response value matches the captured 24-byte response,
+asleap will display the associated clear-text password.
+
+If the password for the LEAP or PPTP user is not present in your dictionary
+file, asleap will not be able to report the user's password.  The quality
+of your dictionary file will have a lot to do with the success of recovering
+LEAP/PPTP user passwords.
+
+
+THE TOOLS
+
+You will need a dictionary file, one word per line, to use with asleap.
+Please don't ask me for my dictionary file - be creative and put your
+own together.  You can use the morewords.pl and strip-nonascii.pl scripts
+in the scripts/ directory if desired.
+
+ + STEP 1.  Generate the database and index files to use with asleap lookups
+   by running them through genkeys.  Very straightforward:
+
+$ ./genkeys
+genkeys 2.0 - generates lookup file for asleap. <jwright@hasborg.com>
+genkeys: Must supply -r -f and -n
+Usage: genkeys [options]
+
+	-r 	Input dictionary file, one word per line
+	-f 	Output pass+hash filename
+	-n 	Output index filename
+	-h 	Last 2 hash bytes to filter with (optional)
+$
+
+I typically use .dat and .idx extensions on the database ("outfile") and
+index file, just to keep it straight in my head.
+
+
+ + STEP 2.  Decide how you are going to collect LEAP credentials for use with
+   asleap.  This could be through a live interface in RFMON mode, or through
+   a previous capture file in libpcap format.  Take a look
+   at the command line options for asleap:
+
+$ ./asleap
+asleap 2.0 - actively recover LEAP/PPTP passwords. <jwright@hasborg.com>
+asleap: Must supply an interface with -i, or a stored file with -r
+Usage: asleap [options]
+
+	-r 	Read from a libpcap file
+	-i 	Interface to capture on
+	-f 	Dictionary file with NT hashes
+	-n 	Index file for NT hashes
+	-s 	Skip the check to make sure authentication was successful
+	-h 	Output this help information and exit
+	-v 	Print verbose information (more -v for more verbosity)
+	-V 	Print program version and exit
+	-W 	ASCII dictionary file (special purpose)
+$
+
+
+BUGS
+
+I'm certain.  Let me know about them.
+While not a bug - a word on channel hopping.  Use channel hopping only to
+look for networks that are running LEAP.  If you are always hopping to a
+different channel, you are likely going to miss valid targets.
+
+
+THE FIX
+
+LEAP is inherently weak as it relies on MS-CHAPv2 for authentication of
+clients on the wireless network.  Cisco seems to acknowledge this fact in
+their support of the Protected Extensible Authentication Protocol (PEAP)
+that uses MS-CHAPv2 authentication within a stronger TLS encryption channel.
+Users relying on LEAP for WLAN access control should consider switching to
+PEAP or TTLS, both open EAP types submitted to the IETF for standardization.
+As a short-term measure, LEAP users should immediately audit the passwords
+of their users to identify weak passwords.  Weak passwords should be expired
+and replaced with passwords at least 8 characters in length that consist of
+numbers, letters and special characters.  This is only a stop-gap measure,
+since an attacker with sufficient disk space could create an exhaustive
+list of all printable characters to use for their dictionary attacks.
+
+Since PPTP uses the same MS-CHAPv2 algorithm, it suffers from the same
+weaknesses as LEAP.  Microsoft recommends users select very strong passwords,
+or switch to a more secure authentication mechanism such as IPSec or L2TP.
+
+
+QUESTIONS, COMMENTS, CONCERNS
+
+Please contact jwright@hasborg.com with any questions, comments on concerns.
+My PGP key is located at http://802.11ninja.net/~jwright/pgpkey.html
+
+

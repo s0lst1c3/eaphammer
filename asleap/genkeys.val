@@ -1,0 +1,118 @@
+==11449== Memcheck, a memory error detector.
+==11449== Copyright (C) 2002-2006, and GNU GPL'd, by Julian Seward et al.
+==11449== Using LibVEX rev 1658, a library for dynamic binary translation.
+==11449== Copyright (C) 2004-2006, and GNU GPL'd, by OpenWorks LLP.
+==11449== Using valgrind-3.2.1, a dynamic binary instrumentation framework.
+==11449== Copyright (C) 2000-2006, and GNU GPL'd, by Julian Seward et al.
+==11449== 
+--11449-- Command line
+--11449--    ./genkeys
+--11449--    -r
+--11449--    dict
+--11449--    -f
+--11449--    out.dat
+--11449--    -n
+--11449--    out.idx
+--11449-- Startup, with flags:
+--11449--    -v
+--11449--    --show-reachable=yes
+--11449-- Contents of /proc/version:
+--11449--   Linux version 2.6.19.1 (root@thallium) (gcc version 4.1.1 (Gentoo 4.1.1-r3)) #2 SMP Tue Apr 3 00:18:31 EDT 2007
+--11449-- Arch and hwcaps: X86, x86-sse1-sse2
+--11449-- Valgrind library directory: /usr/lib/valgrind
+--11449-- Reading syms from /lib/ld-2.3.6.so (0x4000000)
+--11449-- Reading syms from /home/jwright/asleap/genkeys (0x8048000)
+--11449-- Reading syms from /usr/lib/valgrind/x86-linux/memcheck (0x38000000)
+--11449--    object doesn't have a symbol table
+--11449--    object doesn't have a dynamic symbol table
+--11449-- Reading suppressions file: /usr/lib/valgrind/default.supp
+--11449-- REDIR: 0x4010DE0 (index) redirected to 0x380269E7 (???)
+--11449-- Reading syms from /usr/lib/valgrind/x86-linux/vgpreload_core.so (0x4017000)
+--11449--    object doesn't have a symbol table
+--11449-- Reading syms from /usr/lib/valgrind/x86-linux/vgpreload_memcheck.so (0x401A000)
+--11449--    object doesn't have a symbol table
+==11449== WARNING: new redirection conflicts with existing -- ignoring it
+--11449--     new: 0x04010DE0 (index     ) R-> 0x0401D0DB index
+--11449-- Reading syms from /usr/lib/libpcap.so.0.9 (0x4034000)
+--11449--    object doesn't have a symbol table
+--11449-- Reading syms from /lib/libcrypt-2.3.6.so (0x405A000)
+--11449--    object doesn't have a symbol table
+--11449-- Reading syms from /usr/lib/libcrypto.so.0.9.8 (0x4088000)
+--11449--    object doesn't have a symbol table
+--11449-- Reading syms from /lib/libc-2.3.6.so (0x41B4000)
+--11449--    object doesn't have a symbol table
+--11449-- Reading syms from /lib/libdl-2.3.6.so (0x42C3000)
+--11449--    object doesn't have a symbol table
+--11449-- REDIR: 0x42190E0 (rindex) redirected to 0x401CFF7 (rindex)
+--11449-- REDIR: 0x4218F48 (strncmp) redirected to 0x401D2A9 (strncmp)
+--11449-- REDIR: 0x42186C0 (index) redirected to 0x401D0B6 (index)
+--11449-- REDIR: 0x4219034 (strncpy) redirected to 0x401DCF0 (strncpy)
+--11449-- REDIR: 0x4215EE5 (malloc) redirected to 0x401C3C5 (malloc)
+--11449-- REDIR: 0x4219F30 (memset) redirected to 0x401D509 (memset)
+genkeys 2.0 - generates lookup file for asleap. <jwright@hasborg.com>
+Generating hashes for passwords (this may take some time) ...--11449-- REDIR: 0x4219A30 (memchr) redirected to 0x401D41A (memchr)
+--11449-- REDIR: 0x421A3D0 (memcpy) redirected to 0x401DB7A (memcpy)
+--11449-- REDIR: 0x4214053 (free) redirected to 0x401BF97 (free)
+Done.
+14267876 hashes written in 2089.54 seconds:  6828.24 hashes/second
+Starting sort (be patient) ...--11449-- REDIR: 0x4216E34 (calloc) redirected to 0x401B686 (calloc)
+--11449-- REDIR: 0x421ABE0 (rawmemchr) redirected to 0x401D5B4 (rawmemchr)
+--11449-- REDIR: 0x421A0F0 (stpcpy) redirected to 0x401D858 (stpcpy)
+Done.
+Completed sort in 206994907 compares.
+Creating index file (almost finished) ...==11449== Jump to the invalid address stated on the next line
+==11449==    at 0x82D2D2D: ???
+==11449==  Address 0x82D2D2D is not stack'd, malloc'd or (recently) free'd
+==11449== 
+==11449== Process terminating with default action of signal 11 (SIGSEGV)
+==11449==  Bad permissions for mapped region at address 0x82D2D2D
+==11449==    at 0x82D2D2D: ???
+==11449== 
+==11449== ERROR SUMMARY: 1 errors from 1 contexts (suppressed: 7 from 1)
+==11449== 
+==11449== 1 errors in context 1 of 1:
+==11449== Jump to the invalid address stated on the next line
+==11449==    at 0x82D2D2D: ???
+==11449==  Address 0x82D2D2D is not stack'd, malloc'd or (recently) free'd
+--11449-- 
+--11449-- supp:    7 Ubuntu-stripped-ld.so
+==11449== 
+==11449== IN SUMMARY: 1 errors from 1 contexts (suppressed: 7 from 1)
+==11449== 
+==11449== malloc/free: in use at exit: 728 bytes in 2 blocks.
+==11449== malloc/free: 14,268,907 allocs, 14,268,905 frees, 736,778,230 bytes allocated.
+==11449== 
+==11449== searching for pointers to 2 not-freed blocks.
+==11449== checked 345,776 bytes.
+==11449== 
+==11449== LEAK SUMMARY:
+==11449==    definitely lost: 0 bytes in 0 blocks.
+==11449==      possibly lost: 0 bytes in 0 blocks.
+==11449==    still reachable: 728 bytes in 2 blocks.
+==11449==         suppressed: 0 bytes in 0 blocks.
+--11449--  memcheck: sanity checks: 194959 cheap, 7799 expensive
+--11449--  memcheck: auxmaps: 0 auxmap entries (0k, 0M) in use
+--11449--  memcheck: auxmaps: 0 searches, 0 comparisons
+--11449--  memcheck: SMs: n_issued      = 9498 (151968k, 148M)
+--11449--  memcheck: SMs: n_deissued    = 9258 (148128k, 144M)
+--11449--  memcheck: SMs: max_noaccess  = 65535 (1048560k, 1023M)
+--11449--  memcheck: SMs: max_undefined = 17 (272k, 0M)
+--11449--  memcheck: SMs: max_defined   = 55 (880k, 0M)
+--11449--  memcheck: SMs: max_non_DSM   = 292 (4672k, 4M)
+--11449--  memcheck: max sec V bit nodes:    1 (0k, 0M)
+--11449--  memcheck: set_sec_vbits8 calls: 1 (new: 1, updates: 0)
+--11449--  memcheck: max shadow mem size:   4976k, 4M
+--11449-- translate:            fast SP updates identified: 3,178 ( 91.8%)
+--11449-- translate:   generic_known SP updates identified: 214 (  6.1%)
+--11449-- translate: generic_unknown SP updates identified: 67 (  1.9%)
+--11449--     tt/tc: 7,826 tt lookups requiring 7,951 probes
+--11449--     tt/tc: 7,825 fast-cache updates, 2 flushes
+--11449--  transtab: new        2,856 (65,166 -> 1,106,293; ratio 169:10) [0 scs]
+--11449--  transtab: dumped     0 (0 -> ??)
+--11449--  transtab: discarded  0 (0 -> ??)
+--11449-- scheduler: 19,495,988,383 jumps (bb entries).
+--11449-- scheduler: 194,959/29,083,611 major/minor sched events.
+--11449--    sanity: 194960 cheap, 7799 expensive checks.
+--11449--    exectx: 30,011 lists, 30 contexts (avg 0 per list)
+--11449--    exectx: 28,537,820 searches, 28,537,790 full compares (999 per 1000)
+--11449--    exectx: 0 cmp2, 21 cmp4, 0 cmpAll

@@ -19,12 +19,12 @@ from settings import settings
 
 remote_rig = False
 
-ASLEAP_CMD = '/opt/asleap/asleap -C %s -R %s -W %s | grep -v asleap | grep password'
+ASLEAP_CMD = '%s -C %s -R %s -W %s | grep -v asleap | grep password'
 EAP_USERS_ENTRY =  '"%s"\tTTLS-PAP,TTLS-CHAP,TTLS-MSCHAP,MSCHAPV2,MD5,GTC,TTLS,TTLS-MSCHAPV2\t"%s"\t[2]'
 
 def crack_locally(username, challenge, response, wordlist):
 
-        cmd = ASLEAP_CMD % (challenge, response, wordlist)
+        cmd = ASLEAP_CMD % (settings.dict['paths']['asleap']['bin'], challenge, response, wordlist)
         output = subprocess.check_output(cmd, shell=True)
         password = output.split('password:')[1].strip()
 
@@ -51,32 +51,34 @@ def run_autocrack(wordlist):
     # this is basically a primative event loop
     while True:
 
+        print settings.dict['paths']['hostapd']['fifo']
         with open(settings.dict['paths']['hostapd']['fifo']) as fifo:
-            
+    
             print '[fifo reader] FIFO opened'
             while True:
-
+    
                 data = fifo.read()
                 if len(data) == 0:
                     print '[fifo reader] writer closed'
                     break
-
+    
                 print '[fifo reader] received data from writer:', data
-
+    
                 data = data.strip().split('|')
                 username = data[0]
                 challenge = data[1]
                 response = data[2]
-
+    
                 if remote_rig:
                     pass
                 else:
-
+    
                     crack_locally(username,
                             challenge,
                             response,
                             wordlist)
 
+    
 class Autocrack(object):
 
     instance = None
@@ -91,6 +93,7 @@ class Autocrack(object):
     def configure(self, wordlist=None):
     
         assert wordlist is not None
+
 
         self.wordlist = wordlist
         self.fifo_path = settings.dict['paths']['hostapd']['fifo']

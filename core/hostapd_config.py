@@ -1,5 +1,6 @@
 import os
 import json
+import shutil
 
 class HostapdConfig(object):
 
@@ -271,9 +272,9 @@ class HostapdConfig(object):
             general_configs['use_karma'] = options['karma']
 
         if options['autocrack'] is None:
-            general_configs['use_autocrack'] = settings.dict['core']['hostapd']['general']['use_autocrack']
+            general_configs['use_autocrack'] = str(int(settings.dict['core']['hostapd']['general']['use_autocrack']))
         else:
-            general_configs['use_autocrack'] = options['autocrack']
+            general_configs['use_autocrack'] = str(int(options['autocrack']))
         
 
         if options['cloaking'] is None:

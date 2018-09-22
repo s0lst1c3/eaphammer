@@ -38,6 +38,10 @@ if __name__ == '__main__':
     os.system("cd %s && make hostapd-eaphammer_lib" % settings.dict['paths']['directories']['hostapd'])
     print '\n[*] complete!\n'
 
+    print '\n[*] Compiling asleap...\n'
+    os.system("cd %s && make" % settings.dict['paths']['directories']['asleap'])
+    print '\n[*] complete!\n'
+
     print '\n[*] Downloading default wordlist...\n'
     os.system("wget %s -O %s.tar.gz" % (wordlist_source, default_wordlist))
     print '\n[*] complete!\n'

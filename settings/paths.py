@@ -30,11 +30,13 @@ DB_DIR = os.path.join(ROOT_DIR, 'db')
 TMP_DIR = os.path.join(ROOT_DIR, 'tmp')
 WORDLIST_DIR = os.path.join(ROOT_DIR, 'wordlists')
 HOSTAPD_DIR = os.path.join(ROOT_DIR, 'hostapd-eaphammer', 'hostapd')
+ASLEAP_DIR = os.path.join(ROOT_DIR, 'asleap')
 CERTS_DIR = os.path.join(ROOT_DIR, 'certs')
 
+# asleap paths
+ASLEAP_BIN = os.path.join(ASLEAP_DIR, 'asleap')
 
 # hostapd paths
-
 HOSTAPD_BIN = os.path.join(HOSTAPD_DIR, 'hostapd-eaphammer')
 HOSTAPD_LIB = os.path.join(HOSTAPD_DIR, 'libhostapd-eaphammer.so')
 HOSTAPD_LOG = os.path.join(LOG_DIR, 'hostapd-eaphammer.log')
@@ -77,8 +79,14 @@ paths = {
         'tmp' : TMP_DIR,
         'wordlists' : WORDLIST_DIR,
         'hostapd' : HOSTAPD_DIR,
+        'asleap' : ASLEAP_DIR,
         'certs' : CERTS_DIR,
         'saves' : SAVE_DIR,
+    },
+
+    'asleap' : {
+
+        'bin' : ASLEAP_BIN,
     },
 
     'hostapd' : {

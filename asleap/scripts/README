@@ -1,0 +1,6 @@
+Some useless scripts I created while working on these tools:
+
+morewords.pl      - Reads in a dictionary file, appends 00, 01 .. 99 to i
+                    each entry.
+strip-nonascii.pl - Removes non-printable characters from the input file.
+testidx.c         - Reports discrepancies between a genkeys dat and index file.

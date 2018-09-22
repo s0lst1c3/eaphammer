@@ -38,6 +38,22 @@ def sleep_bar(sleep_time, text=''):
 
     print
 
+        
+class nmcli(object):
+
+    @staticmethod
+    def set_managed(iface):
+        os.system('nmcli device set %s managed yes' % iface)
+        sleep_bar(1, '[*] Using nmcli to give NetworkManager control of %s...' % iface)
+        print '[*] Success: %s is now managed by NetworkManager.' % iface
+
+    @staticmethod
+    def set_unmanaged(iface):
+        print '[*] Reticulating radio frequency splines...'
+        os.system('nmcli device set %s managed no' % iface)
+        sleep_bar(1, '[*] Using nmcli to tell NetworkManager not to manage %s...' % iface) 
+        print '[*] Success: %s no longer controlled by NetworkManager.' % iface
+
 def set_ipforward(value):
 
     with open(settings.dict['core']['eaphammer']['general']['proc_ipforward'], 'w') as fd:

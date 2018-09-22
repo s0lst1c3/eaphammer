@@ -1,0 +1,14 @@
+#!/bin/bash
+
+cd /home
+export WLANDEV=`ls -1 /sys/class/net | grep ^wl`
+if [[ ! -z $WLANDEV ]]
+then
+	ARCHIVNAME=`date +'%Y%m%d%H%M'`
+	ip link set $WLANDEV down
+	iw dev $WLANDEV set type monitor
+	ip link set $WLANDEV up
+	hcxdumptool -i $WLANDEV -o $ARCHIVNAME.pcapng -t 5
+fi
+hcxpioff &
+systemctl start dhcpcd@eth0.service

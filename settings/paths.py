@@ -1,5 +1,7 @@
 import os
 import json
+import random
+import string
 
 from datetime import datetime
 
@@ -7,12 +9,13 @@ class OutputFile(object):
 
     def __init__(self, name='', ext=''):
         datestring = datetime.strftime(datetime.now(), '%Y-%m-%d-%H-%M-%S')
+        randstring = ''.join(random.choice(string.ascii_letters+string.digits) for _ in xrange(32))
+        self.str = ''
         if name != '':
-            self.str = '%s-%s' % (name, datestring)
-        else:
-            self.str = datestring
+            self.str += '%s-' % name
+        self.str += '-'.join([datestring, randstring])
         if ext != '':
-            self.str = '%s.%s' % (datestring, ext.replace('.', ''))
+            self.str += '.%s' % ext.replace('.', '')
 
     def string(self):
         return self.str
@@ -30,11 +33,27 @@ DB_DIR = os.path.join(ROOT_DIR, 'db')
 TMP_DIR = os.path.join(ROOT_DIR, 'tmp')
 WORDLIST_DIR = os.path.join(ROOT_DIR, 'wordlists')
 HOSTAPD_DIR = os.path.join(ROOT_DIR, 'hostapd-eaphammer', 'hostapd')
-ASLEAP_DIR = os.path.join(ROOT_DIR, 'asleap')
 CERTS_DIR = os.path.join(ROOT_DIR, 'certs')
+LOOT_DIR = os.path.join(ROOT_DIR, 'loot')
+THIRDPARTY_DIR = os.path.join(ROOT_DIR, 'thirdparty')
+ASLEAP_DIR = os.path.join(THIRDPARTY_DIR, 'asleap')
+HCXDUMPTOOL_DIR = os.path.join(THIRDPARTY_DIR, 'hcxdumptool')
+HCXTOOLS_DIR = os.path.join(THIRDPARTY_DIR, 'hcxtools')
 
 # asleap paths
 ASLEAP_BIN = os.path.join(ASLEAP_DIR, 'asleap')
+
+# hcxdumptool paths
+HCXDUMPTOOL_BIN = os.path.join(HCXDUMPTOOL_DIR, 'hcxdumptool')
+output_file = OutputFile(name='hcxdumptool-output', ext='txt').string()
+HCXDUMPTOOL_OFILE = os.path.join(TMP_DIR, output_file)
+output_file = OutputFile(name='hcxdumptool-filter', ext='txt').string()
+HCXDUMPTOOL_FILTER = os.path.join(TMP_DIR, output_file)
+
+# hcxtools paths
+HCXPCAPTOOL_BIN = os.path.join(HCXTOOLS_DIR, 'hcxpcaptool')
+output_file = OutputFile(name='hcxpcaptool-output', ext='txt').string()
+HCXPCAPTOOL_OFILE = os.path.join(TMP_DIR, output_file)
 
 # hostapd paths
 HOSTAPD_BIN = os.path.join(HOSTAPD_DIR, 'hostapd-eaphammer')
@@ -82,6 +101,25 @@ paths = {
         'asleap' : ASLEAP_DIR,
         'certs' : CERTS_DIR,
         'saves' : SAVE_DIR,
+        'hcxdumptool' : HCXDUMPTOOL_DIR,
+        'hcxtools' : HCXTOOLS_DIR,
+        'loot' : LOOT_DIR,
+    },
+
+    'hcxtools' : {
+
+        'hcxpcaptool' : {
+
+            'bin' : HCXPCAPTOOL_BIN,
+            'ofile' : HCXPCAPTOOL_OFILE,
+        },
+    },
+
+    'hcxdumptool' : {
+
+        'bin' : HCXDUMPTOOL_BIN,
+        'ofile' : HCXDUMPTOOL_OFILE,
+        'filter' : HCXDUMPTOOL_FILTER,
     },
 
     'asleap' : {

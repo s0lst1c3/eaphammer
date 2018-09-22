@@ -7,6 +7,7 @@ from settings import settings
 BASIC_OPTIONS = [
     'cert_wizard',
     'reap_creds',
+    'pmkid',
     'hostile_portal',
     'captive_portal',
     'debug',
@@ -45,6 +46,11 @@ def set_options():
                               dest='reap_creds',
                               action='store_true',
                               help='Harvest EAP creds using evil twin attack')
+
+    modes_group_.add_argument('--pmkid',
+                              dest='pmkid',
+                              action='store_true',
+                              help='Perform clientless attack against PSK network using ZerBea\'s hcxtools.')
 
     modes_group_.add_argument('--hostile-portal',
                               dest='hostile_portal',
@@ -371,6 +377,13 @@ def set_options():
             print '[!] Please specify a valid PHY',
             print 'interface using the --interface flag'
             sys.exit()
+
+        if options['pmkid'] and options['bssid'] is None and options['essid'] is None:
+            parser.print_usage()
+            print
+            print '[!] Please specify a valid target using the --bssid or --essid flags.',
+            sys.exit()
+
     except SystemExit:
 
         print

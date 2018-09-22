@@ -33,13 +33,20 @@ if __name__ == '__main__':
     os.system('pip install -r pip.req')
     print '\n[*] complete!\n'
 
-
     print '\n[*] Compiling hostapd...\n'
     os.system("cd %s && make hostapd-eaphammer_lib" % settings.dict['paths']['directories']['hostapd'])
     print '\n[*] complete!\n'
 
     print '\n[*] Compiling asleap...\n'
     os.system("cd %s && make" % settings.dict['paths']['directories']['asleap'])
+    print '\n[*] complete!\n'
+
+    print '\n[*] Compiling hcxtools...\n'
+    os.system("cd %s && make" % settings.dict['paths']['directories']['hcxtools'])
+    print '\n[*] complete!\n'
+
+    print '\n[*] Compiling hcxdumptool...\n'
+    os.system("cd %s && make" % settings.dict['paths']['directories']['hcxdumptool'])
     print '\n[*] complete!\n'
 
     print '\n[*] Downloading default wordlist...\n'

@@ -1,0 +1,25 @@
+#!/bin/sh
+
+if test -z "$1"
+then
+	for IFACE in `ls -1 /sys/class/net | grep ^wl`
+	do
+		printf "$IFACE "
+		cat /sys/class/net/$IFACE/address 
+	done
+	printf "\nselect WLAN interface: "
+	read WLANDEV
+
+else
+	WLANDEV=$1
+fi
+
+echo "deactivating NetworkManager and wpa_supplicant"
+sudo systemctl stop NetworkManager.service
+sudo systemctl stop wpa_supplicant.service
+
+echo "activating monitor mode on $WLANDEV"
+sudo ip link set $WLANDEV down
+sudo iw dev $WLANDEV set type monitor
+sudo ip link set $WLANDEV up
+sudo iw dev $WLANDEV info

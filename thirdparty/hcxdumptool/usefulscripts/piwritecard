@@ -1,0 +1,40 @@
+#!/bin/bash
+
+lsblk
+printf "\nchoose device: "
+read DEVICE
+
+printf "\033[0;31m o p n p 1 <ret> +100M t c n p 2 <ret> <ret> w \033[1;0m\n"
+sudo fdisk /dev/$DEVICE
+
+echo "build filesystem boot"
+sudo mkfs.fat -F32 /dev/"$DEVICE"1
+echo "build filesystem root"
+sudo mkfs.ext4 /dev/"$DEVICE"2
+
+echo "mount boot"
+if [ ! -d "boot" ]
+then 
+	mkdir boot
+fi
+sudo mount /dev/"$DEVICE"1 boot
+cd boot
+sudo tar -zxvf ../rpiboot.tgz
+sync
+
+cd ..
+echo "mount root"
+if [ ! -d "root" ]
+then 
+	mkdir root
+fi
+sudo mount /dev/"$DEVICE"2 root
+cd root
+sudo tar -zxvf ../rpiroot.tgz
+sync
+
+cd ..
+sudo umount boot
+sudo umount root
+rm -r boot
+rm -r root

@@ -1,0 +1,340 @@
+16.09.2018
+==========
+show warning if NetworkManager and/or wpa_supplicant is running
+
+
+15.09.2018
+==========
+added Cisco Systems, Inc VENDOR information
+--station_vendor=<digit>           : use this VENDOR information for station
+                                     0: transmit no VENDOR information (default)
+                                     1: Broadcom
+                                     2: Apple-Broadcom
+                                     3: Sonos
+                                     4: Netgear-Broadcom
+                                     5: Wilibox Deliberant Group LLC
+                                     6: Cisco Systems, Inc
+
+
+11.09.2018
+==========
+You can “uncomment a line” in a configuration file
+by removing the # at the start of the line.
+Or, to “comment out” a line, add a # character
+to the start of the line. 
+
+001122334455 myap
+# aabbccddeeff ignore this mac
+112233445566 second ap
+# this is may comment
+
+
+05.09.2018
+==========
+added Netgear Broadcom VENDOR information
+added Wilibox Deliberant Group LLC VENDOR information
+
+
+04.09.2018
+==========
+improved rcascan (show time and access points which hide their ESSID)
+prepare detection of PMF
+refactored access point handling
+handle 4096 access points simultaneously
+refactored client handling
+handle 4096 clients simultaneously
+speed up retrieving PMKIDs (< 1 minute)
+attack access points which hide their ESSID
+increased filter list line length
+increased filter list maximum entries
+added option to show beacons in status output:
+--enable_status=<digit>            : enable status messages
+                                     bitmask:
+                                      1: EAPOL
+                                      2: PROBEREQUEST/PROBERESPONSE
+                                      4: AUTHENTICATON
+                                      8: ASSOCIATION
+                                     16: BEACON
+
+added option to choose station VENDOR information:
+--station_chipset=<digit>          : use this VENDOR information for station
+                                     0: transmit no VENDOR information (default)
+                                     1: Broadcom
+                                     2: Apple-Broadcom
+                                     3: Sonos
+
+
+30.08.2018
+==========
+iw/ip functionality added!
+now hcxdumptool will set monitor mode and bring up interface!
+previous interface settings will be restored, when hcxdumptool terminated
+
+
+19.08.2018
+==========
+parse SAE authentication
+
+
+19.08.2018
+==========
+added radio assignment scan
+--do_rcascan                       : show radio channel assignment (scan for target access points)
+--save_rcascan=<file>              : output rca scan list to file when hcxdumptool terminated
+--save_rcascan_raw=<file>          : output file in pcapngformat
+                                     unfiltered packets
+                                     including radiotap header (LINKTYPE_IEEE802_11_RADIOTAP)
+
+
+17.08.2018
+==========
+detect NETWORK EAP authentication system
+transmit BROADCAST beacon
+
+
+16.08.2018
+==========
+From now on we store open system authentications to pcapng
+only if they have have a vendor specific field.
+we are no longer interested in standard open system authentications (payload len = 6)
+
+
+changed some default values:
+
+-D <digit>     : deauthentication interval
+                 default: 10 (every 10 beacons)
+                 the target beacon interval is used as trigger
+-A <digit>     : ap attack interval
+                 default: 10 (every 10 beacons)
+--give_up_deauthentications=<digit>: disable transmitting deauthentications after n tries
+                                     default: 100 tries (minimum: 4)
+                                     affected: connections between client an access point
+                                     deauthentication attacks will not work against protected management frames
+--give_up_ap_attacks=<digit>       : disable transmitting directed proberequests after n tries
+                                     default: 100 tries (minimum: 4)
+                                     affected: client-less attack
+                                     deauthentication attacks will not work against protected management frames
+
+
+
+13.08.2018
+==========
+increased some attack values:
+--give_up_deauthentications=<digit>: disable transmitting deauthentications after n tries
+                                     default: 100 tries (minimum: 4)
+                                     affected: connections between client an access point
+                                     deauthentication attacks will not work against protected management frames
+--give_up_ap_attacks=<digit>       : disable transmitting directed proberequests after n tries
+                                     default: 100 tries (minimum: 4)
+
+
+07.08.2018
+==========
+moved to 4.2.1
+added communication between hcxdumptool and hcxpcaptool via pcapng option fields:
+62108 for REPLAYCOUNT uint64_t
+62109 for ANONCE uint8_t[32]
+
+enabled hardware handshake instead of software handshake
+changed beavior auf status:
+--enable_status=<digit>            : enables status messages
+                                     bitmask:
+                                     1: EAPOL
+                                     2: PROBEREQUEST/PROBERESPONSE
+                                     4: AUTHENTICATON
+                                     8: ASSOCIATION
+Now we use a bitmask to deliver status messages.
+
+
+06.08.2018
+==========
+write ISB (Interface Statistic Block) at the end of a cpature
+
+
+04.08.2018
+==========
+addet new option (--disable-active_scan) to hcxdumptool
+--disable_active_scan: do not transmit proberequests to BROADCAST using a BROADCAST ESSID
+
+
+04.08.2018
+==========
+release hcxdumptool 4.2.0
+complete refactored:
+-various new options
+-measurement of EAPOL timeout
+-full support for hashcat hashmodes -m 16800 and 16801
+-now default format is pcapng
+
+
+$ ./hcxdumptool-bleeding --help
+hcxdumptool 4.2.0 (C) 2018 ZeroBeat
+usage  : hcxdumptool <options>
+example: hcxdumptool -o output.pcapng -i wlp39s0f3u4u5 -t 5 --enable_status
+
+options:
+-i <interface> : interface (monitor mode must be enabled)
+                 ip link set <interface> down
+                 iw dev <interface> set type monitor
+                 ip link set <interface> up
+-o <dump file> : output file in pcapngformat
+                 management frames and EAP/EAPOL frames
+                 including radiotap header (LINKTYPE_IEEE802_11_RADIOTAP)
+-O <dump file> : output file in pcapngformat
+                 unencrypted IPv4 and IPv6 frames
+                 including radiotap header (LINKTYPE_IEEE802_11_RADIOTAP)
+-W <dump file> : output file in pcapngformat
+                 encrypted WEP frames
+                 including radiotap header (LINKTYPE_IEEE802_11_RADIOTAP)
+-c <digit>     : set scanlist  (1,2,3,...)
+                 default scanlist: 1, 3, 5, 7, 9, 11, 13, 2, 4, 6, 8, 10, 12
+                 maximum entries: 127
+                 allowed channels:
+                 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14
+                 34, 36, 38, 40, 42, 44, 46, 48, 52, 56, 58, 60, 62, 64
+                 100, 104, 108, 112, 116, 120, 124, 128, 132,
+                 136, 140, 144, 147, 149, 151, 153, 155, 157
+                 161, 165, 167, 169, 184, 188, 192, 196, 200, 204, 208, 212, 216
+-t <seconds>   : stay time on channel before hopping to the next channel
+                 default: 5 seconds
+-E <digit>     : EAPOL timeout
+                 default: 100000 = 1 second
+                 value depends on channel assignment
+-D <digit>     : deauthentication interval
+                 default: 20 (every 20 beacons)
+                 the target beacon interval is used as trigger
+-A <digit>     : ap attack interval
+                 default: 20 (every 20 beacons)
+                 the target beacon interval is used as trigger
+-I             : show suitable wlan interfaces and quit
+-h             : show this help
+-v             : show version
+
+--filterlist=<file>                : mac filter list
+                                     format: 112233445566 + comment
+                                     maximum line lenght 128, maximum entries 32
+--filtermode=<digit>               : mode for filter list
+                                     1: use filter list as protection list (default)
+                                     2: use filter list as target list
+--disable_deauthentications:         disable transmitting deauthentications
+                                     affected: connections between client an access point
+                                     deauthentication attacks will not work against protected management frames
+--give_up_deauthentications=<digit>: disable transmitting deauthentications after n tries
+                                     default: 10 tries (minimum: 4)
+                                     affected: connections between client an access point
+                                     deauthentication attacks will not work against protected management frames
+--disable_disassociations          : disable transmitting disassociations
+                                     affected: retry (EAPOL 4/4 - M4) attack
+--disable_ap_attacks               : disable attacks on single access points
+                                     affected: client-less (PMKID) attack
+--give_up_ap_attacks=<digit>       : disable transmitting directed proberequests after n tries
+                                     default: 10 tries (minimum: 4)
+                                     affected: client-less attack
+                                     deauthentication attacks will not work against protected management frames
+--disable_client_attacks           : disable attacks on single clients points
+                                     affected: ap-less (EAPOL 2/4 - M2) attack
+--enable_status                    : enable status messages
+--help                             : show this help
+--version                          : show version
+
+
+
+01.08.2018
+==========
+moved some stuff from hcxtools to hcxdumptool repository
+prepare complete refactoring!
+
+
+04.03.2018
+==========
+hcxdumptool: added new option -W
+-W <dump file> : WEP encrypted packets output file in pcapformat including radiotap header (LINKTYPE_IEEE802_11_RADIOTAP)
+
+
+04.03.2018
+==========
+hcxdumptool again complete refactored:
+
+
+02.03.2018
+==========
+hcxdumptool is complete refactored:
+- improved scan engine
+- improved authentication engine (incl. Radio Measurement, and NULL frame detection)
+- dropped timer
+- use threads for LED and channel switch
+- use only one file descriptor for raw socket operations
+- working on Intel Corporation Centrino Ultimate-N 6300 (rev 3e) WiFi adapter (kernel >= 4.15)
+- working on Alfa AWUS036NH, Alfa AWUS036NHA
+- working on Alfa AWUS036ACH (driver: https://github.com/kimocoder/rtl8812au)
+- more channels allowed (depends on installed wireless regulatory domain)
+- simple usage: hcxdumptool -i <interface> -o dumpfile.pcap -t 5
+  interface (real interface - no monX) must be in monitor - all services/programs with access to the interface must be stopped! 
+- new format of blacklist
+- and more...
+
+reported to run on Gentoo
+https://github.com/ZerBea/hcxdumptool_bleeding_testing/issues/2#issuecomment-369256915
+
+reported to run on OpenWRT/LEDE
+https://github.com/ZerBea/hcxdumptool_bleeding_testing/issues/3#issuecomment-369756725
+
+reported to run with Intel Corporation Centrino Ultimate-N 6300 (rev 3e)
+https://github.com/ZerBea/hcxdumptool_bleeding_testing/issues/2#issuecomment-369259800
+
+$ hcxdumptool -h
+hcxdumptool 4.1.0 (C) 2018 ZeroBeat
+usage:
+hcxdumptool <options>
+
+options:
+-i <interface> : interface (monitor mode must be eanabled)
+                 ip link set <interface> down
+                 iw dev <interface> set type monitor
+                 ip link set <interface> up
+-o <dump file> : output file in pcapformat including radiotap header (LINKTYPE_IEEE802_11_RADIOTAP)
+-O <dump file> : ip based traffic output file in pcapformat including radiotap header (LINKTYPE_IEEE802_11_RADIOTAP)
+-c <digit>     : set scanlist  (1,2,3,... / default = default scanlist)
+                 default scanlist: 1, 3, 5, 7, 9, 11, 13, 2, 4, 6, 8, 10, 12
+                 allowed channels:
+                 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14
+                 36, 40, 44, 48, 52, 56, 60, 64
+                 100, 104, 108, 112, 116, 120, 124, 128, 132, 136, 140, 147, 151, 155, 167
+-t <seconds>   : stay time on channel before hopping to the next channel
+                 default = 5 seconds
+-T <maxerrors> : terminate after <x> maximal errors
+               : default: 1000000
+-D             : do not transmit deauthentications or disassociations
+-R             : do not transmit requests
+-A             : do not respond to requests from clients
+-B <file>      : blacklist (do not deauthenticate clients from this hosts)
+                 format = mac_ap:mac_sta:ESSID
+                 112233445566:aabbccddeeff:networkname (max. 32 chars)
+-P             : enable poweroff
+-s             : enable status messages
+-I             : show suitable wlan interfaces and quit
+-h             : show this help
+-v             : show version
+
+
+27.02.2018
+==========
+Now recommendations since we are run into heavy problems with latest drivers and operating systems
+* Operatingsystem: archlinux (strict), Kernel >= 4.14 (strict)
+* Raspberry Pi A, B, A+, B+ (Recommended: A+ = very low power consumption or B+), but notebooks and desktops could work, too.
+* GPIO hardware mod recommended
+
+Supported adapters (strict)
+* USB ID 148f:7601 Ralink Technology, Corp. MT7601U Wireless Adapter
+* USB ID 148f:3070 Ralink Technology, Corp. RT2870/RT3070 Wireless Adapter
+* USB ID 148f:5370 Ralink Technology, Corp. RT5370 Wireless Adapter
+* USB ID 0bda:8187 Realtek Semiconductor Corp. RTL8187 Wireless Adapter
+* USB ID 0bda:8189 Realtek Semiconductor Corp. RTL8187B Wireless 802.11g 54Mbps Network Adapter
+ 
+
+25.02.2018
+==========
+- initial start of this repository
+- added hcxdumptool
+- added hcxpioff
+

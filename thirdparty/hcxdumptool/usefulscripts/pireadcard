@@ -1,0 +1,43 @@
+#!/bin/bash
+
+lsblk
+printf "\nchoose device: "
+read DEVICE
+
+if [ -f "rpiboot.tgz" ]
+then
+	rm -f rpiboot.tgz
+fi
+
+if [ -f "rpiroot.tgz" ]
+then
+	rm -f rpiroot.tgz
+fi
+
+echo "mount boot"
+if [ ! -d "boot" ]
+then 
+	mkdir boot
+fi
+sudo mount /dev/"$DEVICE"1 boot
+cd boot
+sudo tar -zcvf ../rpiboot.tgz .
+sync
+
+cd ..
+echo "mount root"
+if [ ! -d "root" ]
+then 
+	mkdir root
+fi
+
+sudo mount /dev/"$DEVICE"2 root
+cd root
+sudo tar --exclude=var/log --exclude=lost+found -zcvpf ../rpiroot.tgz .
+sync
+
+cd ..
+sudo umount boot
+sudo umount root
+rm -r boot
+rm -r root

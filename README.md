@@ -513,7 +513,7 @@ The PMKID attack is a new technique, released in August 2018 by Jens Steube, tha
 
 More information about how this attack works is available here:
 
-	- [https://hashcat.net/forum/thread-7717.html](https://hashcat.net/forum/thread-7717.html)
+- [https://hashcat.net/forum/thread-7717.html](https://hashcat.net/forum/thread-7717.html)
 
 The PMKID attack can be executed using the --pmkid flag. To target a specific access point, use the --bssid flag as shown below:
 

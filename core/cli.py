@@ -26,6 +26,10 @@ BASIC_OPTIONS = [
     'remote_rig',
     'wordlist',
     'pivot',
+    'eap_spray',
+    'password',
+    'interface_pool',
+    'user_list',
 ]
 
 def set_options():
@@ -51,6 +55,11 @@ def set_options():
                               dest='pmkid',
                               action='store_true',
                               help='Perform clientless attack against PSK network using ZerBea\'s hcxtools.')
+
+    modes_group_.add_argument('--eap-spray',
+                              dest='eap_spray',
+                              action='store_true',
+                              help='Check for password reuse by spraying a single password across a series of usernames against target ESSID.')
 
     modes_group_.add_argument('--hostile-portal',
                               dest='hostile_portal',
@@ -96,6 +105,7 @@ def set_options():
                         dest='advanced_help',
                         action='store_true',
                         help='Show extended help options then exit.')
+
 
 
     access_point_group = parser.add_argument_group('Access Point')
@@ -346,10 +356,31 @@ def set_options():
 
     hp_group = parser.add_argument_group('Hostile Portal Options', 'Only applicable if --hostile-portal is used')
 
-    eap_group.add_argument('--pivot',
+    hp_group.add_argument('--pivot',
                            dest='pivot',
                            action='store_true',
                            help='Runs responder without SMB server enabled.')
+
+    eap_spray_group = parser.add_argument_group('EAP Spray')
+    eap_spray_group.add_argument('-I', '--interface-pool',
+                            dest='interface_pool',
+                            metavar='iface_n',
+                            type=str,
+                            nargs='+',
+                            default=None,
+                            help='List of interfaces available for password spray attack.')
+
+    eap_spray_group.add_argument('--user-list',
+                            dest='user_list',
+                            default=None,
+                            type=str,
+                            help='Like a wordlist, except contains usernames instead of passwords. Each username should be placed on a separate line.')
+
+    eap_spray_group.add_argument('--password',
+                            dest='password',
+                            default=None,
+                            type=str,
+                            help='Specify password to be sprayed across list of users.')
 
     try:
 
@@ -366,10 +397,10 @@ def set_options():
             parser.print_help()
             sys.exit()
 
-
         if (options['cert_wizard'] is False and
             options['manual_config'] is None and
             options['advanced_help'] is False and
+            options['eap_spray'] is False and
             options['interface'] is None):
 
             parser.print_usage()
@@ -383,6 +414,30 @@ def set_options():
             print
             print '[!] Please specify a valid target using the --bssid or --essid flags.',
             sys.exit()
+
+        if options['eap_spray']:
+            invalid_args = False
+            if options['user_list'] is None:
+                print
+                print '[!] Please specify a valid user list file using the --user-list flag.',
+                invalid_args = True
+
+            if options['essid'] is None:
+                print
+                print '[!] Please specify a valid target using the --essid flag.',
+                invalid_args = True
+    
+            if options['password'] is None:
+                print
+                print '[!] Please specify password to spray using the --password flag.',
+                invalid_args = True
+        
+            if options['interface_pool'] is None:
+                print
+                print '[!] Please specify a list of wireless interfaces using the --interface-pool flag.'
+                invalid_args = True
+            if invalid_args:
+                sys.exit()
 
     except SystemExit:
 

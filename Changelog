@@ -83,6 +83,9 @@ Fixed issue where setup script was unable to download rockyou wordlist due to: h
 - Performed some code refactoring
 - Updated README.md
 
+0.4.0 - Gabriel Ryan <gabriel@digitalsilence.com>
+- New feature: password spraying attacks
+
 
 
 

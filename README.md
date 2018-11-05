@@ -33,10 +33,12 @@ Features
 - Generate timed Powershell payloads for indirect wireless pivots
 - Integrated HTTP server for Hostile Portal attacks
 - Support for SSID cloaking
+- Fast and automated PMKID attacks against PSK networks using hcxtools
 
-New (as of Version 0.3.7)(latest)
+New (as of Version 0.4.0)(latest)
 ---------------------------------
-- EAPHammer now support fast and automated PMKID attacks against PSK networks using hcxtools
+
+- EAPHammer now supports password spraying across multiple usernames against a single ESSID
 
 802.11a and 802.11n Support
 ---------------------------
@@ -95,7 +97,8 @@ Table of Contents
       * [IX - ESSID Cloaking](#ix---essid-cloaking)
       * [X - Using Karma](#x---using-karma)
 	  * [XI - PMKID Attacks Against WPA-PSK and WPA2-PSK Networks](#xi---pmkid-attacks-against-wpa-psk-and-wpa2-psk-networks)
-      * [XII - Advanced Granular Controls](#xii---advanced-granular-controls)
+	  * [XII - Password Spraying](#xii---password-spraying)
+      * [XIII - Advanced Granular Controls](#xiii---advanced-granular-controls)
 
 Setup Guide
 ===========
@@ -507,9 +510,9 @@ With that out of the way, here's a usage example:
 
 The PMKID attack is a new technique, released in August 2018 by Jens Steube, that can be used to breach WPA-PSK and WPA2-PSK networks. It can be used against 802.11i/p/q/r networks that have roaming functions enabled, which essentially amounts to most modern wireless routers. The PMKID attack offers several advantages over the traditional 4-way handshake captures:
 	
-	- It's a client-less attack -- the attack is directed at the access point.
-	- It's fast (for several reason, see original post by Jens Steube)
-	- It works at longer ranges (lost EAPOL frames due to distance are no longer as much of a concern)
+- It's a client-less attack -- the attack is directed at the access point.
+- It's fast (for several reason, see original post by Jens Steube)
+- It works at longer ranges (lost EAPOL frames due to distance are no longer as much of a concern)
 
 More information about how this attack works is available here:
 
@@ -528,8 +531,19 @@ With that said, if you want to specify the channel manually, you can do so using
 Alternatively, you can use the --essid flag to tell EAPHammer to target any access point that is part of a specific network. EAPHammer will automatically locate an in-scope access point and identify its BSSID and channel. To perform this style of attack, use the following command:
 
 	./eaphammer --pmkid --interface wlan0 --essid RED_WHEELBARROW
+
+## XII - Password Spraying
+EAPHammer allows the user to check for password reuse across multiple RADIUS accounts using its password spraying feature. To leverage this feature, use the --eap-spray flag as shown below:
+
+	./eaphammer --eap-spray --interface-pool wlan0 wlan1 wlan2 wlan3 wlan4 --essid example-wifi --password bananas --user-list users.txt
+
+Most of these flags are pretty self-exlanatory. The --eap-spray flag tells eaphammer to perform a password spraying attack. The --essid flag is used to specify the target network, the --password flag is used to specify the password to spray, and the --user-list flag is used to supply a user list file to eaphammer. A user list file is like a wordlist, but contains usernames instead of password candidates. Eaphammer will attempt to authenticate against the network specified by --essid using every username in the file specified by --user-list paired with the password specified by --password.
+
+The --inteface-pool flag could be a bit confusing, so let's talk about it in greater detail. A password spraying attack is essentially a network-based bruteforce operation. Although network-based bruteforce attacks are algorithmically similar to their local counterparts, such as dictionary attacks against password hashes, they're a lot slower from a performance perspective. Each login attempt made in our password spraying attack is a network-bound operation. To make matters worse, the EAP authentication process itself takes multiple seconds to complete. We theoretically can speed up this process using multithreading (Python's GIL isn't an issue here), but we still have to deal with the fact that a single wireless interface can only perform a single authentication attempt at a time.  The oslution is to create a pool of worker threads, and give each thread in the pool its own wireless interface to work with. The --interface-pool flag is used to provide eaphammer with a list of wireless interfaces with which to create this thread pool.
+
+Generally speaking, the more interfaces you use, the faster the attack. Be aware, however, that sending too much traffic to the access point will overwhelm it, causing your attack to take more time rather than less.
 	
-## XII - Advanced Granular Controls
+## XIII - Advanced Granular Controls
 
 To view a complete list of granular configuration options supported by eaphammer, use the -hh flag as shown below:
 

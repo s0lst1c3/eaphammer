@@ -60,6 +60,9 @@ HOSTAPD_BIN = os.path.join(HOSTAPD_DIR, 'hostapd-eaphammer')
 HOSTAPD_LIB = os.path.join(HOSTAPD_DIR, 'libhostapd-eaphammer.so')
 HOSTAPD_LOG = os.path.join(LOG_DIR, 'hostapd-eaphammer.log')
 
+# eap_spray paths
+EAP_SPRAY_LOG = os.path.join(LOG_DIR, 'eap_spray.log')
+
 output_file = OutputFile(name='hostapd', ext='conf').string()
 HOSTAPD_CONF = os.path.join(TMP_DIR, output_file)
 HOSTAPD_SAVE = os.path.join(SAVE_DIR, output_file)
@@ -125,6 +128,11 @@ paths = {
     'asleap' : {
 
         'bin' : ASLEAP_BIN,
+    },
+
+    'eap_spray' : {
+
+        'log' : EAP_SPRAY_LOG,
     },
 
     'hostapd' : {

@@ -2,6 +2,7 @@
 
 import argparse
 import core.cli
+import core.eap_spray
 import datetime
 import json
 import os
@@ -16,9 +17,14 @@ from core.autocrack import Autocrack
 from core import iw_parse
 from core.hostapd import HostapdEaphammer
 from core.hostapd_config import HostapdConfig
+from core.lazy_file_reader import LazyFileReader
 from core.servers.redirect_server import RedirectServer
+from core.wpa_supplicant import WPA_Supplicant
+from core.wpa_supplicant_conf import WPASupplicantConf
 from datetime import datetime
+from queue import Queue
 from settings import settings, __version__
+from threading import Thread
 
 
 def cert_wizard():
@@ -441,6 +447,35 @@ def pmkid_attack():
         print "Error: %s - %s" % (e.filename, e.strerror)
     print '[*] Complete!'
 
+def eap_spray():
+
+    # set variables from settings / options
+    interfaces = options['interface_pool']
+    essid = options['essid']
+    password = options['password']
+    input_file = options['user_list']
+    output_file = settings.dict['paths']['eap_spray']['log']
+    conf_dir = settings.dict['paths']['directories']['tmp']
+
+    # instantiate pipelines
+    input_queue = Queue()
+    output_queue = Queue(maxsize=(len(interfaces) * 5))
+
+    # instantiate workers
+    producer = core.eap_spray.Producer(input_file, input_queue, len(interfaces))
+    cred_logger = core.eap_spray.Cred_Logger(output_file, output_queue)
+    worker_pool = core.eap_spray.Worker_Pool(interfaces, essid, password, input_queue, output_queue, conf_dir)
+
+    # start everything (order matters)
+    worker_pool.start()
+    cred_logger.start()
+    producer.run()
+
+    # when producer reaches end of user_list file, everything else should
+    # terminate
+    worker_pool.join()
+    cred_logger.join()
+
 def save_config_only():
 
     hostapd_conf = HostapdConfig(settings, options)
@@ -486,6 +521,8 @@ if __name__ == '__main__':
         hostile_portal()
     elif options['pmkid']:
         pmkid_attack()
+    elif options['eap_spray']:
+        eap_spray()
     else:
         reap_creds()
 

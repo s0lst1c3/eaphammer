@@ -97,7 +97,7 @@ Table of Contents
       * [IX - ESSID Cloaking](#ix---essid-cloaking)
       * [X - Using Karma](#x---using-karma)
 	  * [XI - PMKID Attacks Against WPA-PSK and WPA2-PSK Networks](#xi---pmkid-attacks-against-wpa-psk-and-wpa2-psk-networks)
-	  * [XII - PMKID Attacks Against WPA-PSK and WPA2-PSK Networks](#xi---pmkid-attacks-against-wpa-psk-and-wpa2-psk-networks)
+	  * [XII - Password Spraying](#xii---password-spraying)
       * [XIII - Advanced Granular Controls](#xiii---advanced-granular-controls)
 
 Setup Guide

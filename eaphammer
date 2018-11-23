@@ -22,7 +22,7 @@ from core.servers.redirect_server import RedirectServer
 from core.wpa_supplicant import WPA_Supplicant
 from core.wpa_supplicant_conf import WPASupplicantConf
 from datetime import datetime
-from queue import Queue
+from multiprocessing import Queue
 from settings import settings, __version__
 from threading import Thread
 

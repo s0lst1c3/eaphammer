@@ -32,6 +32,7 @@ SCRIPT_DIR = os.path.join(ROOT_DIR, 'scripts')
 DB_DIR = os.path.join(ROOT_DIR, 'db')
 TMP_DIR = os.path.join(ROOT_DIR, 'tmp')
 WORDLIST_DIR = os.path.join(ROOT_DIR, 'wordlists')
+LOCAL_DIR = os.path.join(ROOT_DIR, 'local')
 HOSTAPD_DIR = os.path.join(ROOT_DIR, 'hostapd-eaphammer', 'hostapd')
 CERTS_DIR = os.path.join(ROOT_DIR, 'certs')
 LOOT_DIR = os.path.join(ROOT_DIR, 'loot')
@@ -100,6 +101,7 @@ paths = {
         'db' : DB_DIR,
         'tmp' : TMP_DIR,
         'wordlists' : WORDLIST_DIR,
+        'local' : LOCAL_DIR,
         'hostapd' : HOSTAPD_DIR,
         'asleap' : ASLEAP_DIR,
         'certs' : CERTS_DIR,

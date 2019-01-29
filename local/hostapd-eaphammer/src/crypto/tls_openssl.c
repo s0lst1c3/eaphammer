@@ -969,8 +969,10 @@ void * tls_init(const struct tls_config *conf)
 	if (conf)
 		data->tls_session_lifetime = conf->tls_session_lifetime;
 
-	SSL_CTX_set_options(ssl, SSL_OP_NO_SSLv2);
-	SSL_CTX_set_options(ssl, SSL_OP_NO_SSLv3);
+	// eaphammer start
+	//SSL_CTX_set_options(ssl, SSL_OP_NO_SSLv2);
+	//SSL_CTX_set_options(ssl, SSL_OP_NO_SSLv3);
+	// eaphammer end
 
 	SSL_CTX_set_info_callback(ssl, ssl_info_cb);
 	SSL_CTX_set_app_data(ssl, context);
@@ -1349,8 +1351,11 @@ struct tls_connection * tls_connection_init(void *ssl_ctx)
 	SSL_set_app_data(conn->ssl, conn);
 	SSL_set_msg_callback(conn->ssl, tls_msg_cb);
 	SSL_set_msg_callback_arg(conn->ssl, conn);
-	options = SSL_OP_NO_SSLv2 | SSL_OP_NO_SSLv3 |
-		SSL_OP_SINGLE_DH_USE;
+	// eaphammer start
+	//options = SSL_OP_NO_SSLv2 | SSL_OP_NO_SSLv3 |
+	//	SSL_OP_SINGLE_DH_USE;
+	options = SSL_OP_SINGLE_DH_USE;
+	// eaphammer end
 #ifdef SSL_OP_NO_COMPRESSION
 	options |= SSL_OP_NO_COMPRESSION;
 #endif /* SSL_OP_NO_COMPRESSION */

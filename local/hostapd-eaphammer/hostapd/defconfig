@@ -9,31 +9,40 @@
 # be modified from here. In most cass, these lines should use += in order not
 # to override previous values of the variables.
 
+# eaphammer start
 CONFIG_EAPHAMMER=y
+# eaphammer end
 
 # Driver interface for Host AP driver
 CONFIG_DRIVER_HOSTAP=y
 
 # Driver interface for wired authenticator
-#CONFIG_DRIVER_WIRED=y
+CONFIG_DRIVER_WIRED=y
+
+# Driver interface for madwifi driver
+#CONFIG_DRIVER_MADWIFI=y
+#CFLAGS += -I../../madwifi # change to the madwifi source directory
 
 # Driver interface for drivers using the nl80211 kernel interface
 CONFIG_DRIVER_NL80211=y
-
-# QCA vendor extensions to nl80211
-#CONFIG_DRIVER_NL80211_QCA=y
 
 # driver_nl80211.c requires libnl. If you are compiling it yourself
 # you may need to point hostapd to your version of libnl.
 #
 #CFLAGS += -I$<path to libnl include files>
 #LIBS += -L$<path to libnl library files>
+#
+
+# eaphammer start
+LIBS += -L../../openssl/local/lib/
+CFLAGS += -I../../openssl/local/include/
+# eaphammer end
 
 # Use libnl v2.0 (or 3.0) libraries.
 #CONFIG_LIBNL20=y
 
 # Use libnl 3.2 libraries (if this is selected, CONFIG_LIBNL20 is ignored)
-#CONFIG_LIBNL32=y
+CONFIG_LIBNL32=y
 
 
 # Driver interface for FreeBSD net80211 layer (e.g., Atheros driver)
@@ -61,9 +70,6 @@ CONFIG_IEEE80211W=y
 # Integrated EAP server
 CONFIG_EAP=y
 
-# EAP Re-authentication Protocol (ERP) in integrated EAP server
-CONFIG_ERP=y
-
 # EAP-MD5 for the integrated EAP server
 CONFIG_EAP_MD5=y
 
@@ -83,29 +89,29 @@ CONFIG_EAP_GTC=y
 CONFIG_EAP_TTLS=y
 
 # EAP-SIM for the integrated EAP server
-#CONFIG_EAP_SIM=y
+CONFIG_EAP_SIM=y
 
 # EAP-AKA for the integrated EAP server
-#CONFIG_EAP_AKA=y
+CONFIG_EAP_AKA=y
 
 # EAP-AKA' for the integrated EAP server
 # This requires CONFIG_EAP_AKA to be enabled, too.
-#CONFIG_EAP_AKA_PRIME=y
+CONFIG_EAP_AKA_PRIME=y
 
 # EAP-PAX for the integrated EAP server
-#CONFIG_EAP_PAX=y
+CONFIG_EAP_PAX=y
 
 # EAP-PSK for the integrated EAP server (this is _not_ needed for WPA-PSK)
-#CONFIG_EAP_PSK=y
+CONFIG_EAP_PSK=y
 
 # EAP-pwd for the integrated EAP server (secure authentication with a password)
-#CONFIG_EAP_PWD=y
+CONFIG_EAP_PWD=y
 
 # EAP-SAKE for the integrated EAP server
-#CONFIG_EAP_SAKE=y
+CONFIG_EAP_SAKE=y
 
 # EAP-GPSK for the integrated EAP server
-#CONFIG_EAP_GPSK=y
+CONFIG_EAP_GPSK=y
 # Include support for optional SHA256 cipher suite in EAP-GPSK
 #CONFIG_EAP_GPSK_SHA256=y
 
@@ -113,7 +119,7 @@ CONFIG_EAP_TTLS=y
 # Note: If OpenSSL is used as the TLS library, OpenSSL 1.0 or newer is needed
 # for EAP-FAST support. Older OpenSSL releases would need to be patched, e.g.,
 # with openssl-0.9.8x-tls-extensions.patch, to add the needed functions.
-#CONFIG_EAP_FAST=y
+CONFIG_EAP_FAST=y
 
 # Wi-Fi Protected Setup (WPS)
 #CONFIG_WPS=y
@@ -123,13 +129,13 @@ CONFIG_EAP_TTLS=y
 #CONFIG_WPS_NFC=y
 
 # EAP-IKEv2
-#CONFIG_EAP_IKEV2=y
+CONFIG_EAP_IKEV2=y
 
 # Trusted Network Connect (EAP-TNC)
-#CONFIG_EAP_TNC=y
+CONFIG_EAP_TNC=y
 
 # EAP-EKE for the integrated EAP server
-#CONFIG_EAP_EKE=y
+CONFIG_EAP_EKE=y
 
 # PKCS#12 (PFX) support (used to read private key and certificate file from
 # a file that usually has extension .p12 or .pfx)
@@ -137,7 +143,7 @@ CONFIG_PKCS12=y
 
 # RADIUS authentication server. This provides access to the integrated EAP
 # server from external hosts using RADIUS.
-#CONFIG_RADIUS_SERVER=y
+CONFIG_RADIUS_SERVER=y
 
 # Build IPv6 support for RADIUS operations
 CONFIG_IPV6=y
@@ -146,18 +152,18 @@ CONFIG_IPV6=y
 #CONFIG_IEEE80211R=y
 
 # Use the hostapd's IEEE 802.11 authentication (ACL), but without
-# the IEEE 802.11 Management capability (e.g., FreeBSD/net80211)
+# the IEEE 802.11 Management capability (e.g., madwifi or FreeBSD/net80211)
 #CONFIG_DRIVER_RADIUS_ACL=y
 
 # IEEE 802.11n (High Throughput) support
-#CONFIG_IEEE80211N=y
+CONFIG_IEEE80211N=y
 
 # Wireless Network Management (IEEE Std 802.11v-2011)
 # Note: This is experimental and not complete implementation.
 #CONFIG_WNM=y
 
 # IEEE 802.11ac (Very High Throughput) support
-#CONFIG_IEEE80211AC=y
+CONFIG_IEEE80211AC=y
 
 # Remove debugging code that is printing out debug messages to stdout.
 # This can be used to reduce the size of the hostapd considerably if debugging
@@ -175,7 +181,7 @@ CONFIG_IPV6=y
 #CONFIG_DEBUG_LINUX_TRACING=y
 
 # Remove support for RADIUS accounting
-#CONFIG_NO_ACCOUNTING=y
+CONFIG_NO_ACCOUNTING=y
 
 # Remove support for RADIUS
 #CONFIG_NO_RADIUS=y
@@ -245,15 +251,6 @@ CONFIG_IPV6=y
 # requirements described above.
 #CONFIG_NO_RANDOM_POOL=y
 
-# Should we use poll instead of select? Select is used by default.
-#CONFIG_ELOOP_POLL=y
-
-# Should we use epoll instead of select? Select is used by default.
-#CONFIG_ELOOP_EPOLL=y
-
-# Should we use kqueue instead of select? Select is used by default.
-#CONFIG_ELOOP_KQUEUE=y
-
 # Select TLS implementation
 # openssl = OpenSSL (default)
 # gnutls = GnuTLS
@@ -297,12 +294,6 @@ CONFIG_IPV6=y
 # Enable SQLite database support in hlr_auc_gw, EAP-SIM DB, and eap_user_file
 #CONFIG_SQLITE=y
 
-# Enable Fast Session Transfer (FST)
-#CONFIG_FST=y
-
-# Enable CLI commands for FST testing
-#CONFIG_FST_TEST=y
-
 # Testing options
 # This can be used to enable some testing options (see also the example
 # configuration file) that are really useful only for testing clients that
@@ -334,14 +325,3 @@ CONFIG_IPV6=y
 # http://wireless.kernel.org/en/users/Documentation/acs
 #
 #CONFIG_ACS=y
-
-# Multiband Operation support
-# These extentions facilitate efficient use of multiple frequency bands
-# available to the AP and the devices that may associate with it.
-#CONFIG_MBO=y
-
-# Client Taxonomy
-# Has the AP retain the Probe Request and (Re)Association Request frames from
-# a client, from which a signature can be produced which can identify the model
-# of client device like "Nexus 6P" or "iPhone 5s".
-#CONFIG_TAXONOMY=y

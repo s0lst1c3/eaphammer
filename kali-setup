@@ -14,6 +14,12 @@ if __name__ == '__main__':
 
     wordlist_source = settings.dict['core']['eaphammer']['general']['wordlist_source']
 
+    local_dir = settings.dict['paths']['directories']['local']
+
+    openssl_source = settings.dict['core']['eaphammer']['general']['openssl_source']
+    openssl_version = settings.dict['core']['eaphammer']['general']['openssl_version']
+    openssl_build_options = settings.dict['core']['eaphammer']['general']['openssl_build_options']
+    openssl_build_prefix = os.path.join(local_dir, 'openssl/local')
 
     if raw_input('Do you want update your package list ("apt -y update")(recommended)? [y/N]: ').lower() == 'y':
         print '\n[*] Downloading package lists from kali repositories...\n'
@@ -31,6 +37,22 @@ if __name__ == '__main__':
 
     print '\n[*] Installing Python dependencies...\n'
     os.system('pip install -r pip.req')
+    print '\n[*] complete!\n'
+
+    print '\n[*] Downloading OpenSSL_{}...\n'.format(openssl_version.replace('.', '_'))
+    os.system('wget {} -O {}/openssl.tar.gz'.format(openssl_source, local_dir))
+    print '\n[*] complete!\n'
+
+    print '\n[*] Extracting OpenSSL_{}...\n'.format(openssl_version.replace('.', '_'))
+    os.system('cd {} && tar xzf openssl.tar.gz'.format(local_dir))
+    os.system('mv {}/openssl-OpenSSL_{} {}/openssl'.format(local_dir, openssl_version.replace('.', '_'), local_dir))
+    os.system('cd {} && rm -f openssl.tar.gz'.format(local_dir))
+    print '\n[*] complete!\n'
+
+    print '\n[*] Compiling OpenSSL locally to avoid interfering with system install...\n'
+    os.system('cd {}/openssl && ./config --prefix={} enable-ssl2 enable-ssl3 enable-ssl3-method enable-des enable-rc4 enable-weak-ssl-ciphers'.format(local_dir, openssl_build_prefix))
+    os.system('cd {}/openssl && make'.format(local_dir))
+    os.system('cd {}/openssl && make install_sw'.format(local_dir))
     print '\n[*] complete!\n'
 
     print '\n[*] Compiling hostapd...\n'

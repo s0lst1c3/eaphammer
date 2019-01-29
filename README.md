@@ -34,11 +34,13 @@ Features
 - Integrated HTTP server for Hostile Portal attacks
 - Support for SSID cloaking
 - Fast and automated PMKID attacks against PSK networks using hcxtools
+- Password spraying across multiple usernames against a single ESSID
 
-New (as of Version 0.4.0)(latest)
+New (as of Version 0.5.0)(latest)
 ---------------------------------
 
-- EAPHammer now supports password spraying across multiple usernames against a single ESSID
+EAPHammer now uses a local build of libssl that exists independently of the systemwide install. This local version is compiled with support for SSLv3, allowing EAPHammer to be used against legacy clients without compromising the integrity of the attacker's operating system.
+
 
 802.11a and 802.11n Support
 ---------------------------

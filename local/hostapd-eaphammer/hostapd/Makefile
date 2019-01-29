@@ -1,3 +1,4 @@
+# set compiler to gcc
 ifndef CC
 CC=gcc
 endif
@@ -29,8 +30,13 @@ export BINDIR ?= /usr/local/bin/
 
 -include .config
 
+
 hostapd-eaphammer_lib: CFLAGS += -fPIC
 hostapd-eaphammer_lib: LDFLAGS += -shared
+
+ifdef CONFIG_EAPHAMMER
+LIBS += -Wl,-rpath=../../openssl/local/lib
+endif
 
 ifdef CONFIG_EAPHAMMER
 CFLAGS += -DCONFIG_EAPHAMMER

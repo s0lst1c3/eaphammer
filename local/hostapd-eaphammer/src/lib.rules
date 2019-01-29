@@ -6,6 +6,10 @@ ifndef CFLAGS
 CFLAGS = -MMD -O2 -Wall -g
 endif
 
+# eaphammer start
+CFLAGS += -I/root/openssl-OpenSSL_1_1_1/local/include/
+# eaphammer end
+
 CFLAGS += -I.. -I../utils
 
 

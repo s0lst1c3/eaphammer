@@ -32,13 +32,14 @@ SCRIPT_DIR = os.path.join(ROOT_DIR, 'scripts')
 DB_DIR = os.path.join(ROOT_DIR, 'db')
 TMP_DIR = os.path.join(ROOT_DIR, 'tmp')
 WORDLIST_DIR = os.path.join(ROOT_DIR, 'wordlists')
-HOSTAPD_DIR = os.path.join(ROOT_DIR, 'hostapd-eaphammer', 'hostapd')
+LOCAL_DIR = os.path.join(ROOT_DIR, 'local')
+HOSTAPD_DIR = os.path.join(LOCAL_DIR, 'hostapd-eaphammer', 'hostapd')
 CERTS_DIR = os.path.join(ROOT_DIR, 'certs')
 LOOT_DIR = os.path.join(ROOT_DIR, 'loot')
 THIRDPARTY_DIR = os.path.join(ROOT_DIR, 'thirdparty')
-ASLEAP_DIR = os.path.join(THIRDPARTY_DIR, 'asleap')
-HCXDUMPTOOL_DIR = os.path.join(THIRDPARTY_DIR, 'hcxdumptool')
-HCXTOOLS_DIR = os.path.join(THIRDPARTY_DIR, 'hcxtools')
+ASLEAP_DIR = os.path.join(LOCAL_DIR, 'asleap')
+HCXDUMPTOOL_DIR = os.path.join(LOCAL_DIR, 'hcxdumptool')
+HCXTOOLS_DIR = os.path.join(LOCAL_DIR, 'hcxtools')
 
 # asleap paths
 ASLEAP_BIN = os.path.join(ASLEAP_DIR, 'asleap')
@@ -100,6 +101,7 @@ paths = {
         'db' : DB_DIR,
         'tmp' : TMP_DIR,
         'wordlists' : WORDLIST_DIR,
+        'local' : LOCAL_DIR,
         'hostapd' : HOSTAPD_DIR,
         'asleap' : ASLEAP_DIR,
         'certs' : CERTS_DIR,

@@ -50,7 +50,7 @@ if __name__ == '__main__':
     print '\n[*] complete!\n'
 
     print '\n[*] Compiling OpenSSL locally to avoid interfering with system install...\n'
-    os.system('cd {}/openssl && ./config --prefix={} enable-ssl2 enable-ssl3 enable-ssl3-method enable-des enable-rc4 enable-weak-ssl-ciphers'.format(local_dir, openssl_build_prefix))
+    os.system('cd {}/openssl && ./config --prefix={} enable-ssl2 enable-ssl3 enable-ssl3-method enable-des enable-rc4 enable-weak-ssl-ciphers no-shared'.format(local_dir, openssl_build_prefix))
     os.system('cd {}/openssl && make'.format(local_dir))
     os.system('cd {}/openssl && make install_sw'.format(local_dir))
     print '\n[*] complete!\n'

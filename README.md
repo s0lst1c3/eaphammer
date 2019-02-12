@@ -140,7 +140,7 @@ Once you have installed each of the dependencies listed in `kali-dependencies.tx
 
 Compile hostapd using the following commands:
 
-	cd hostapd-eaphammer/hostapd
+	cd local/hostapd-eaphammer/hostapd
 	make hostapd-eaphammer_lib
 
 Open settings/core/eaphammer.ini in the text editor of your choice and edit the following lines so that to values that work for your distro:

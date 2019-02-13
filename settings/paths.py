@@ -37,12 +37,8 @@ HOSTAPD_DIR = os.path.join(LOCAL_DIR, 'hostapd-eaphammer', 'hostapd')
 CERTS_DIR = os.path.join(ROOT_DIR, 'certs')
 LOOT_DIR = os.path.join(ROOT_DIR, 'loot')
 THIRDPARTY_DIR = os.path.join(ROOT_DIR, 'thirdparty')
-ASLEAP_DIR = os.path.join(LOCAL_DIR, 'asleap')
 HCXDUMPTOOL_DIR = os.path.join(LOCAL_DIR, 'hcxdumptool')
 HCXTOOLS_DIR = os.path.join(LOCAL_DIR, 'hcxtools')
-
-# asleap paths
-ASLEAP_BIN = os.path.join(ASLEAP_DIR, 'asleap')
 
 # hcxdumptool paths
 HCXDUMPTOOL_BIN = os.path.join(HCXDUMPTOOL_DIR, 'hcxdumptool')
@@ -103,7 +99,6 @@ paths = {
         'wordlists' : WORDLIST_DIR,
         'local' : LOCAL_DIR,
         'hostapd' : HOSTAPD_DIR,
-        'asleap' : ASLEAP_DIR,
         'certs' : CERTS_DIR,
         'saves' : SAVE_DIR,
         'hcxdumptool' : HCXDUMPTOOL_DIR,
@@ -125,11 +120,6 @@ paths = {
         'bin' : HCXDUMPTOOL_BIN,
         'ofile' : HCXDUMPTOOL_OFILE,
         'filter' : HCXDUMPTOOL_FILTER,
-    },
-
-    'asleap' : {
-
-        'bin' : ASLEAP_BIN,
     },
 
     'eap_spray' : {

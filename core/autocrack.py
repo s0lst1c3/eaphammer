@@ -19,12 +19,12 @@ from settings import settings
 
 remote_rig = False
 
-ASLEAP_CMD = '%s -C %s -R %s -W %s | grep -v asleap | grep password'
+ASLEAP_CMD = 'asleap -C %s -R %s -W %s | grep -v asleap | grep password'
 EAP_USERS_ENTRY =  '"%s"\tTTLS-PAP,TTLS-CHAP,TTLS-MSCHAP,MSCHAPV2,MD5,GTC,TTLS,TTLS-MSCHAPV2\t"%s"\t[2]'
 
 def crack_locally(username, challenge, response, wordlist):
 
-        cmd = ASLEAP_CMD % (settings.dict['paths']['asleap']['bin'], challenge, response, wordlist)
+        cmd = ASLEAP_CMD % (challenge, response, wordlist)
         output = subprocess.check_output(cmd, shell=True)
         password = output.split('password:')[1].strip()
 

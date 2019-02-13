@@ -36,7 +36,7 @@ Features
 - Fast and automated PMKID attacks against PSK networks using hcxtools
 - Password spraying across multiple usernames against a single ESSID
 
-New (as of Version 0.5.0)(latest)
+New (as of Version 0.5.1)(latest)
 ---------------------------------
 
 EAPHammer now uses a local build of libssl that exists independently of the systemwide install. This local version is compiled with support for SSLv3, allowing EAPHammer to be used against legacy clients without compromising the integrity of the attacker's operating system.
@@ -153,6 +153,8 @@ Open settings/core/eaphammer.ini in the text editor of your choice and edit the 
 
 	# change this 'httpd' if necessary
 	httpd = 'apache2'
+
+Finally, if you're interested in using the Autocrack feature, figure out how to get a working asleap binary installed on your system.
 
 
 Usage Guide

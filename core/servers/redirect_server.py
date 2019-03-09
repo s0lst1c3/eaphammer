@@ -3,8 +3,8 @@ import sys
 import random
 import string
 
-from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
-from SocketServer import ThreadingMixIn
+from http.server import BaseHTTPRequestHandler, HTTPServer
+from socketserver import ThreadingMixIn
 from multiprocessing import Process
 
 upper_alnum = string.ascii_uppercase + string.digits
@@ -43,7 +43,7 @@ class RedirectServer(object):
         if RedirectServer.instance is None:
             instance = RedirectServer()
         return instance
-    
+
     def configure(self, bind_addr, bind_port=80):
 
         self.bind_addr = bind_addr
@@ -61,7 +61,7 @@ class RedirectServer(object):
         httpd.server_close()
 
     def start(self):
-    
+
         args = (self.bind_addr, self.bind_port,)
         self.proc = Process(target=self._start, args=args)
         self.proc.daemon = True

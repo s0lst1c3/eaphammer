@@ -19,12 +19,12 @@ def sleep_bar(sleep_time, text=''):
 
     sleep_time = int(sleep_time)
 
-    print
-    
+    print()
+
     if text:
 
-        print text
-        print
+        print(text)
+        print()
 
     interval = sleep_time % 1
     if interval == 0:
@@ -33,10 +33,10 @@ def sleep_bar(sleep_time, text=''):
     else:
         iterations = sleep_time / interval
 
-    for i in tqdm(range(iterations)):
+    for i in tqdm(list(range(iterations))):
         time.sleep(interval)
 
-    print
+    print()
 
 def set_ipforward(value):
 
@@ -50,7 +50,7 @@ class Iptables(object):
         os.system('iptables --policy INPUT ACCEPT')
         os.system('iptables --policy FORWARD ACCEPT')
         os.system('iptables --policy OUTPUT ACCEPT')
-   
+
     @staticmethod
     def flush(table=None):
         if table is None:
@@ -76,19 +76,16 @@ class Iptables(object):
 
     @staticmethod
     def save_rules(rules_file=None):
-        print "[*] Saving current iptables configuration..."
+        print("[*] Saving current iptables configuration...")
         if rules_file is None:
             os.system('iptables-save > /tmp/rules_file.txt')
         else:
             os.system('iptables-save > ' + rules_file)
-    
+
     @staticmethod
     def restore_rules(rules_file=None):
-        print "[*] Restoring previous iptables configuration..."
+        print("[*] Restoring previous iptables configuration...")
         if rules_file is None:
             os.system('iptables-restore </tmp/rules_file.txt')
         else:
             os.system('iptables-restore > ' + rules_file)
-
-
-        

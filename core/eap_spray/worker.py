@@ -18,28 +18,28 @@ class Worker(object):
 
     @staticmethod
     def _start(interface, essid, password, conf_dir, input_queue, output_queue):
-    
+
         while True:
 
             identity = input_queue.get()
             if identity is None:
                 return
-            
-            print '[%s] Trying credentials: %s:%s@%s' % (interface, identity, password, essid)
+
+            print('[%s] Trying credentials: %s:%s@%s' % (interface, identity, password, essid))
 
             wpa_supplicant_conf = WPASupplicantConf(essid, identity, password, conf_dir)
             wpa_supplicant_conf.write()
 
             wpa_supplicant = WPA_Supplicant(interface, wpa_supplicant_conf)
             if wpa_supplicant.test_creds():
-                print
-                print '[%s] FOUND ONE: %s:%s@%s' % (interface, identity, password, essid)
-                print
+                print()
+                print('[%s] FOUND ONE: %s:%s@%s' % (interface, identity, password, essid))
+                print()
                 output_queue.put('%s:%s@%s' % (identity, password, essid))
             else:
-                print
-                print '[%s] Password invalid.' % (interface)
-                print
+                print()
+                print('[%s] Password invalid.' % (interface))
+                print()
 
             wpa_supplicant_conf.remove()
 

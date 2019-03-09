@@ -15,7 +15,7 @@ class Service(object):
             os.system('systemctl start %s' % cls.service_name)
         else:
             os.system('service %s start' % cls.service_name)
-        
+
         if verbose:
             sleep_bar(cls.sleep_time,
                 '[*] Starting %s service.' % cls.service_name)
@@ -78,7 +78,7 @@ class Service(object):
             time.sleep(int(cls.sleep_time))
 
 class NetworkManager(Service):
-    
+
     service_name = services_settings['network_manager']
     bin_path = None
     sleep_time = services_settings['network_manager_sleep']

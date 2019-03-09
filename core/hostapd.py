@@ -26,13 +26,13 @@ class HostapdEaphammer(object):
     def start(self):
 
         argv = [
-            self.exec_path,
-            '-N',
+            bytes(self.exec_path.encode('ascii')),
+            bytes('-N'.encode('ascii')),
         ]
         if self.debug:
-            argv.append('-d')
-        argv.append(self.runtime_config_path)
-    
+            argv.append(bytes('-d'.encode('ascii')))
+        argv.append(bytes(self.runtime_config_path.encode('ascii')))
+
         argc = len(argv)
         argv_mem = ctypes.c_char_p * argc
         argv = argv_mem(*argv)
@@ -44,30 +44,30 @@ class HostapdEaphammer(object):
             self.thread = threading.Thread(target=self.libhostapd.main, args=(argc, argv))
             self.thread.start()
 
-            print
-            print '[hostapd] AP starting...'
-            print
+            print()
+            print('[hostapd] AP starting...')
+            print()
             time.sleep(self.sleep_time)
 
         except KeyboardInterrupt:
-            
+
             self.stop()
 
     def stop(self):
 
 
-        print '[hostapd] Terminating event loop...'
+        print('[hostapd] Terminating event loop...')
         self.libhostapd.eloop_terminate()
 
-        print '[hostapd] Event loop terminated.'
-        
-        if self.thread.is_alive():
-        
-            print '[hostapd] Hostapd worker still running... waiting for it to join.'
-            print
-            self.thread.join(5)
-            print
-            print '[hostapd] Worker joined.'
+        print('[hostapd] Event loop terminated.')
 
-        print '[hostapd] AP disabled.'
-        print
+        if self.thread.is_alive():
+
+            print('[hostapd] Hostapd worker still running... waiting for it to join.')
+            print()
+            self.thread.join(5)
+            print()
+            print('[hostapd] Worker joined.')
+
+        print('[hostapd] AP disabled.')
+        print()

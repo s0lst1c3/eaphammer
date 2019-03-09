@@ -3,14 +3,14 @@ from threading import Thread
 class Cred_Logger(object):
 
     def __init__(self, output_file, input_queue):
-    
+
         args = (
             output_file,
             input_queue,
         )
         self.thread = Thread(target=self._start, args=args)
         self.input_queue = input_queue
-        
+
     @staticmethod
     def _start(output_file, input_queue):
 

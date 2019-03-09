@@ -16,47 +16,47 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from core.responder.utils import *
 from base64 import b64decode
-from SocketServer import BaseRequestHandler
+from socketserver import BaseRequestHandler
 from core.responder.packets import SMTPGreeting, SMTPAUTH, SMTPAUTH1, SMTPAUTH2
 
 class ESMTP(BaseRequestHandler):
 
-	def handle(self):
-		try:
-			self.request.send(str(SMTPGreeting()))
-			data = self.request.recv(1024)
+    def handle(self):
+        try:
+            self.request.send(str(SMTPGreeting()))
+            data = self.request.recv(1024)
 
-			if data[0:4] == "EHLO":
-				self.request.send(str(SMTPAUTH()))
-				data = self.request.recv(1024)
+            if data[0:4] == "EHLO":
+                self.request.send(str(SMTPAUTH()))
+                data = self.request.recv(1024)
 
-			if data[0:4] == "AUTH":
-				self.request.send(str(SMTPAUTH1()))
-				data = self.request.recv(1024)
-				
-				if data:
-					try:
-						User = filter(None, b64decode(data).split('\x00'))
-						Username = User[0]
-						Password = User[1]
-					except:
-						Username = b64decode(data)
+            if data[0:4] == "AUTH":
+                self.request.send(str(SMTPAUTH1()))
+                data = self.request.recv(1024)
 
-						self.request.send(str(SMTPAUTH2()))
-						data = self.request.recv(1024)
+                if data:
+                    try:
+                        User = [_f for _f in b64decode(data).split('\x00') if _f]
+                        Username = User[0]
+                        Password = User[1]
+                    except:
+                        Username = b64decode(data)
 
-						if data:
-							try: Password = b64decode(data)
-							except: Password = data
+                        self.request.send(str(SMTPAUTH2()))
+                        data = self.request.recv(1024)
 
-					SaveToDb({
-						'module': 'SMTP', 
-						'type': 'Cleartext', 
-						'client': self.client_address[0], 
-						'user': Username, 
-						'cleartext': Password, 
-						'fullhash': Username+":"+Password,
-					})
+                        if data:
+                            try: Password = b64decode(data)
+                            except: Password = data
 
-		except Exception:
-			pass
+                    SaveToDb({
+                            'module': 'SMTP',
+                            'type': 'Cleartext',
+                            'client': self.client_address[0],
+                            'user': Username,
+                            'cleartext': Password,
+                            'fullhash': Username+":"+Password,
+                    })
+
+        except Exception:
+            pass

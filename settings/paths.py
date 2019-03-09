@@ -9,7 +9,7 @@ class OutputFile(object):
 
     def __init__(self, name='', ext=''):
         datestring = datetime.strftime(datetime.now(), '%Y-%m-%d-%H-%M-%S')
-        randstring = ''.join(random.choice(string.ascii_letters+string.digits) for _ in xrange(32))
+        randstring = ''.join(random.choice(string.ascii_letters+string.digits) for _ in range(32))
         self.str = ''
         if name != '':
             self.str += '%s-' % name
@@ -161,4 +161,3 @@ paths = {
         'script' : DHCP_SCRIPT,
     },
 }
-

@@ -208,7 +208,7 @@ hostapd_wpe_cnf = '''
 # ------------------------------------------------
 #
 # Configuration file for hostapd-wpe
-# 
+#
 # General Options - Likely to need to be changed if you're using this
 
 # Interface - Probably wlan0 for 802.11, eth0 for wired
@@ -230,11 +230,11 @@ ssid=%s
 hw_mode=%s
 channel=%d
 
-# WPE Options - Dont need to change these to make it all work 
+# WPE Options - Dont need to change these to make it all work
 #
 eaphammer_logfile=%s
 # wpe_hb_send_before_handshake=0    # Heartbleed True/False (Default: 1)
-# wpe_hb_send_before_appdata=0      # Heartbleed True/False (Default: 0) 
+# wpe_hb_send_before_appdata=0      # Heartbleed True/False (Default: 0)
 # wpe_hb_send_after_appdata=0       # Heartbleed True/False (Default: 0)
 # wpe_hb_payload_size=0             # Heartbleed 0-65535 (Default: 50000)
 # wpe_hb_num_repeats=0              # Heartbleed 0-65535 (Default: 1)
@@ -2096,11 +2096,11 @@ RespondTo =
 
 ; Specific NBT-NS/LLMNR names to respond to (default = All)
 ; Example: RespondTo = WPAD, DEV, PROD, SQLINT
-RespondToName = 
+RespondToName =
 
 ; Specific IP Addresses not to respond to (default = None)
 ; Example: DontRespondTo = 10.20.1.100-150, 10.20.3.10
-DontRespondTo = 
+DontRespondTo =
 
 ; Specific NBT-NS/LLMNR names not to respond to (default = None)
 ; Example: DontRespondTo = NAC, IPS, IDS
@@ -2150,4 +2150,4 @@ HTMLToInject = <img src='file://RespProxySrv/pictures/logo.jpg' alt='Loading' he
 SSLCert = certs/responder.crt
 SSLKey = certs/responder.key
 
-''' 
+'''

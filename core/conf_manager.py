@@ -1,5 +1,5 @@
 import os
-import cnf_templates
+from . import cnf_templates
 import core.utils
 
 from settings import settings
@@ -54,7 +54,7 @@ class hostapd_wpe_cnf(object):
         assert eaphammer_fifo_path is not None
 
         cloaking = hostapd_parse_essid_cloaking(cloaking)
-    
+
         with open(cls.path, 'w') as fd:
             fd.write(cls.template %\
                 (interface, eap_user_file, ca_pem,
@@ -62,7 +62,7 @@ class hostapd_wpe_cnf(object):
                         ssid, hw_mode, channel, logpath,
                             wpa, cloaking, bssid,
                                 int(karma), int(use_autocrack),
-                                	eaphammer_fifo_path))
+                                        eaphammer_fifo_path))
 
 class hostapd_open_cnf(object):
 
@@ -76,7 +76,7 @@ class hostapd_open_cnf(object):
             hw_mode=None,
             channel=None,
             bssid=None,
-			cloaking=None,
+                        cloaking=None,
             karma=False):
 
         assert interface is not None
@@ -87,11 +87,11 @@ class hostapd_open_cnf(object):
         assert cloaking is not None
 
         cloaking = hostapd_parse_essid_cloaking(cloaking)
-    
+
         with open(cls.path, 'w') as fd:
             fd.write(cls.template %\
                 (interface, ssid, hw_mode, channel,
-					bssid, int(karma), cloaking))
+                                        bssid, int(karma), cloaking))
 
 class dnsmasq_dhcp_only_cnf(object):
 
@@ -107,7 +107,7 @@ class dnsmasq_dhcp_only_cnf(object):
         assert interface is not None
         assert log_file is not None
         assert dhcp_script is not None
-    
+
         with open(cls.path, 'w') as fd:
             fd.write(cls.template %\
                 (interface, log_file, dhcp_script))
@@ -126,7 +126,7 @@ class dnsmasq_captive_portal_cnf(object):
         assert interface is not None
         assert log_file is not None
         assert dhcp_script is not None
-    
+
         with open(cls.path, 'w') as fd:
             fd.write(cls.template %\
                 (interface, log_file, dhcp_script))

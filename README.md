@@ -3,7 +3,9 @@ eaphammer
 
 by Gabriel Ryan ([s0lst1c3](https://twitter.com/s0lst1c3))
 
-[![Black Hat Arsenal](https://cdn.rawgit.com/toolswatch/badges/master/arsenal/2017.svg)](https://www.blackhat.com/us-17/arsenal.html#eaphammer)
+[![Foo](https://rawcdn.githack.com/toolswatch/badges/8bd9be6dac2a1d445367001f2371176cc50a5707/arsenal/usa/2017.svg)](https://www.blackhat.com/us-17/arsenal.html#eaphammer)
+
+Supports _Python 3.5+_.
 
 Overview
 --------

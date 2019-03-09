@@ -89,8 +89,5 @@ Fixed issue where setup script was unable to download rockyou wordlist due to: h
 0.5.0 - Gabriel Ryan <gabriel@digitalsilence.com>
 EAPHammer now uses a local build of libssl that exists independently of the systemwide install. This local version is compiled with support for SSLv3, allowing EAPHammer to be used against legacy clients without compromising the integrity of the attacker's operating system.
 
-
-
-
-
-
+0.6.0 - Gabriel Ryan <gabriel@solstice.sh>
+EAPHammer ported to Python 3.

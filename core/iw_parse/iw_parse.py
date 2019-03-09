@@ -51,7 +51,7 @@ def get_signal_level(cell):
 
     signal = matching_line(cell, "Signal level=")
     if signal is  None:
-      return ""
+        return ""
     signal = signal.split("=")[1].split("/")
     if len(signal) == 2:
         return str(int(round(float(signal[0]) / float(signal[1]) * 100)))
@@ -191,7 +191,7 @@ def parse_cell(cell, rules):
 
 def print_table(table):
     # Functional black magic.
-    widths = list(map(max, map(lambda l: map(len, l), zip(*table))))
+    widths = list(map(max, [list(map(len, l)) for l in zip(*table)]))
 
     justified_table = []
     for line in table:
@@ -201,7 +201,7 @@ def print_table(table):
         justified_table.append(justified_line)
 
     for line in justified_table:
-        print("\t".join(line))
+        print(("\t".join(line)))
 
 def print_cells(cells, columns):
     table = [columns]
@@ -282,5 +282,3 @@ def get_interfaces(interface="wlan0"):
             properties: dictionary of iwlist attributes
     """
     return get_parsed_cells(call_iwlist(interface).split('\n'))
-
-

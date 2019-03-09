@@ -45,7 +45,7 @@ def parse_eap_user_file():
 	
 			# odd number of quotes means unmatched quotes in line
 			if len(quotes) % 2 != 0:
-				print '[!] Unmatched quote found on line %d. Skipping.' % line_number
+				print('[!] Unmatched quote found on line %d. Skipping.' % line_number)
 				continue
 	
 			quotes_len = len(quotes)
@@ -140,7 +140,7 @@ def parse_eap_user_file():
 			}
 			
 			if identity in master_set:
-				print '[!] Duplicate entry detected... pruning from eap_user file.'
+				print('[!] Duplicate entry detected... pruning from eap_user file.')
 			else:
 				master_set.add(identity)
 				if phase == 1:
@@ -280,15 +280,15 @@ def list_users(users,
 		invert=invert
 	)
 
-	print 'Phase 1 users'
+	print('Phase 1 users')
 	for user in filtered_users['phase1']:
-		print create_user_string(user)
-	print
+		print(create_user_string(user))
+	print()
 
-	print 'Phase 2 users'
+	print('Phase 2 users')
 	for user in filtered_users['phase2']:
-		print create_user_string(user)
-	print
+		print(create_user_string(user))
+	print()
 
 
 def delete_users(users,
@@ -328,12 +328,12 @@ def add_user(users, identity, methods, phase, password=None, nt_hash=None):
 	}
 
 	if identity == 't':
-		print '[*] Updating existing entry.'
+		print('[*] Updating existing entry.')
 		return users
 	
 	if identity in users['master_set']:
 
-		print '[*] Updating existing entry.'
+		print('[*] Updating existing entry.')
 		old_phase = 0
 
 		# get old phase and index
@@ -565,15 +565,15 @@ def set_options():
 
 	if args['add_user']:
 		if args['identity'] is None:
-			print '[!] Please specify an identity using the --identity flag.'
+			print('[!] Please specify an identity using the --identity flag.')
 			sys.exit()
 	elif args['delete_user']:
 		if args['filtered'] == False and args['delete_all'] == False:
 
-			print '[!] Cowardly refusing to delete everything in the '\
-				  'database without additional confirmation'
-			print '[!] If this is really what you want to do, please use the following syntax:'
-			print '[!] root@localhost:~# ./ehdb --delete --delete-all'
+			print('[!] Cowardly refusing to delete everything in the '\
+				  'database without additional confirmation')
+			print('[!] If this is really what you want to do, please use the following syntax:')
+			print('[!] root@localhost:~# ./ehdb --delete --delete-all')
 			sys.exit()
 	elif args['list_users']:
 		pass

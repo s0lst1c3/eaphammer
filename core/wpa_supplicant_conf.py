@@ -13,7 +13,7 @@ class WPASupplicantConf(object):
         self._set_path()
 
     def _set_path(self):
-        randstring = ''.join(random.choice(string.ascii_letters+string.digits) for _ in xrange(32))
+        randstring = ''.join(random.choice(string.ascii_letters+string.digits) for _ in range(32))
         self.filename = '.'.join([randstring, 'wpa_supplicant'])
         self.path = os.path.join(self.write_dir, self.filename)
 
@@ -34,4 +34,4 @@ network={
         try:
             os.remove(self.path)
         except OSError as e:
-            print "Error: %s - %s" % (e.filename, e.strerror)
+            print("Error: %s - %s" % (e.filename, e.strerror))

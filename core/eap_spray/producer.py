@@ -10,5 +10,5 @@ class Producer(object):
     def run(self):
         for identity in self.lfr.read_one():
             self.output_queue.put(identity, block=True)
-        for i in xrange(self.num_consumers):
+        for i in range(self.num_consumers):
             self.output_queue.put(None)

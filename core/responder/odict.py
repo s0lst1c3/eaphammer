@@ -14,7 +14,8 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-from UserDict import DictMixin
+from collections import UserDict
+from collections import MutableMapping as DictMixin
 
 class OrderedDict(dict, DictMixin):
 
@@ -64,9 +65,9 @@ class OrderedDict(dict, DictMixin):
         if not self:
             raise KeyError('dictionary is empty')
         if last:
-            key = reversed(self).next()
+            key = next(reversed(self))
         else:
-            key = iter(self).next()
+            key = next(iter(self))
         value = self.pop(key)
         return key, value
 
@@ -88,14 +89,14 @@ class OrderedDict(dict, DictMixin):
     pop = DictMixin.pop
     values = DictMixin.values
     items = DictMixin.items
-    iterkeys = DictMixin.iterkeys
-    itervalues = DictMixin.itervalues
-    iteritems = DictMixin.iteritems
+    iterkeys = DictMixin.keys
+    itervalues = DictMixin.values
+    iteritems = DictMixin.items
 
     def __repr__(self):
         if not self:
             return '%s()' % (self.__class__.__name__,)
-        return '%s(%r)' % (self.__class__.__name__, self.items())
+        return '%s(%r)' % (self.__class__.__name__, list(self.items()))
 
     def copy(self):
         return self.__class__(self)
@@ -110,7 +111,7 @@ class OrderedDict(dict, DictMixin):
     def __eq__(self, other):
         if isinstance(other, OrderedDict):
             return len(self)==len(other) and \
-                   min(p==q for p, q in  zip(self.items(), other.items()))
+                   min(p==q for p, q in  zip(list(self.items()), list(other.items())))
         return dict.__eq__(self, other)
 
     def __ne__(self, other):

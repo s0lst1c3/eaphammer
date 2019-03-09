@@ -1,11 +1,11 @@
-import cert_manager
-import conf_manager
-import utils
-import poisoners
-import responder
-import payloads
-import autocrack
-import services
-import cli
-import interface
-import iw_parse
+from . import cert_manager
+from . import conf_manager
+from . import utils
+from . import poisoners
+from . import responder
+from . import payloads
+from . import autocrack
+from . import services
+from . import cli
+from . import interface
+from . import iw_parse

@@ -1,5 +1,5 @@
 import os
-import cnf_templates
+from . import cnf_templates
 
 from settings import settings
 
@@ -13,7 +13,7 @@ class cert_cnf(object):
             org=None,
             email=None,
             cn=None):
-    
+
         with open(cls.path, 'w') as fd:
             fd.write(cls.template %\
                 (country, state, locale, org, email, cn))
@@ -34,6 +34,5 @@ class ca_cnf(cert_cnf):
     template = cnf_templates.ca_cnf
 
 def bootstrap():
-    
-    os.system(settings.dict['paths']['hostapd']['bootstrap'])
 
+    os.system(settings.dict['paths']['hostapd']['bootstrap'])

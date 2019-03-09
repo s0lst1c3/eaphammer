@@ -392,7 +392,7 @@ def set_options():
         args = parser.parse_args()
 
         options = args.__dict__
-        
+
         if options['advanced_help']:
             parser.print_help()
             sys.exit()
@@ -404,47 +404,47 @@ def set_options():
             options['interface'] is None):
 
             parser.print_usage()
-            print
-            print '[!] Please specify a valid PHY',
-            print 'interface using the --interface flag'
+            print()
+            print('[!] Please specify a valid PHY', end=' ')
+            print('interface using the --interface flag')
             sys.exit()
 
         if options['pmkid'] and options['bssid'] is None and options['essid'] is None:
             parser.print_usage()
-            print
-            print '[!] Please specify a valid target using the --bssid or --essid flags.',
+            print()
+            print('[!] Please specify a valid target using the --bssid or --essid flags.', end=' ')
             sys.exit()
 
         if options['eap_spray']:
             invalid_args = False
             if options['user_list'] is None:
-                print
-                print '[!] Please specify a valid user list file using the --user-list flag.',
+                print()
+                print('[!] Please specify a valid user list file using the --user-list flag.', end=' ')
                 invalid_args = True
 
             if options['essid'] is None:
-                print
-                print '[!] Please specify a valid target using the --essid flag.',
+                print()
+                print('[!] Please specify a valid target using the --essid flag.', end=' ')
                 invalid_args = True
-    
+
             if options['password'] is None:
-                print
-                print '[!] Please specify password to spray using the --password flag.',
+                print()
+                print('[!] Please specify password to spray using the --password flag.', end=' ')
                 invalid_args = True
-        
+
             if options['interface_pool'] is None:
-                print
-                print '[!] Please specify a list of wireless interfaces using the --interface-pool flag.'
+                print()
+                print('[!] Please specify a list of wireless interfaces using the --interface-pool flag.')
                 invalid_args = True
             if invalid_args:
                 sys.exit()
 
     except SystemExit:
 
-        print
-        print '[!] Use -h or --help to display a list of basic options.'
-        print '[!] Use -hh or --advanced-help to display full list of extended options.'
-        print
+        print()
+        print('[!] Use -h or --help to display a list of basic options.')
+        print('[!] Use -hh or --advanced-help to display full list of extended options.')
+        print()
 
         raise
 
@@ -456,8 +456,8 @@ def set_options():
                 if 'interface' in line:
                     options['interface'] = line.strip().split('=')[1]
         if options['interface'] is None:
-            print
-            print '[!] Please specify a valid PHY interface in your config file.'
+            print()
+            print('[!] Please specify a valid PHY interface in your config file.')
             sys.exit()
 
     return options

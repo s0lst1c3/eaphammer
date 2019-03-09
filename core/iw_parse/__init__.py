@@ -1,2 +1,2 @@
-import iw_parse
-import helper_functions
+from . import iw_parse
+from . import helper_functions

@@ -36,7 +36,7 @@ if __name__ == '__main__':
     print '\n[*] complete!\n'
 
     print '\n[*] Installing Python dependencies...\n'
-    os.system('pip install -r pip.req')
+    os.system('pip3 install -r pip.req')
     print '\n[*] complete!\n'
 
     print '\n[*] Downloading OpenSSL_{}...\n'.format(openssl_version.replace('.', '_'))

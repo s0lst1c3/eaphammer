@@ -12,7 +12,7 @@ import sys
 import time
 
 from argparse import ArgumentParser
-from core import cert_manager, conf_manager, utils, responder, services
+from core import conf_manager, utils, responder, services
 from core.autocrack import Autocrack
 from core import iw_parse
 from core.hostapd import HostapdEaphammer
@@ -25,41 +25,6 @@ from datetime import datetime
 from multiprocessing import Queue
 from settings import settings, __version__
 from threading import Thread
-
-
-def cert_wizard():
-
-    while True:
-
-        print ('[*] Please enter two letter country '
-                            'code for certs (i.e. US, FR)')
-
-        country = input(': ').upper()
-        if len(country) == 2:
-            break
-        print('[!] Invalid input.')
-
-    print ('[*] Please enter state or province for '
-                        'certs (i.e. Ontario, New Jersey)')
-    state = input(': ')
-
-    print('[*] Please enter locale for certs (i.e. London, Hong Kong)')
-    locale = input(': ')
-
-    print('[*] Please enter organization for certs (i.e. Evil Corp)')
-    org = input(': ')
-
-    print('[*] Please enter email for certs (i.e. cyberz@h4x0r.lulz)')
-    email = input(': ')
-
-    print('[*] Please enter common name (CN) for certs.')
-    cn = input(': ')
-
-    cert_manager.ca_cnf.configure(country, state, locale, org, email, cn)
-    cert_manager.server_cnf.configure(country, state, locale, org, email, cn)
-    cert_manager.client_cnf.configure(country, state, locale, org, email, cn)
-
-    cert_manager.bootstrap()
 
 def hostile_portal():
     global responder
@@ -482,6 +447,113 @@ def save_config_only():
     hostapd_conf.write()
     hostapd_conf.save()
     hostapd_conf.remove()
+
+def cert_wizard():
+
+    if options['cert_wizard'] == 'import':
+       
+        cert_wizard.import_cert(options['server_cert'],
+                    private_key_path=options['private_key'],
+                    ca_cert_path=options['ca_cert'],
+                    passwd=options['private_key_passwd'],
+        )
+
+    elif options['cert_wizard'] == 'create' or options['bootstrap']:
+
+        if options['self_signed'] or options['bootstrap']:
+            
+            cert_wizard.bootstrap(options['cn'],
+                                country=options['country'],
+                                state_province=options['state'],
+                                city=options['locale'],
+                                organization=options['org'],
+                                org_unit=options['org_unit'],
+                                email_address=options['email'],
+                                not_before=options['not_before'],
+                                not_after=options['not_after'],
+                                algorithm=options['algorithm'],
+                                key_length=options['key_length'],
+            )
+
+        else:
+
+            cert_wizard.create_server_cert(options['ca_cert'],
+                            options['cn'],
+                            signing_key_path=options['ca_key'],
+                            signing_key_passwd=options['ca_key_passwd'],
+                            country=options['country'],
+                            state_province=options['state'],
+                            city=options['locale'],
+                            organization=options['org'],
+                            org_unit=options['org_unit'],
+                            email_address=options['email'],
+                            not_before=options['not_before'],
+                            not_after=options['not_after'],
+                            algorithm=options['algorithm'],
+                            key_length=options['key_length'],
+            )
+
+    elif options['cert_wizard'] == 'interactive':
+
+            cert_wizard.interactive()
+
+    elif options['cert_wizard'] == 'list':
+
+            cert_wizard.list_certs()
+
+    elif options['cert_wizard'] == 'dh':
+
+            cert_wizard.rebuild_dh_file(options['key_length'])
+
+    else:
+
+        raise Exception('Invalid argument passed to --cert-wizard')
+            
+
+    # --cert-wizard import
+    # mandatory flags
+    #       --server-cert <path>
+    # optional flags
+    #       --private-key <path> 
+    #       --private-key-passwd <passwd>
+    #       --ca-cert <path>
+    #import_cert(...
+
+    # --cert-wizard create
+    # mandatory flags:
+    #       --cn
+    # optional flags
+    #       --self-signed
+    #       --signing-cert [required if not self-signed]
+    #       --signing-key [required if not self-signed]
+    #       --signing-key-passwd
+    #       
+    #       --country
+    #       --state
+    #       --locale
+    #       --org
+    #       --org-unit
+    #       --email
+    #       
+    #       --not-before
+    #       --not-after
+    #       --algorithm
+    #       --key-length
+
+    # --bootstrap (alias for --cert-wizard create --self-signed
+    #bootstrap(...
+
+    # --cert-wizard interactive 
+    #interactive(...
+
+    # --cert-wizard (alias for --cert-wizard interactive)
+    #interactive(...
+    
+
+    # --cert-wizard list
+    # --cert-type ca|server|all (default: all)
+    #list_certs(...
+
 
 def print_banner():
 

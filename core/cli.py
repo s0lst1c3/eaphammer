@@ -4,6 +4,8 @@ import sys
 
 from settings import settings
 
+from cert_wizard import cert_utils
+
 BASIC_OPTIONS = [
     'cert_wizard',
     'reap_creds',
@@ -30,6 +32,7 @@ BASIC_OPTIONS = [
     'password',
     'interface_pool',
     'user_list',
+    'bootstrap',
 ]
 
 def set_options():
@@ -42,6 +45,14 @@ def set_options():
 
     modes_group_.add_argument('--cert-wizard',
                               dest='cert_wizard',
+                              choices=['create', 'import', 'interactive', 'list', 'dh'],
+                              default=False,
+                              const='interactive',
+                              help=('Use this flag to create a new '
+                                    'RADIUS cert for your AP'))
+
+    modes_group_.add_argument('--bootstrap',
+                              dest='bootstrap',
                               action='store_true',
                               help=('Use this flag to create a new '
                                     'RADIUS cert for your AP'))
@@ -106,7 +117,124 @@ def set_options():
                         action='store_true',
                         help='Show extended help options then exit.')
 
+    cert_wizard_group = parser.add_argument_group('Cert Wizard')
 
+    cert_wizard_group.add_argument('--server-cert',
+                                   dest='server_cert',
+                                   default=None,
+                                   type=str,
+                                   help='Specify path to server cert file.')
+
+    cert_wizard_group.add_argument('--ca-cert',
+                                   dest='ca_cert',
+                                   default=None,
+                                   type=str,
+                                   help='Specify path to ca cert file.')
+
+
+    cert_wizard_group.add_argument('--private-key',
+                                   dest='private_key',
+                                   default=None,
+                                   type=str,
+                                   help='Specify path to private key file.')
+
+    cert_wizard_group.add_argument('--private-key-passwd',
+                                   dest='private_key_passwd',
+                                   default=None,
+                                   type=str,
+                                   help='Specify private key password.')
+
+    cert_wizard_group.add_argument('--self-signed',
+                                   dest='self_signed',
+                                   action='store_true',
+                                   default=False,
+                                   help='Create a self-signed cert.')
+
+    cert_wizard_group.add_argument('--cn',
+                                   dest='cn',
+                                   default=None,
+                                   type=str,
+                                   help='Specify certificate CN.')
+
+    cert_wizard_group.add_argument('--country',
+                                   dest='country',
+                                   default=None,
+                                   type=str,
+                                   help='Specify certificate country attribute.')
+
+    cert_wizard_group.add_argument('--state',
+                                   dest='state',
+                                   default=None,
+                                   type=str,
+                                   help='Specify certificate state or province attribute.')
+
+    cert_wizard_group.add_argument('--locale',
+                                   dest='locale',
+                                   default=None,
+                                   type=str,
+                                   help='Specify certificate locale (city) attribute.')
+
+    cert_wizard_group.add_argument('--org',
+                                   dest='org',
+                                   default=None,
+                                   type=str,
+                                   help='Specify certificate organization attribute.')
+
+    cert_wizard_group.add_argument('--org-unit',
+                                   dest='org_unit',
+                                   default=None,
+                                   type=str,
+                                   help='Specify certificate org unit attribute.')
+
+    cert_wizard_group.add_argument('--email',
+                                   dest='email',
+                                   default=None,
+                                   type=str,
+                                   help='Specify certificate emailAddress attribute.')
+
+    cw_advanced_group = parser.add_argument_group('Cert Wizard Advanced Options')
+
+    cw_advanced_group.add_argument('--not-before',
+                                   dest='not_before',
+                                   default=0,
+                                   type=int,
+                                   help='Specify datetime on which cert should become active.')
+
+    cw_advanced_group.add_argument('--not-after',
+                                   dest='not_after',
+                                   default=cert_utils.DEFAULT_EXP,
+                                   type=int,
+                                   help='Specify datetime on which cert should become active.')
+
+    cw_advanced_group.add_argument('--algorithm',
+                                   dest='algorithm',
+                                   default=cert_utils.DEFAULT_ALGORITHM,
+                                   type=int,
+                                   help='Specify algorithm with which to sign cert.')
+
+    cw_advanced_group.add_argument('--key_length',
+                                   dest='key_length',
+                                   default=cert_utils.DEFAULT_KEY_LEN,
+                                   type=int,
+                                   help='Specify default certificate key length.')
+
+    cw_advanced_group.add_argument('--dh-file',
+                                   dest='dh_file',
+                                   default=None,
+                                   type=str,
+                                   help='Manually specify path to dh_file at runtime.')
+
+    cw_advanced_group.add_argument('--ca-key',
+                                   dest='ca_key',
+                                   default=None,
+                                   type=str,
+                                   help='Specify path to CA private key file.')
+
+    cw_advanced_group.add_argument('--ca-key-passwd',
+                                   dest='ca_key_passwd',
+                                   default=None,
+                                   type=str,
+                                   help='Specify CA key password.')
 
     access_point_group = parser.add_argument_group('Access Point')
 

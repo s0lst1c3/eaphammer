@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import os
 
 from settings import settings
@@ -14,6 +14,7 @@ if __name__ == '__main__':
 
     wordlist_source = settings.dict['core']['eaphammer']['general']['wordlist_source']
 
+    root_dir = settings.dict['paths']['directories']['root']
     local_dir = settings.dict['paths']['directories']['local']
 
     openssl_source = settings.dict['core']['eaphammer']['general']['openssl_source']
@@ -21,56 +22,71 @@ if __name__ == '__main__':
     openssl_build_options = settings.dict['core']['eaphammer']['general']['openssl_build_options']
     openssl_build_prefix = os.path.join(local_dir, 'openssl/local')
 
-    if raw_input('Do you want update your package list ("apt -y update")(recommended)? [y/N]: ').lower() == 'y':
-        print '\n[*] Downloading package lists from kali repositories...\n'
+    openssl_bin = settings.dict['paths']['openssl']['bin']
+    dh_file = settings.dict['paths']['certs']['dh']
+
+    if input('Do you want update your package list ("apt -y update")(recommended)? [y/N]: ').lower() == 'y':
+        print('\n[*] Downloading package lists from kali repositories...\n')
         os.system('apt -y update')
-    print '\n[*] complete!\n'
+        print('\n[*] complete!\n')
 
-    if raw_input('Do you want upgrade your installed packages ("apt -y upgrade")(recommended)? [y/N]: ').lower() == 'y':
-        print '\n[*] Performing upgrade...\n'
+    print()
+
+    if input('Do you want upgrade your installed packages ("apt -y upgrade")(recommended)? [y/N]: ').lower() == 'y':
+        print('\n[*] Performing upgrade...\n')
         os.system('apt -y upgrade')
-    print '\n[*] complete!\n'
+        print('\n[*] complete!\n')
 
-    print '\n[*] Installing Kali dependencies...\n'
+    print()
+
+    print('\n[*] Removing stub files...\n')
+    os.system('find {} -type f -name \'stub\' -exec {{}} +'.format(root_dir))
+    print('\ncomplete!\n')
+
+    print('\n[*] Installing Kali dependencies...\n')
     os.system('apt -y install %s' % read_deps_file('kali-dependencies.txt'))
-    print '\n[*] complete!\n'
+    print('\n[*] complete!\n')
 
-    print '\n[*] Installing Python dependencies...\n'
+    print('\n[*] Installing Python dependencies...\n')
     os.system('pip3 install -r pip.req')
-    print '\n[*] complete!\n'
+    print('\n[*] complete!\n')
 
-    print '\n[*] Downloading OpenSSL_{}...\n'.format(openssl_version.replace('.', '_'))
+    print('\n[*] Downloading OpenSSL_{}...\n'.format(openssl_version.replace('.', '_')))
     os.system('wget {} -O {}/openssl.tar.gz'.format(openssl_source, local_dir))
-    print '\n[*] complete!\n'
+    print('\n[*] complete!\n')
 
-    print '\n[*] Extracting OpenSSL_{}...\n'.format(openssl_version.replace('.', '_'))
+    print('\n[*] Extracting OpenSSL_{}...\n'.format(openssl_version.replace('.', '_')))
     os.system('cd {} && tar xzf openssl.tar.gz'.format(local_dir))
     os.system('mv {}/openssl-OpenSSL_{} {}/openssl'.format(local_dir, openssl_version.replace('.', '_'), local_dir))
     os.system('cd {} && rm -f openssl.tar.gz'.format(local_dir))
-    print '\n[*] complete!\n'
+    print('\n[*] complete!\n')
 
-    print '\n[*] Compiling OpenSSL locally to avoid interfering with system install...\n'
+    print('\n[*] Compiling OpenSSL locally to avoid interfering with system install...\n')
     os.system('cd {}/openssl && ./config --prefix={} enable-ssl2 enable-ssl3 enable-ssl3-method enable-des enable-rc4 enable-weak-ssl-ciphers no-shared'.format(local_dir, openssl_build_prefix))
     os.system('cd {}/openssl && make'.format(local_dir))
     os.system('cd {}/openssl && make install_sw'.format(local_dir))
-    print '\n[*] complete!\n'
+    print('\n[*] complete!\n')
 
-    print '\n[*] Compiling hostapd...\n'
+    print('\n[*] Create DH parameters file with default length of 2048...\n')
+    os.system('{} dhparam -out {} 2048'.format(openssl_bin, dh_file))
+    print('\ncomplete!\n')
+
+    print('\n[*] Compiling hostapd...\n')
     os.system("cd %s && make hostapd-eaphammer_lib" % settings.dict['paths']['directories']['hostapd'])
-    print '\n[*] complete!\n'
+    print('\n[*] complete!\n')
 
-    print '\n[*] Compiling hcxtools...\n'
+    print('\n[*] Compiling hcxtools...\n')
     os.system("cd %s && make" % settings.dict['paths']['directories']['hcxtools'])
-    print '\n[*] complete!\n'
+    print('\n[*] complete!\n')
 
-    print '\n[*] Compiling hcxdumptool...\n'
+    print('\n[*] Compiling hcxdumptool...\n')
     os.system("cd %s && make" % settings.dict['paths']['directories']['hcxdumptool'])
-    print '\n[*] complete!\n'
+    print('\n[*] complete!\n')
 
-    print '\n[*] Downloading default wordlist...\n'
+    print('\n[*] Downloading default wordlist...\n')
     os.system("wget %s -O %s.tar.gz" % (wordlist_source, default_wordlist))
-    print '\n[*] complete!\n'
+    print('\n[*] complete!\n')
 
-    print '\n[*] Extracting default wordlist...\n'
+    print('\n[*] Extracting default wordlist...\n')
     os.system("cd %s && tar xzf %s.tar.gz" % (settings.dict['paths']['directories']['wordlists'], default_wordlist))
-    print '\n[*] complete!\n'
+    print('\n[*] complete!\n')

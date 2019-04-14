@@ -2,7 +2,7 @@ import json
 import os
 import glob
 
-from . import paths
+import settings.paths
 import configparser
 
 CONF_SUBDIRS = [
@@ -14,15 +14,15 @@ class EaphammerSettings(object):
 
     def __init__(self):
 
-        self.dict = {
+        self.dict = { 
 
-            'paths' : paths.paths,
+            'paths' : settings.paths.paths,
         }
         self.parse_configs()
 
     def parse_configs(self):
 
-        conf_dir = self.dict['paths']['directories']['conf']
+        conf_dir = self.dict['paths']['directories']['conf'] 
         config_dirs = [os.path.join(conf_dir, subdir) for subdir in CONF_SUBDIRS]
 
         for config_dir in config_dirs:
@@ -43,7 +43,7 @@ class EaphammerSettings(object):
                 for section in parser.sections():
 
                     self.dict[category][module][section] = {}
-
+                    
                     for key,val in parser.items(section):
                         self.dict[category][module][section][key] = val
 

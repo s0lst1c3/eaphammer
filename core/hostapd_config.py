@@ -23,21 +23,16 @@ class HostapdConfig(object):
             configs['80211n'] = self.populate_80211n(settings, options)
 
         if options['auth'] == 'wpa' or options['reap_creds']:
-
             configs['wpa'] = self.populate_wpa(settings, options)
-
             configs['eap'] = self.populate_eap(settings, options)
 
         if options['wmm']:
-
             configs['wmm'] = self.populate_wmm(settings, options)
 
         self.dict = configs
 
         if options['debug']:
-            print()
-            print()
-            print('[debug] HostapdConf:')
+            print('\n\n[debug] HostapdConf:')
             print(json.dumps(self.dict, indent=4, sort_keys=True))
 
     def save(self):
@@ -60,19 +55,14 @@ class HostapdConfig(object):
         try:
             os.remove(self.path)
         except OSError:
+            print('[*] Can\'t remove non-existant config file.')
             pass
 
     def populate_eap(self, settings, options):
 
-
-        return {
+        eap_configs = {
             'eap_user_file' : settings.dict['paths']['hostapd']['eap_user'],
-            'ca_cert' : settings.dict['paths']['hostapd']['ca_pem'],
-            'server_cert' : settings.dict['paths']['hostapd']['server_pem'],
-            'private_key' : settings.dict['paths']['hostapd']['private_key'],
-            'dh_file' : settings.dict['paths']['hostapd']['dh'],
             'eaphammer_logfile' : settings.dict['paths']['hostapd']['log'],
-            'private_key_passwd' : settings.dict['core']['hostapd']['eap']['private_key_passwd'],
 
             'eap_server' : settings.dict['core']['hostapd']['eap']['eap_server'],
             'eap_fast_a_id' : settings.dict['core']['hostapd']['eap']['eap_fast_a_id'],
@@ -84,6 +74,41 @@ class HostapdConfig(object):
             'pac_opaque_encr_key' : settings.dict['core']['hostapd']['eap']['pac_opaque_encr_key'],
             'wpa_key_mgmt' : settings.dict['core']['hostapd']['eap']['wpa_key_mgmt'],
         }
+
+        
+        if options['dh_path'] is not None:
+            # if the user specified a dh file manually, use this
+            eap_configs['dh_file'] = options['dh_path']
+        else:
+            eap_configs['dh_file'] = settings.dict['paths']['certs']['dh']
+
+
+        # All certificate options within hostapd's default configuration file are
+        # are completely ignored if even one certificate option is passed
+        # via the CLI. This is done to prevent the default config and CLI flags
+        # from interfering with one another.
+        override_conf = False
+        if options['ca_cert'] is not None:
+            eap_configs['ca_cert'] = options['ca_cert']
+            override_conf = True
+        if options['server_cert'] is not None:
+            eap_configs['server_cert'] = options['server_cert']
+            override_conf = True
+        if options['private_key'] is not None:
+            eap_configs['private_key'] = options['private_key']
+            override_conf = True
+        if options['private_key_passwd'] is not None:
+            eap_configs['private_key_passwd'] = options['private_key_passwd']
+            override_conf = True
+
+        # if we're not overriding the default conf file, use the currently active
+        # certificate chain
+        if not override_conf:
+
+            eap_configs['server_cert'] = settings.dict['paths']['certs']['active_full_chain']
+            eap_configs['private_key'] = settings.dict['paths']['certs']['active_full_chain']
+
+        return eap_configs
 
     def populate_wpa(self, settings, options):
 

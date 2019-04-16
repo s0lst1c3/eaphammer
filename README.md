@@ -38,7 +38,7 @@ Features
 - Fast and automated PMKID attacks against PSK networks using hcxtools
 - Password spraying across multiple usernames against a single ESSID
 
-New (as of Version 0.5.1)(latest)
+New (as of Version 0.7.0)(latest)
 ---------------------------------
 
 EAPHammer now uses a local build of libssl that exists independently of the systemwide install. This local version is compiled with support for SSLv3, allowing EAPHammer to be used against legacy clients without compromising the integrity of the attacker's operating system.

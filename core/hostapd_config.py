@@ -103,7 +103,7 @@ class HostapdConfig(object):
             # valid. onus is on them to get that right.
 
             # doesn't make sense to do this without specifying a server cert
-            if eap_configs['server_cert'] is not None:
+            if options['server_cert'] is not None:
                 eap_configs['server_cert'] = options['server_cert']
             else:
                 raise Exception('Certificate conf override detected but not server cert specified.')

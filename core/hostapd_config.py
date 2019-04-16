@@ -76,9 +76,9 @@ class HostapdConfig(object):
         }
 
         
-        if options['dh_path'] is not None:
+        if options['dh_file'] is not None:
             # if the user specified a dh file manually, use this
-            eap_configs['dh_file'] = options['dh_path']
+            eap_configs['dh_file'] = options['dh_file']
         else:
             eap_configs['dh_file'] = settings.dict['paths']['certs']['dh']
 

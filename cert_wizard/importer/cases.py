@@ -17,7 +17,7 @@ def combined_ca_and_server_separate_key(server_cert_path,
     )
     full_chain_certs = cert_utils.load_certs_from_file(server_cert_path)
 
-    full_chain = [ cert for cert in full_chain_certs ] + [ private_key ]
+    full_chain = [ private_key ] + [ cert for cert in full_chain_certs ]
 
     full_chain_path = cert_utils.write_full_chain_pem(full_chain)
 
@@ -35,7 +35,7 @@ def combined_ca_and_server_integrated_key(server_cert_path, passwd=None):
     )
     full_chain_certs = cert_utils.load_certs_from_file(server_cert_path)
 
-    full_chain = [ cert for cert in full_chain_certs ] + [ private_key ]
+    full_chain = [ private_key ] + [ cert for cert in full_chain_certs ]
 
     full_chain_path = cert_utils.write_full_chain_pem(full_chain)
 
@@ -63,7 +63,7 @@ def separate_ca_and_server_integrated_key(server_cert_path,
 
     ca_cert_chain = cert_utils.load_pems_from_file(ca_cert_path, passwd=passwd)
 
-    full_chain = [cert for cert in ca_cert_chain] + [server_cert, private_key]
+    full_chain = [private_key, server_cert] + [cert for cert in ca_cert_chain]
 
     full_chain_path = cert_utils.write_full_chain_pem(full_chain)
 
@@ -90,7 +90,7 @@ def all_separate(server_cert_path,
     server_cert = cert_utils.load_cert_from_pem(server_cert_path)
     ca_cert_chain = cert_utils.load_pems_from_file(ca_cert_path, passwd=passwd)
 
-    full_chain = [cert for cert in ca_cert_chain] + [server_cert, private_key]
+    full_chain = [private_key, server_cert] + [cert for cert in ca_cert_chain]
 
     full_chain_path = cert_utils.write_full_chain_pem(full_chain)
 

@@ -4,6 +4,15 @@ import time
 from settings import settings
 from tqdm import tqdm
 
+def extract_iface_from_hostapd_conf(hostapd_conf_path):
+
+    with open(hostapd_conf_path) as fd:
+        for line in fd:
+            if line.startswith('interface='):
+                interface = line.strip().split('=')[1]
+                return interface
+    
+
 def parse_boolean(raw_str):
 
     raw_str = raw_str.strip().lower()

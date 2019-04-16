@@ -47,6 +47,7 @@ def set_options():
                               dest='cert_wizard',
                               choices=['create', 'import', 'interactive', 'list', 'dh'],
                               default=False,
+                              nargs='?',
                               const='interactive',
                               help=('Use this flag to create a new '
                                     'RADIUS cert for your AP'))
@@ -209,7 +210,7 @@ def set_options():
     cw_advanced_group.add_argument('--algorithm',
                                    dest='algorithm',
                                    default=cert_utils.DEFAULT_ALGORITHM,
-                                   type=int,
+                                   type=str,
                                    help='Specify algorithm with which to sign cert.')
 
     cw_advanced_group.add_argument('--key_length',

@@ -48,6 +48,8 @@ def import_cert(server_cert_path,
     cert_utils.activate_fullchain(server_pem_path)
     print('[CW] Complete!')
 
+    return server_pem_path
+
 def list_certs(server=False, ca=False):
     cert_utils.list_certs(server=server, ca=ca)
 
@@ -114,18 +116,15 @@ def bootstrap(cn,
     print('[CW] Complete!')
 
     print('[CW] Writing server cert and key pair to disk...')
-    server_cert_path = cert_utils.write_server_cert_pem(
-                                                server_cert,
-                                                server_key_pair=server_key_pair,
-                                                ca_cert=ca_cert,
-    )
+    full_chain = [ server_key_pair, server_cert, ca_cert ]
+    full_chain_path = cert_utils.write_full_chain_pem(full_chain)
     print('[CW] Complete!')
 
     print('[CW] Activating full certificate chain...')
-    cert_utils.activate_fullchain(server_cert_path)
+    cert_utils.activate_fullchain(full_chain_path)
     print('[CW] Complete!')
 
-    return server_cert_path
+    return full_chain_path
 
 # --gen-cert server --signing-cert <path to ca_cert pem>
 def create_server_cert(signing_cert_path,
@@ -187,18 +186,15 @@ def create_server_cert(signing_cert_path,
     print('[CW] Complete!')
 
     print('[CW] Writing server cert and key pair to disk...')
-    server_cert_path = cert_utils.write_server_cert_pem(
-                            server_cert,
-                            server_key_pair=server_key_pair,
-                            ca_cert=ca_cert,
-    )
+    full_chain = [ server_key_pair, server_cert, ca_cert ]
+    full_chain_path = cert_utils.write_full_chain_pem(full_chain)
     print('[CW] Complete!')
 
     print('[CW] Activating full certificate chain...')
-    cert_utils.activate_fullchain(server_cert_path)
+    cert_utils.activate_fullchain(full_chain_path)
     print('[CW] Complete!')
 
-    return server_cert_path
+    return full_chain_path
 
 def interactive():
 
@@ -222,8 +218,8 @@ def interactive():
     print('[*] Please enter organization for certs (i.e. Evil Corp)')
     organization = input(': ')
 
-    print('[*] Please enter org unitfor certs (i.e. Hooman Resource Says)')
-    organization = input(': ')
+    print('[*] Please enter org unit for certs (i.e. Hooman Resource Says)')
+    org_unit = input(': ')
 
     print('[*] Please enter email for certs (i.e. cyberz@h4x0r.lulz)')
     email_address = input(': ')
@@ -231,7 +227,7 @@ def interactive():
     print('[*] Please enter common name (CN) for certs.')
     cn = input(': ')
 
-    bootstrap(
+    return bootstrap(
             cn,
             country=country,
             state_province=state_province,

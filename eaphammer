@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import argparse
+import cert_wizard
 import core.cli
 import core.eap_spray
 import datetime
@@ -31,7 +32,11 @@ def hostile_portal():
 
     use_autocrack = options['autocrack']
     wordlist = options['wordlist']
-    interface = core.interface.Interface(options['interface'])
+    if options['manual_config'] is None:
+        interface = core.interface.Interface(options['interface'])
+    else:
+        interface_name = core.utils.extract_iface_from_hostapd_conf(options['manual_config'])
+        interface = core.interface.Interface(interface_name)
     use_pivot = options['pivot']
     save_config = options['save_config']
 
@@ -149,7 +154,11 @@ def hostile_portal():
 
 def captive_portal():
 
-    interface = core.interface.Interface(options['interface'])
+    if options['manual_config'] is None:
+        interface = core.interface.Interface(options['interface'])
+    else:
+        interface_name = core.utils.extract_iface_from_hostapd_conf(options['manual_config'])
+        interface = core.interface.Interface(interface_name)
     use_autocrack = options['autocrack']
     wordlist = options['wordlist']
     save_config = options['save_config']
@@ -246,7 +255,11 @@ def captive_portal():
 
 def reap_creds():
 
-    interface = core.interface.Interface(options['interface'])
+    if options['manual_config'] is None:
+        interface = core.interface.Interface(options['interface'])
+    else:
+        interface_name = core.utils.extract_iface_from_hostapd_conf(options['manual_config'])
+        interface = core.interface.Interface(interface_name)
     use_autocrack = options['autocrack']
     wordlist = options['wordlist']
     save_config = options['save_config']
@@ -448,7 +461,7 @@ def save_config_only():
     hostapd_conf.save()
     hostapd_conf.remove()
 
-def cert_wizard():
+def run_cert_wizard():
 
     if options['cert_wizard'] == 'import':
        
@@ -584,7 +597,7 @@ if __name__ == '__main__':
         print(json.dumps(options, indent=4, sort_keys=True))
 
     if options['cert_wizard']:
-        cert_wizard()
+        run_cert_wizard()
     elif options['save_config_only']:
         save_config_only()        
     elif options['captive_portal']:

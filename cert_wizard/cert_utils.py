@@ -163,21 +163,21 @@ def write_server_cert_pem(server_cert, ca_cert=None, server_key_pair=None):
     print(msg.format(output_path))
 
     with open(output_path, 'w') as fd:
-        if server_key_pair is not None:
-            fd.write(private_key_pem.decode('utf-8'))
         if ca_cert is not None:
             fd.write(ca_cert_pem.decode('utf-8'))
         fd.write(server_cert_pem.decode('utf-8'))
+        if server_key_pair is not None:
+            fd.write(private_key_pem.decode('utf-8'))
 
     return output_path
 
 def write_full_chain_pem(full_chain):
 
     #full_chain = [
-    #    ca_cert_1, ca_cert_2, ... , ca_cert_n, server_cert, private_key ]
+    #    [ private_key, server_cert, ca_cert_1, ca_cert_2, ... , ca_cert_n ]
 
     output_path = generate_pem_output_path(
-                                full_chain[-2].get_subject().CN,
+                                full_chain[1].get_subject().CN,
                                 SERVER_CERTS_DIR,
     )
 

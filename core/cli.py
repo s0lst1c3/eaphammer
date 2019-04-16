@@ -35,6 +35,13 @@ BASIC_OPTIONS = [
     'bootstrap',
 ]
 
+ROGUE_AP_ATTACKS = [
+
+    'hostile_portal',
+    'captive_portal',
+    'creds',
+]
+
 def set_options():
 
 
@@ -530,6 +537,7 @@ def set_options():
             options['manual_config'] is None and
             options['advanced_help'] is False and
             options['eap_spray'] is False and
+            options['bootstrap'] is False and
             options['interface'] is None):
 
             parser.print_usage()
@@ -537,6 +545,62 @@ def set_options():
             print('[!] Please specify a valid PHY', end=' ')
             print('interface using the --interface flag')
             sys.exit()
+
+        cw_val = options['cert_wizard']
+        if cw_val is not None:
+
+            if cw_val == 'bootstrap' or cw_val == 'create' and options['self_signed']:
+        
+                if options['cn'] is None:
+                    parser.print_usage()
+                    print()
+                    print('[!] Please specify a valid CN in order to use --bootstrap mode.', end='')
+                    sys.exit()
+    
+            if cw_val == 'create' and not options['self_signed']:
+
+                if options['ca_cert'] is None:
+                    parser.print_usage()
+                    print()
+                    print('[!] Please specify valid CA cert using the --ca-cert flag. If CA private key is not included in CA cert file, it must also be specified using the --ca-key flag.', end='')
+                    sys.exit()
+
+
+                if options['cn'] is None:
+                    parser.print_usage()
+                    print()
+                    print('[!] Please specify a valid CN in order to use --bootstrap mode.', end='')
+                    sys.exit()
+
+            if cw_val == 'import':
+
+                if options['server_cert'] is None:
+                    parser.print_usage()
+                    print()
+                    print('[!] Please specify path a server certificate using the --server-cert flag.', end='')
+                    sys.exit()
+
+        if any([ options[a] for a in ROGUE_AP_ATTACKS ]):
+
+                if options['server_cert'] is None:
+                    if options['ca_cert']:
+                        parser.print_usage()
+                        print()
+                        print('[!] Cannot use --ca-cert flag at attack runtime without using --server-cert flag.', end='')
+                        sys.exit()
+                        
+
+                    if options['private_key']:
+                        parser.print_usage()
+                        print()
+                        print('[!] Cannot use --ca-cert flag at attack runtime without using --server-cert flag.', end='')
+                        sys.exit()
+
+                    if options['private_key_passwd']:
+                        parser.print_usage()
+                        print()
+                        print('[!] Cannot use --private-key flag at attack runtime without using --server-cert flag.', end='')
+                        sys.exit()
 
         if options['pmkid'] and options['bssid'] is None and options['essid'] is None:
             parser.print_usage()

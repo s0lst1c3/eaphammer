@@ -89,21 +89,46 @@ class HostapdConfig(object):
         # from interfering with one another.
         override_conf = False
         if options['ca_cert'] is not None:
-            eap_configs['ca_cert'] = options['ca_cert']
             override_conf = True
         if options['server_cert'] is not None:
-            eap_configs['server_cert'] = options['server_cert']
             override_conf = True
         if options['private_key'] is not None:
-            eap_configs['private_key'] = options['private_key']
             override_conf = True
         if options['private_key_passwd'] is not None:
-            eap_configs['private_key_passwd'] = options['private_key_passwd']
             override_conf = True
 
-        # if we're not overriding the default conf file, use the currently active
-        # certificate chain
-        if not override_conf:
+        if override_conf:
+        
+            # we're going to assume that any certs or keys that the user has given us are
+            # valid. onus is on them to get that right.
+
+            # doesn't make sense to do this without specifying a server cert
+            if eap_configs['server_cert'] is not None:
+                eap_configs['server_cert'] = options['server_cert']
+            else:
+                raise Exception('Certificate conf override detected but not server cert specified.')
+
+            # if no private key is specified, assume it is included in the server_cert file
+            # (think: fullchain.pem)
+            if options['private_key'] is None:
+                eap_configs['private_key'] = options['server_cert']
+            else:
+                eap_configs['private_key'] = options['private_key']
+
+            # if no ca cert is specified, assume it is included in the server_cert file
+            # and therefore is not needed (think: Let's Encrypt)
+            if options['ca_cert'] is None:
+                eap_configs['ca_cert'] = options['server_cert']
+            else:
+                eap_configs['ca_cert'] = options['ca_cert']
+
+            # if there's a private key password, we specify that here
+            eap_configs['private_key_passwd'] = options['private_key_passwd']
+
+        else:
+
+            # if we're not overriding the active configuration, use the currently active
+            # certificate chain
 
             eap_configs['server_cert'] = settings.dict['paths']['certs']['active_full_chain']
             eap_configs['private_key'] = settings.dict['paths']['certs']['active_full_chain']

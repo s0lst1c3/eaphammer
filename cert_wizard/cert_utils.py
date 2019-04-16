@@ -82,13 +82,13 @@ def load_pems_from_file(pem_path, passwd=None):
             yield crypto.load_privatekey(
                     crypto.FILETYPE_PEM,
                     str(raw_pem),
-                    passphrase=passwd,
+                    passphrase=passwd.encode('ascii'),
             )
         elif type(raw_pem) == pem._core.RSAPrivateKey:
             yield crypto.load_privatekey(
                     crypto.FILETYPE_PEM,
                     str(raw_pem),
-                    passphrase=passwd,
+                    passphrase=passwd.encode('ascii'),
             )
         else:
             raise Exception("Invalid PEM file")
@@ -123,7 +123,7 @@ def load_private_key_from_pem(private_key_pem_path, passwd=None):
     return crypto.load_privatekey(
                     crypto.FILETYPE_PEM,
                     private_key_pem,
-                    passphrase=passwd,
+                    passphrase=passwd.encode('ascii'),
     )
 
 def load_cert_from_pem(cert_pem_path):

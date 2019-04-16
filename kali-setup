@@ -40,8 +40,9 @@ if __name__ == '__main__':
     print()
 
     print('\n[*] Removing stub files...\n')
-    os.system('find {} -type f -name \'stub\' -exec {{}} +'.format(root_dir))
+    os.system('find {} -type f -name \'stub\' -exec rm -f {{}} +'.format(root_dir))
     print('\ncomplete!\n')
+
 
     print('\n[*] Installing Kali dependencies...\n')
     os.system('apt -y install %s' % read_deps_file('kali-dependencies.txt'))

@@ -1,6 +1,9 @@
 import cert_wizard.cert_utils as cert_utils
+import os
 
 from cert_wizard.importer import cases 
+
+from settings import settings
 
 # --cert-wizard import
 def import_cert(server_cert_path,
@@ -246,7 +249,7 @@ def rebuild_dh_file(length):
     openssl_bin = settings.dict['paths']['openssl']['bin']
     dh_file = settings.dict['paths']['certs']['dh']
 
-    length = options['rebuild_dh_file']
+    length = length
     print('\n[*] Rebuilding DH parameters file with length of {}...\n'.format(length))
     os.system('{} dhparam -out {} {}'.format(openssl_bin, dh_file, length))
     print('\ncomplete!\n')

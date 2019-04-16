@@ -39,7 +39,7 @@ ROGUE_AP_ATTACKS = [
 
     'hostile_portal',
     'captive_portal',
-    'creds',
+    'reap_creds',
 ]
 
 def set_options():
@@ -220,7 +220,7 @@ def set_options():
                                    type=str,
                                    help='Specify algorithm with which to sign cert.')
 
-    cw_advanced_group.add_argument('--key_length',
+    cw_advanced_group.add_argument('--key-length',
                                    dest='key_length',
                                    default=cert_utils.DEFAULT_KEY_LEN,
                                    type=int,
@@ -549,7 +549,7 @@ def set_options():
         cw_val = options['cert_wizard']
         if cw_val is not None:
 
-            if cw_val == 'bootstrap' or cw_val == 'create' and options['self_signed']:
+            if options['bootstrap'] or cw_val == 'create' and options['self_signed']:
         
                 if options['cn'] is None:
                     parser.print_usage()

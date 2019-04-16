@@ -596,7 +596,7 @@ if __name__ == '__main__':
         print('[debug] Options:')
         print(json.dumps(options, indent=4, sort_keys=True))
 
-    if options['cert_wizard']:
+    if options['cert_wizard'] or options['bootstrap']:
         run_cert_wizard()
     elif options['save_config_only']:
         save_config_only()        

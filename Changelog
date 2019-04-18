@@ -91,3 +91,6 @@ EAPHammer now uses a local build of libssl that exists independently of the syst
 
 0.6.0 - Gabriel Ryan <gabriel@solstice.sh>
 EAPHammer ported to Python 3.
+
+0.7.0 - Gabriel Ryan <gabriel@solstice.sh>
+EAPHammer is now able to import external certificates, generate self-signed and trusted certificates, and load certificates at runtime. 

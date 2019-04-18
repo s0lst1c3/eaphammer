@@ -37,8 +37,12 @@ HOSTAPD_DIR = os.path.join(LOCAL_DIR, 'hostapd-eaphammer', 'hostapd')
 CERTS_DIR = os.path.join(ROOT_DIR, 'certs')
 LOOT_DIR = os.path.join(ROOT_DIR, 'loot')
 THIRDPARTY_DIR = os.path.join(ROOT_DIR, 'thirdparty')
+ASLEAP_DIR = os.path.join(LOCAL_DIR, 'asleap')
 HCXDUMPTOOL_DIR = os.path.join(LOCAL_DIR, 'hcxdumptool')
 HCXTOOLS_DIR = os.path.join(LOCAL_DIR, 'hcxtools')
+
+# asleap paths
+ASLEAP_BIN = os.path.join(ASLEAP_DIR, 'asleap')
 
 # hcxdumptool paths
 HCXDUMPTOOL_BIN = os.path.join(HCXDUMPTOOL_DIR, 'hcxdumptool')
@@ -46,6 +50,9 @@ output_file = OutputFile(name='hcxdumptool-output', ext='txt').string()
 HCXDUMPTOOL_OFILE = os.path.join(TMP_DIR, output_file)
 output_file = OutputFile(name='hcxdumptool-filter', ext='txt').string()
 HCXDUMPTOOL_FILTER = os.path.join(TMP_DIR, output_file)
+
+# openssl paths
+OPENSSL_BIN = os.path.join(LOCAL_DIR, 'openssl/local/bin/openssl')
 
 # hcxtools paths
 HCXPCAPTOOL_BIN = os.path.join(HCXTOOLS_DIR, 'hcxpcaptool')
@@ -67,15 +74,14 @@ FIFO_PATH = os.path.join(TMP_DIR, OutputFile(ext='fifo').string())
 
 EAP_USER_FILE = os.path.join(DB_DIR, 'eaphammer.eap_user')
 EAP_USER_HEADER = os.path.join(DB_DIR, 'eap_user_header.txt')
-CA_CNF = os.path.join(CERTS_DIR, 'ca.cnf')
-SERVER_CNF = os.path.join(CERTS_DIR, 'server.cnf')
-CLIENT_CNF = os.path.join(CERTS_DIR, 'client.cnf')
-BOOTSTRAP_FILE = os.path.join(CERTS_DIR, 'bootstrap')
-CA_PEM = os.path.join(CERTS_DIR, 'ca.pem')
-SERVER_PEM = os.path.join(CERTS_DIR, 'server.pem')
-PRIVATE_KEY = os.path.join(CERTS_DIR, 'server.pem')
-DH_FILE = os.path.join(CERTS_DIR, 'dh')
 
+# cert paths
+CA_CERTS_DIR = os.path.join(CERTS_DIR, 'ca')
+SERVER_CERTS_DIR = os.path.join(CERTS_DIR, 'server')
+ACTIVE_CERTS_DIR = os.path.join(CERTS_DIR, 'active')
+ACTIVE_FULL_CHAIN = os.path.join(ACTIVE_CERTS_DIR, 'fullchain.pem')
+
+DH_FILE = os.path.join(CERTS_DIR, 'dh')
 
 # everything else
 DNSMASQ_LOG = os.path.join(LOG_DIR, 'dnsmasq.log')
@@ -99,6 +105,7 @@ paths = {
         'wordlists' : WORDLIST_DIR,
         'local' : LOCAL_DIR,
         'hostapd' : HOSTAPD_DIR,
+        'asleap' : ASLEAP_DIR,
         'certs' : CERTS_DIR,
         'saves' : SAVE_DIR,
         'hcxdumptool' : HCXDUMPTOOL_DIR,
@@ -122,6 +129,11 @@ paths = {
         'filter' : HCXDUMPTOOL_FILTER,
     },
 
+    'asleap' : {
+
+        'bin' : ASLEAP_BIN,
+    },
+
     'eap_spray' : {
 
         'log' : EAP_SPRAY_LOG,
@@ -134,17 +146,24 @@ paths = {
         'log' : HOSTAPD_LOG,
         'eap_user'  : EAP_USER_FILE,
         'eap_user_header'  : EAP_USER_HEADER,
-        'ca_cnf' : CA_CNF,
-        'server_cnf' : SERVER_CNF,
-        'client_cnf' : CLIENT_CNF,
-        'bootstrap' : BOOTSTRAP_FILE,
-        'ca_pem' : CA_PEM,
-        'server_pem' : SERVER_PEM,
-        'private_key' : PRIVATE_KEY,
-        'dh' : DH_FILE,
         'fifo' : FIFO_PATH,
         'conf' : HOSTAPD_CONF,
         'save' : HOSTAPD_SAVE,
+    },
+
+    'certs' : {
+
+        'dh' : DH_FILE,
+        'server_certs_dir' : SERVER_CERTS_DIR,
+        'ca_certs_dir' : CA_CERTS_DIR,
+        'active_certs_dir' : ACTIVE_CERTS_DIR,
+        'active_full_chain' : ACTIVE_FULL_CHAIN,
+
+    },
+
+    'openssl' : {
+
+        'bin' : OPENSSL_BIN,
     },
 
     'dnsmasq' : {
@@ -161,3 +180,4 @@ paths = {
         'script' : DHCP_SCRIPT,
     },
 }
+

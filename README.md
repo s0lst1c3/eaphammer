@@ -38,7 +38,7 @@ Features
 - Fast and automated PMKID attacks against PSK networks using hcxtools
 - Password spraying across multiple usernames against a single ESSID
 
-New (as of Version 0.5.1)(latest)
+New (as of Version 0.7.0)(latest)
 ---------------------------------
 
 EAPHammer now uses a local build of libssl that exists independently of the systemwide install. This local version is compiled with support for SSLv3, allowing EAPHammer to be used against legacy clients without compromising the integrity of the attacker's operating system.
@@ -94,22 +94,36 @@ Table of Contents
             * [VIII.3.a - Basic Usage](#viii3a---basic-usage)
                * [VIII.3.aa - Listing Users](#viii3aa---listing-users)
                * [VIII.3.ab - Adding Users](#viii3ab---adding-users)
-               * [VIII.3.ac - Deleting Users](#viii3ac---deleting-users)
+          BB     * [VIII.3.ac - Deleting Users](#viii3ac---deleting-users)
                * [VIII.3.ad - Updating Users](#viii3ad---updating-users)
                * [VIII.3.ae - Search Filters](#viii3ae---search-filters)
             * [VIII.4.b - Advanced Usage](#viii4b---advanced-usage)
       * [IX - ESSID Cloaking](#ix---essid-cloaking)
       * [X - Using Karma](#x---using-karma)
-	  * [XI - PMKID Attacks Against WPA-PSK and WPA2-PSK Networks](#xi---pmkid-attacks-against-wpa-psk-and-wpa2-psk-networks)
-	  * [XII - Password Spraying](#xii---password-spraying)
-      * [XIII - Advanced Granular Controls](#xiii---advanced-granular-controls)
+      * [XI - PMKID Attacks Against WPA-PSK and WPA2-PSK Networks](#xi---pmkid-attacks-against-wpa-psk-and-wpa2-psk-networks)
+      * [XII - Password Spraying](#xii---password-spraying)
+      * [XIII - Cert Wizard](#xiii---cert-wizard)
+         * [XIII.1 - Interactive Mode](#xiii1---interactive-mode---cert-wizard-interactive)
+         * [XIII.2 - Creating Certificates](#xiii2---creating-certificates---cert-wizard-create)
+            * [XIII.2.a - Self-signed Certificates](#xiii2a---self-signed-certificates---cert-wizard-create---self-signed)
+            * [XIII.2.b - Bootstrap Mode](#xiii2b---bootstrap-mode---bootstrap)
+            * [XIII.2.c - Using External CA Certs and Keys](#xiii2c---using-external-ca-certs-and-keys---cert-wizard-create)
+            * [XIII.2.d - Certificate Attributes](#xiii2d---certificate-attributes)
+         * [XIII.3 - Importing Certificates and Keys](#xiii3---importing-certificates-and-keys---cert-wizard-import)
+            * [XIII.3.a - Password Protected Private Keys](#xiii3a---password-protected-private-keys)
+         * [XIII.4 - Listing Previously Imported or Created Certificates](#xiii4---listing-previously-imported-or-created-certificates---cert-wizard-list)
+         * [XIII.5 - Regenerating Diffie Hellman (DH) Parameters](#xiii5---regenerating-diffie-hellman-dh-parameters---cert-wizard-dh)
+         * [XIII.6 - Overriding EAPHammer's Static Configuration](#xiii6---overriding-eaphammers-static-configuration)
+      * [XIV - Advanced Granular Controls](#xiv---advanced-granular-controls)
+
+
+
 
 Setup Guide
 ===========
 
 I. Kali Setup Instructions
 --------------------------
-
 
 Begin by cloning the __eaphammer__ repo using the following command.
 
@@ -545,11 +559,179 @@ EAPHammer allows the user to check for password reuse across multiple RADIUS acc
 
 Most of these flags are pretty self-exlanatory. The --eap-spray flag tells eaphammer to perform a password spraying attack. The --essid flag is used to specify the target network, the --password flag is used to specify the password to spray, and the --user-list flag is used to supply a user list file to eaphammer. A user list file is like a wordlist, but contains usernames instead of password candidates. Eaphammer will attempt to authenticate against the network specified by --essid using every username in the file specified by --user-list paired with the password specified by --password.
 
-The --inteface-pool flag could be a bit confusing, so let's talk about it in greater detail. A password spraying attack is essentially a network-based bruteforce operation. Although network-based bruteforce attacks are algorithmically similar to their local counterparts, such as dictionary attacks against password hashes, they're a lot slower from a performance perspective. Each login attempt made in our password spraying attack is a network-bound operation. To make matters worse, the EAP authentication process itself takes multiple seconds to complete. We theoretically can speed up this process using multithreading (Python's GIL isn't an issue here), but we still have to deal with the fact that a single wireless interface can only perform a single authentication attempt at a time.  The oslution is to create a pool of worker threads, and give each thread in the pool its own wireless interface to work with. The --interface-pool flag is used to provide eaphammer with a list of wireless interfaces with which to create this thread pool.
+The --interface-pool flag could be a bit confusing, so let's talk about it in greater detail. A password spraying attack is essentially a network-based bruteforce operation. Although network-based bruteforce attacks are algorithmically similar to their local counterparts, such as dictionary attacks against password hashes, they're a lot slower from a performance perspective. Each login attempt made in our password spraying attack is a network-bound operation. To make matters worse, the EAP authentication process itself takes multiple seconds to complete. We theoretically can speed up this process using multithreading (Python's GIL isn't an issue here), but we still have to deal with the fact that a single wireless interface can only perform a single authentication attempt at a time.  The solution is to create a pool of worker threads, and give each thread in the pool its own wireless interface to work with. The --interface-pool flag is used to provide eaphammer with a list of wireless interfaces with which to create this thread pool.
 
 Generally speaking, the more interfaces you use, the faster the attack. Be aware, however, that sending too much traffic to the access point will overwhelm it, causing your attack to take more time rather than less.
-	
-## XIII - Advanced Granular Controls
+
+## XIII - Cert Wizard
+
+EAPHammer's Cert Wizard mode is used for creating, importing, and managing SSL certificates used by the project. Cert Wizard has a number of submodes that can be used to perform these operations.
+
+### XIII.1 - Interactive Mode `--cert-wizard interactive`
+
+This is Cert Wizard's default mode of operation. It can be activated by using either `--cert-wizard` or `--cert-wizard interactive`.
+
+Interactive mode walks the user through a series of guided prompts in order to create a self-signed server certificate and private key, which are added to EAPHammer's static configuration. 
+
+Example:
+
+	./eaphammer --cert-wizard
+
+OR
+
+	./eaphammer --cert-wizard interactive
+
+### XIII.2 - Creating Certificates `--cert-wizard create`
+
+Use `—cert-wizard create` to build new SSL certificates. Certs created using this mode are automatically imported into eaphammer's static configuration.
+
+The created server cert, along with its private key and CA certificate chain, will be saved as a single PEM file in `certs/server`.  The full chain file is then copied to `certs/active`, which incorporates it into eaphammer's static configuration. The created certificate chain and key is then used by eaphammer until another cert is imported or created.
+
+#### XIII.2.a - Self-signed Certificates `--cert-wizard create --self-signed`
+To create a self-signed certificate, use `--cert-wizard create` in conjunction with the `--self-signed` flag as shown in the following examples:
+
+	./eaphammer --cert-wizard create --self-signed --cn MySecureWiFi.biz
+
+Note that the `--cn` flag is used to specify the common name (CN) of the generated certificate (see sections that follow).  
+ 
+#### XIII.2.b - Bootstrap Mode `--bootstrap`
+
+The `--bootstrap` flag is shorthand for `--cert-wizard create --self-signed`.
+
+In other words, this:
+
+	./eaphammer --bootstrap --cn MySecureWiFi.biz
+
+…is logically equivalent to:
+
+	./eaphammer --cert-wizard create --self-signed --cn MySecureWiFi.biz
+
+#### XIII.2.c - Using External CA Certs and Keys `--cert-wizard create`
+
+If you happen to "stumble" across a valid CA certificate and private key, you can use these to create trusted SSL certificates. Note that the CA certificate and private key must be in PEM format. To do this, you need to use the `--ca-cert` and `--ca-key` flags as shown in the following example:
+
+	./eaphammer --cert-wizard create \
+	 --cn MySecureWiFi.biz \
+	 --ca-cert /path/to/ca.crt \
+	 --ca-key /path/to/ca.key
+
+As with the creation of self-signed certs, the mandatory `--cn` flag is used to set the Common Name (CN) of the certificate. Additionally, all of the flags listed in the next section can be used to further configure the generated certificate.
+
+If the CA certificate and private key have been combined into a single PEM file, the `--ca-key` flag can be omitted:
+
+	./eaphammer --cert-wizard create \
+	 --cn MySecureWiFi.biz \
+	 --ca-cert /path/to/ca_cert_and_key.pem
+
+
+#### XIII.2.d - Certificate Attributes
+
+The flags listed in this section are used to set the subject and attributes of both self-signed and CA-signed  certificates created with Cert Wizard.
+
+The --cn flag is used to set the Common Name (CN) of the generated certificate, and is mandatory:\
+ 
+- __--cn__ - Specify certificate common name (CN)
+
+The following flags are used to set specific certificate attributes, and are optional:
+
+- __--country__ - Specify certificate country attribute
+- **--state** - Specify certificate state or province attribute
+- **--locale** - Specify certificate locale (city) attribute
+- **--org** - Specify certificate organization attribute
+- **--org-unit** - Specify certificate org unit attribute
+- **--email** - Specify certificate emailAddress attribute
+
+For example, the following command generates and imports a self-signed certificate with these specific attributes:
+
+	./eaphammer --bootstrap \
+	 --country US\
+	 --state Washington\
+	 --locale Seattle\
+	 --org BigScaryEDRVendor\
+	 --org-unit Legal\
+	 --email bugreport@bsevendor.com
+
+Cert Wizard also has a number of advanced options that can be used during cert creation:
+
+- **—not-before** - Specify datetime on which cert should become active.
+- **—not-after** - Specify datetime on which cert should become active.
+- **—algorithm**  - Specify algorithm with which to sign cert.
+- **—key-length** - Specify default certificate key length.
+
+However, in most cases these options can be left to their default values.
+
+### XIII.3 - Importing Certificates and Keys `--cert-wizard import`
+
+EAPHammer doesn't limit you to certificates created with Cert Wizard. You can also import certificates using `--cert-wizard import`. Imported certificates and private keys are combined into a single PEM file and saved to `certs/server`, then copied to `certs/active`, which incorporates them into eaphammer's static configuration. The imported certificate chain and key is then used by eaphammer until another cert is imported or created.
+
+Imported certificates can be of any of the following formats, so long as they are in PEM format:
+
+**Server certificate, CA certificate, and server private key all in separate files:**\
+Usage example:\
+
+	./eaphammer --cert-wizard import \
+	 --server-cert /path/to/server_cert.pem \
+	 --ca-cert /path/to/ca_cert.pem \
+	 --private-key /path/to/server_key.pem
+
+**Full certificate chain in single file and server private key in separate file (i.e. "Let's Encrypt" certificate format):**\
+Usage example:\
+
+	./eaphammer --cert-wizard import \
+	 --server-cert /path/to/fullchain.pem \
+	 --private-key /path/to/private_key.pem
+
+**Server certificate and private key in combined PEM file, CA certificate in separate file:**\
+Usage example:\
+
+	./eaphammer --cert-wizard import \
+	 --server-cert /path/to/server_and_key.pem \
+	 --ca-cert /path/to/ca_cert.pem
+
+**Full certificate chain and private key in single PEM file:**\
+Usage example:\
+
+	./eaphammer --cert-wizard import \
+	 --server-cert /path/to/fullchain_and_key.pem
+
+#### XIII.3.a - Password Protected Private Keys
+If the private key is password protected and encrypted, you'll be prompted to input a passphrase when you run `--cert-wizard import`. Alternatively, you can skip the prompt by providing the password using the `--private-key-passwd` flag. For example:
+
+	./eaphammer --cert-wizard import \
+	 --server-cert /path/to/fullchain.pem \
+	 --private-key /path/to/server_key.pem \
+	 --private-key-passwd whatever
+
+### XIII.4 - Listing Previously Imported or Created Certificates `--cert-wizard list`
+Certificates that are created or imported with EAPHammer are stored for future use in the `certs` directory. CA certificates are stored in `certs/ca`, and full certificate chains (with integrated private keys) are stored in `certs/server`. To view a list of all certificates currently in Cert Wizard's inventory, along with their basic attributes, use `--cert-wizard list` as shown below:
+
+	./eaphammer --cert-wizard list
+
+### XIII.5 - Regenerating Diffie Hellman (DH) Parameters `--cert-wizard dh`
+By default, EAPHammer uses a 2048 bit DH file that is located at `certs/dh_file`. Since generating DH parameters can be time consuming, the DH file is generated once when `./kali-setup` is run. If you need to regenerate the 2048 bit DH file for whatever reason, you can do so with the following command:
+
+	./eaphammer --cert-wizard dh
+
+If you need a DH file with a different key length, you can generate one by using `--cert-wizard dh` in conjunction with the `--key-length` flag:
+
+	./eaphammer --cert-wizard dh --key-length 1024
+
+### XIII.6 - Overriding EAPHammer's Static Configuration
+You can pass certificates and keys to EAPHammer manually at runtime, overriding the tool's static configuration. For example, the following command can be used to load a custom server cert, CA cert, and private key at runtime:
+
+	./eaphammer --creds \
+	 -e lolskillzshortage \
+	 -b 13:37:13:37:13:37 \
+	 -i wlan0 \
+	 --server-cert /path/to/server_cert.pem
+	 --ca-cert /path/to/ca_cert.pem
+	 --private-key /path/to/private_key.pem
+
+Certificates and keys loaded at runtime are used once, and once only. EAPHammer then reverts to its active certificates and keys.
+
+Certificates and private keys can be in any of the formats listed in Importing Certificates and Keys, so long as they are in PEM format. Additionally, the `--private-key-passwd` flag can be used to provide a private key password at runtime. 
+
+## XIV - Advanced Granular Controls
 
 To view a complete list of granular configuration options supported by eaphammer, use the -hh flag as shown below:
 

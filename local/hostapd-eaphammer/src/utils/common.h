@@ -53,6 +53,15 @@ static inline unsigned int bswap_32(unsigned int v)
 }
 #endif /* __APPLE__ */
 
+#ifdef __rtems__
+#include <rtems/endian.h>
+#define __BYTE_ORDER BYTE_ORDER
+#define __LITTLE_ENDIAN LITTLE_ENDIAN
+#define __BIG_ENDIAN BIG_ENDIAN
+#define bswap_16 CPU_swap_u16
+#define bswap_32 CPU_swap_u32
+#endif /* __rtems__ */
+
 #ifdef CONFIG_NATIVE_WINDOWS
 #include <winsock.h>
 
@@ -141,6 +150,7 @@ static inline unsigned int wpa_swap_32(unsigned int v)
 #define host_to_le32(n) (n)
 #define be_to_host32(n) wpa_swap_32(n)
 #define host_to_be32(n) wpa_swap_32(n)
+#define host_to_le64(n) (n)
 
 #define WPA_BYTE_SWAP_DEFINED
 
@@ -331,6 +341,9 @@ static inline void WPA_PUT_LE64(u8 *a, u64 val)
 #ifndef ETH_P_RRB
 #define ETH_P_RRB 0x890D
 #endif /* ETH_P_RRB */
+#ifndef ETH_P_OUI
+#define ETH_P_OUI 0x88B7
+#endif /* ETH_P_OUI */
 
 
 #ifdef __GNUC__
@@ -423,6 +436,7 @@ void perror(const char *s);
 #define __bitwise __attribute__((bitwise))
 #else
 #define __force
+#undef __bitwise
 #define __bitwise
 #endif
 
@@ -463,6 +477,7 @@ int hwaddr_aton2(const char *txt, u8 *addr);
 int hex2byte(const char *hex);
 int hexstr2bin(const char *hex, u8 *buf, size_t len);
 void inc_byte_array(u8 *counter, size_t len);
+void buf_shift_right(u8 *buf, size_t len, size_t bits);
 void wpa_get_ntp_timestamp(u8 *buf);
 int wpa_scnprintf(char *buf, size_t size, const char *fmt, ...);
 int wpa_snprintf_hex_sep(char *buf, size_t buf_size, const u8 *data, size_t len,
@@ -552,6 +567,10 @@ int is_ctrl_char(char c);
 
 int str_starts(const char *str, const char *start);
 
+u8 rssi_to_rcpi(int rssi);
+char * get_param(const char *cmd, const char *param);
+
+void forced_memzero(void *ptr, size_t len);
 
 /*
  * gcc 4.4 ends up generating strict-aliasing warnings about some very common

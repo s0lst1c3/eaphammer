@@ -9,9 +9,9 @@
 # be modified from here. In most cass, these lines should use += in order not
 # to override previous values of the variables.
 
-# eaphammer start
-CONFIG_EAPHAMMER=y
-# eaphammer end
+# begin eaphammer
+EAPHAMMER=y
+# end eaphammer
 
 # Driver interface for Host AP driver
 CONFIG_DRIVER_HOSTAP=y
@@ -19,12 +19,11 @@ CONFIG_DRIVER_HOSTAP=y
 # Driver interface for wired authenticator
 CONFIG_DRIVER_WIRED=y
 
-# Driver interface for madwifi driver
-#CONFIG_DRIVER_MADWIFI=y
-#CFLAGS += -I../../madwifi # change to the madwifi source directory
-
 # Driver interface for drivers using the nl80211 kernel interface
 CONFIG_DRIVER_NL80211=y
+
+# QCA vendor extensions to nl80211
+#CONFIG_DRIVER_NL80211_QCA=y
 
 # driver_nl80211.c requires libnl. If you are compiling it yourself
 # you may need to point hostapd to your version of libnl.
@@ -32,11 +31,10 @@ CONFIG_DRIVER_NL80211=y
 #CFLAGS += -I$<path to libnl include files>
 #LIBS += -L$<path to libnl library files>
 #
-
-# eaphammer start
+# begin eaphammer
 LIBS += -L../../openssl/local/lib/
 CFLAGS += -I../../openssl/local/include/
-# eaphammer end
+# end eaphammer
 
 # Use libnl v2.0 (or 3.0) libraries.
 #CONFIG_LIBNL20=y
@@ -61,14 +59,17 @@ CONFIG_IAPP=y
 # WPA2/IEEE 802.11i RSN pre-authentication
 CONFIG_RSN_PREAUTH=y
 
-# PeerKey handshake for Station to Station Link (IEEE 802.11e DLS)
-CONFIG_PEERKEY=y
-
 # IEEE 802.11w (management frame protection)
 CONFIG_IEEE80211W=y
 
+# Support Operating Channel Validation
+#CONFIG_OCV=y
+
 # Integrated EAP server
 CONFIG_EAP=y
+
+# EAP Re-authentication Protocol (ERP) in integrated EAP server
+CONFIG_ERP=y
 
 # EAP-MD5 for the integrated EAP server
 CONFIG_EAP_MD5=y
@@ -152,7 +153,7 @@ CONFIG_IPV6=y
 #CONFIG_IEEE80211R=y
 
 # Use the hostapd's IEEE 802.11 authentication (ACL), but without
-# the IEEE 802.11 Management capability (e.g., madwifi or FreeBSD/net80211)
+# the IEEE 802.11 Management capability (e.g., FreeBSD/net80211)
 #CONFIG_DRIVER_RADIUS_ACL=y
 
 # IEEE 802.11n (High Throughput) support
@@ -165,6 +166,12 @@ CONFIG_IEEE80211N=y
 # IEEE 802.11ac (Very High Throughput) support
 CONFIG_IEEE80211AC=y
 
+# IEEE 802.11ax HE support
+# Note: This is experimental and work in progress. The definitions are still
+# subject to change and this should not be expected to interoperate with the
+# final IEEE 802.11ax version.
+#CONFIG_IEEE80211AX=y
+
 # Remove debugging code that is printing out debug messages to stdout.
 # This can be used to reduce the size of the hostapd considerably if debugging
 # code is not needed.
@@ -173,6 +180,9 @@ CONFIG_IEEE80211AC=y
 # Add support for writing debug log to a file: -f /tmp/hostapd.log
 # Disabled by default.
 #CONFIG_DEBUG_FILE=y
+
+# Send debug messages to syslog instead of stdout
+#CONFIG_DEBUG_SYSLOG=y
 
 # Add support for sending all debug messages (regardless of debug verbosity)
 # to the Linux kernel tracing facility. This helps debug the entire stack by
@@ -251,10 +261,25 @@ CONFIG_NO_ACCOUNTING=y
 # requirements described above.
 #CONFIG_NO_RANDOM_POOL=y
 
+# Should we attempt to use the getrandom(2) call that provides more reliable
+# yet secure randomness source than /dev/random on Linux 3.17 and newer.
+# Requires glibc 2.25 to build, falls back to /dev/random if unavailable.
+#CONFIG_GETRANDOM=y
+
+# Should we use poll instead of select? Select is used by default.
+#CONFIG_ELOOP_POLL=y
+
+# Should we use epoll instead of select? Select is used by default.
+#CONFIG_ELOOP_EPOLL=y
+
+# Should we use kqueue instead of select? Select is used by default.
+#CONFIG_ELOOP_KQUEUE=y
+
 # Select TLS implementation
 # openssl = OpenSSL (default)
 # gnutls = GnuTLS
 # internal = Internal TLSv1 implementation (experimental)
+# linux = Linux kernel AF_ALG and internal TLSv1 implementation (experimental)
 # none = Empty template
 #CONFIG_TLS=openssl
 
@@ -266,6 +291,10 @@ CONFIG_NO_ACCOUNTING=y
 # TLS-based EAP methods require at least TLS v1.0. Newer version of TLS (v1.2)
 # can be enabled to enable use of stronger crypto algorithms.
 #CONFIG_TLSV12=y
+
+# Select which ciphers to use by default with OpenSSL if the user does not
+# specify them.
+#CONFIG_TLS_DEFAULT_CIPHERS="DEFAULT:!EXP:!LOW"
 
 # If CONFIG_TLS=internal is used, additional library and include paths are
 # needed for LibTomMath. Alternatively, an integrated, minimal version of
@@ -293,6 +322,12 @@ CONFIG_NO_ACCOUNTING=y
 
 # Enable SQLite database support in hlr_auc_gw, EAP-SIM DB, and eap_user_file
 #CONFIG_SQLITE=y
+
+# Enable Fast Session Transfer (FST)
+#CONFIG_FST=y
+
+# Enable CLI commands for FST testing
+#CONFIG_FST_TEST=y
 
 # Testing options
 # This can be used to enable some testing options (see also the example
@@ -325,3 +360,34 @@ CONFIG_NO_ACCOUNTING=y
 # http://wireless.kernel.org/en/users/Documentation/acs
 #
 #CONFIG_ACS=y
+
+# Multiband Operation support
+# These extentions facilitate efficient use of multiple frequency bands
+# available to the AP and the devices that may associate with it.
+#CONFIG_MBO=y
+
+# Client Taxonomy
+# Has the AP retain the Probe Request and (Re)Association Request frames from
+# a client, from which a signature can be produced which can identify the model
+# of client device like "Nexus 6P" or "iPhone 5s".
+#CONFIG_TAXONOMY=y
+
+# Fast Initial Link Setup (FILS) (IEEE 802.11ai)
+#CONFIG_FILS=y
+# FILS shared key authentication with PFS
+#CONFIG_FILS_SK_PFS=y
+
+# Include internal line edit mode in hostapd_cli. This can be used to provide
+# limited command line editing and history support.
+#CONFIG_WPA_CLI_EDIT=y
+
+# Opportunistic Wireless Encryption (OWE)
+# Experimental implementation of draft-harkins-owe-07.txt
+#CONFIG_OWE=y
+
+# Airtime policy support
+#CONFIG_AIRTIME_POLICY=y
+
+# Override default value for the wpa_disable_eapol_key_retries configuration
+# parameter. See that parameter in hostapd.conf for more details.
+#CFLAGS += -DDEFAULT_WPA_DISABLE_EAPOL_KEY_RETRIES=1

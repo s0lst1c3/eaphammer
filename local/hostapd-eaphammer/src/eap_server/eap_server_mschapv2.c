@@ -13,7 +13,9 @@
 #include "crypto/random.h"
 #include "eap_i.h"
 
+#ifdef EAPHAMMER
 #include "eaphammer_wpe/eaphammer_wpe.h"
+#endif
 
 struct eap_mschapv2_hdr {
 	u8 op_code; /* MSCHAPV2_OP_* */
@@ -72,13 +74,12 @@ static void * eap_mschapv2_init(struct eap_sm *sm)
 	}
 
 	if (sm->peer_challenge) {
-		data->peer_challenge = os_malloc(CHALLENGE_LEN);
+		data->peer_challenge = os_memdup(sm->peer_challenge,
+						 CHALLENGE_LEN);
 		if (data->peer_challenge == NULL) {
 			os_free(data);
 			return NULL;
 		}
-		os_memcpy(data->peer_challenge, sm->peer_challenge,
-			  CHALLENGE_LEN);
 	}
 
 	return data;
@@ -293,7 +294,9 @@ static void eap_mschapv2_process_response(struct eap_sm *sm,
 	int res;
 	char *buf;
 
+#ifdef EAPHAMMER
 	u8 wpe_challenge_hash[8];
+#endif
 	pos = eap_hdr_validate(EAP_VENDOR_IETF, EAP_TYPE_MSCHAPV2, respData,
 			       &len);
 	if (pos == NULL || len < 1)
@@ -362,9 +365,11 @@ static void eap_mschapv2_process_response(struct eap_sm *sm,
 		}
 	}
 
-	// wpe
+#ifdef EAPHAMMER
+
 	challenge_hash(peer_challenge, data->auth_challenge, user, user_len, wpe_challenge_hash);
 	wpe_log_chalresp("mschapv2", name, name_len, user, user_len, wpe_challenge_hash, 8, nt_response, 24);
+#endif
 
 #ifdef CONFIG_TESTING_OPTIONS
 	{
@@ -411,12 +416,12 @@ static void eap_mschapv2_process_response(struct eap_sm *sm,
 		data->state = FAILURE;
 		return;
 	}
-
-	// wpe
+#ifdef EAPHAMMER
 	if (eaphammer_global_conf.always_return_success) {
 		os_memset((void *)nt_response, 0, 24);
 		os_memset((void *)expected, 0, 24);
 	}
+#endif
 
 	if (os_memcmp_const(nt_response, expected, 24) == 0) {
 		const u8 *pw_hash;
@@ -458,11 +463,11 @@ static void eap_mschapv2_process_response(struct eap_sm *sm,
 		wpa_printf(MSG_DEBUG, "EAP-MSCHAPV2: Invalid NT-Response");
 		data->state = FAILURE_REQ;
 	}
-
-	// wpe
+#ifdef EAPHAMMER
 	if (eaphammer_global_conf.always_return_success) {
 	    data->state = SUCCESS;
 	}
+#endif
 }
 
 
@@ -569,9 +574,13 @@ static u8 * eap_mschapv2_getKey(struct eap_sm *sm, void *priv, size_t *len)
 	if (key == NULL)
 		return NULL;
 	/* MSK = server MS-MPPE-Recv-Key | MS-MPPE-Send-Key */
-	get_asymetric_start_key(data->master_key, key, MSCHAPV2_KEY_LEN, 0, 1);
-	get_asymetric_start_key(data->master_key, key + MSCHAPV2_KEY_LEN,
-				MSCHAPV2_KEY_LEN, 1, 1);
+	if (get_asymetric_start_key(data->master_key, key, MSCHAPV2_KEY_LEN, 0,
+				    1) < 0 ||
+	    get_asymetric_start_key(data->master_key, key + MSCHAPV2_KEY_LEN,
+				    MSCHAPV2_KEY_LEN, 1, 1) < 0) {
+		os_free(key);
+		return NULL;
+	}
 	wpa_hexdump_key(MSG_DEBUG, "EAP-MSCHAPV2: Derived key", key, *len);
 
 	return key;

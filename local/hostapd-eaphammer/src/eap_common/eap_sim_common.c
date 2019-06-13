@@ -175,7 +175,7 @@ int eap_sim_verify_mac(const u8 *k_aut, const struct wpabuf *req,
 	    mac > wpabuf_head_u8(req) + wpabuf_len(req) - EAP_SIM_MAC_LEN)
 		return -1;
 
-	tmp = os_malloc(wpabuf_len(req));
+	tmp = os_memdup(wpabuf_head(req), wpabuf_len(req));
 	if (tmp == NULL)
 		return -1;
 
@@ -185,7 +185,6 @@ int eap_sim_verify_mac(const u8 *k_aut, const struct wpabuf *req,
 	len[1] = extra_len;
 
 	/* HMAC-SHA1-128 */
-	os_memcpy(tmp, wpabuf_head(req), wpabuf_len(req));
 	os_memset(tmp + (mac - wpabuf_head_u8(req)), 0, EAP_SIM_MAC_LEN);
 	wpa_hexdump(MSG_MSGDUMP, "EAP-SIM: Verify MAC - msg",
 		    tmp, wpabuf_len(req));
@@ -370,7 +369,7 @@ int eap_sim_verify_mac_sha256(const u8 *k_aut, const struct wpabuf *req,
 	    mac > wpabuf_head_u8(req) + wpabuf_len(req) - EAP_SIM_MAC_LEN)
 		return -1;
 
-	tmp = os_malloc(wpabuf_len(req));
+	tmp = os_memdup(wpabuf_head(req), wpabuf_len(req));
 	if (tmp == NULL)
 		return -1;
 
@@ -380,7 +379,6 @@ int eap_sim_verify_mac_sha256(const u8 *k_aut, const struct wpabuf *req,
 	len[1] = extra_len;
 
 	/* HMAC-SHA-256-128 */
-	os_memcpy(tmp, wpabuf_head(req), wpabuf_len(req));
 	os_memset(tmp + (mac - wpabuf_head_u8(req)), 0, EAP_SIM_MAC_LEN);
 	wpa_hexdump(MSG_MSGDUMP, "EAP-AKA': Verify MAC - msg",
 		    tmp, wpabuf_len(req));
@@ -943,15 +941,19 @@ u8 * eap_sim_parse_encr(const u8 *k_encr, const u8 *encr_data,
 		return NULL;
 	}
 
-	decrypted = os_malloc(encr_data_len);
+	decrypted = os_memdup(encr_data, encr_data_len);
 	if (decrypted == NULL)
 		return NULL;
-	os_memcpy(decrypted, encr_data, encr_data_len);
 
+#ifdef TEST_FUZZ
+		wpa_printf(MSG_INFO,
+			   "TEST: Skip AES-128-CBC decryption for fuzz testing");
+#else /* TEST_FUZZ */
 	if (aes_128_cbc_decrypt(k_encr, iv, decrypted, encr_data_len)) {
 		os_free(decrypted);
 		return NULL;
 	}
+#endif /* TEST_FUZZ */
 	wpa_hexdump(MSG_MSGDUMP, "EAP-SIM: Decrypted AT_ENCR_DATA",
 		    decrypted, encr_data_len);
 
@@ -1205,4 +1207,20 @@ void eap_sim_report_notification(void *msg_ctx, int notification, int aka)
 				   type, notification);
 		}
 	}
+}
+
+
+int eap_sim_anonymous_username(const u8 *id, size_t id_len)
+{
+	static const char *anonymous_id_prefix = "anonymous@";
+	size_t anonymous_id_len = os_strlen(anonymous_id_prefix);
+
+	if (id_len > anonymous_id_len &&
+	    os_memcmp(id, anonymous_id_prefix, anonymous_id_len) == 0)
+		return 1; /* 'anonymous@realm' */
+
+	if (id_len > 1 && id[0] == '@')
+		return 1; /* '@realm' */
+
+	return 0;
 }

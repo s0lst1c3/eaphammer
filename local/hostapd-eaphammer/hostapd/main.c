@@ -1,6 +1,6 @@
 /*
  * hostapd / main()
- * Copyright (c) 2002-2016, Jouni Malinen <j@w1.fi>
+ * Copyright (c) 2002-2019, Jouni Malinen <j@w1.fi>
  *
  * This software may be distributed under the terms of the BSD license.
  * See README for more details.
@@ -18,18 +18,22 @@
 #include "crypto/random.h"
 #include "crypto/tls.h"
 #include "common/version.h"
+#include "common/dpp.h"
 #include "drivers/driver.h"
 #include "eap_server/eap.h"
 #include "eap_server/tncs.h"
 #include "ap/hostapd.h"
 #include "ap/ap_config.h"
 #include "ap/ap_drv_ops.h"
+#include "ap/dpp_hostapd.h"
 #include "fst/fst.h"
 #include "config_file.h"
 #include "eap_register.h"
 #include "ctrl_iface.h"
 
+#ifdef EAPHAMMER
 #include "eaphammer_wpe/eaphammer_wpe.h"
+#endif
 
 
 struct hapd_global {
@@ -39,7 +43,7 @@ struct hapd_global {
 
 static struct hapd_global global;
 
-#ifdef CONFIG_EAPHAMMER
+#ifdef EAPHAMMER
 static int global_disable_signal_handler = 0;
 #endif
 
@@ -113,6 +117,10 @@ static void hostapd_logger_cb(void *ctx, const u8 *addr, unsigned int module,
 			    module_str ? module_str : "",
 			    module_str ? ": " : "", txt);
 
+#ifdef CONFIG_DEBUG_SYSLOG
+	if (wpa_debug_syslog)
+		conf_stdout = 0;
+#endif /* CONFIG_DEBUG_SYSLOG */
 	if ((conf_stdout & module) && level >= conf_stdout_level) {
 		wpa_debug_print_timestamp();
 		wpa_printf(MSG_INFO, "%s", format);
@@ -253,7 +261,7 @@ static int hostapd_driver_init(struct hostapd_iface *iface)
  *
  * This function is used to parse configuration file for a full interface (one
  * or more BSSes sharing the same radio) and allocate memory for the BSS
- * interfaces. No actiual driver operations are started.
+ * interfaces. No actual driver operations are started.
  */
 static struct hostapd_iface *
 hostapd_interface_init(struct hapd_interfaces *interfaces, const char *if_name,
@@ -359,17 +367,15 @@ static int hostapd_global_init(struct hapd_interfaces *interfaces,
 	eloop_register_signal(SIGHUP, handle_reload, interfaces);
 	eloop_register_signal(SIGUSR1, handle_dump_state, interfaces);
 #endif /* CONFIG_NATIVE_WINDOWS */
-	eloop_register_signal_terminate(handle_term, interfaces);
 
-#ifdef CONFIG_EAPHAMMER
-	
+#ifdef EAPHAMMER
 	if (!global_disable_signal_handler) {
 
 		eloop_register_signal_terminate(handle_term, interfaces);
 	}
 #else
 	eloop_register_signal_terminate(handle_term, interfaces);
-#endif // END CONFIG_EAPHAMMER
+#endif
 
 #ifndef CONFIG_NATIVE_WINDOWS
 	openlog("hostapd", 0, LOG_DAEMON);
@@ -462,18 +468,49 @@ static int hostapd_global_run(struct hapd_interfaces *ifaces, int daemonize,
 
 static void show_version(void)
 {
+#ifdef EAPHAMMER
 	fprintf(stderr,
-		"hostapd-wpe v" VERSION_STR "\n"
+		"hostapd v" VERSION_STR "\n"
 		"User space daemon for IEEE 802.11 AP management,\n"
 		"IEEE 802.1X/WPA/WPA2/EAP/RADIUS Authenticator\n"
-		"Copyright (c) 2002-2016, Jouni Malinen <j@w1.fi> "
+		"Copyright (c) 2002-2019, Jouni Malinen <j@w1.fi> "
 		"and contributors\n"
-        "-----------------------------------------------------\n"
-        "WPE (Wireless Pwnage Edition)\n"
-        "This version has been cleverly modified to target\n"
-        "wired and wireless users.\n"
-        "Brad Antoniewicz <@brad_anton>\n"
-        "Foundstone\n");
+		"\n"
+		"------------------------------------------------\n"
+		"EAPHAMMER https://github.com/s0lst1c3/eaphammer\n"
+		"By @s0lst1c3 (gryan@specterops.io)\n"
+		"------------------------------------------------\n"
+		"\n"
+		" Heavily influenced by the work of: \n"
+		"\n"
+		"    @singe (dominic@sensepost.com) \n"
+		"    Ian de Villiers (ian@sensepost.com) \n"
+		"    Michal Kruger (@_cablethief)\n"
+		"      -> EAP research\n"
+		"      -> Karma research\n"
+		"      -> Original autocrack PoC\n"
+		"    	Check out their project:\n"
+		"      	https://github.com/sensepost/hostapd-mana\n"
+		"\n"
+		"    Robin Wood (robin@digininja.org)\n"
+		"    Dino Dai Zovi (@dinodaizovi)\n"
+		"    Shane Macaulay (linkedin.com/in/shanemacaulay)\n"
+		"      -> Original Karma patchces\n"
+		"\n"
+		"    Brad Antoniewicz (@brad_anton)\n"
+		"    Joshua Wright (@joswr1ght)\n"
+		"      -> Original EAP patches\n"
+		"    	Check out their project:\n"
+		"      	https://github.com/opensecurityresearch/hostapd-wpe\n"
+		"\n");
+#else
+	fprintf(stderr,
+		"hostapd v" VERSION_STR "\n"
+		"User space daemon for IEEE 802.11 AP management,\n"
+		"IEEE 802.1X/WPA/WPA2/EAP/RADIUS Authenticator\n"
+		"Copyright (c) 2002-2019, Jouni Malinen <j@w1.fi> "
+		"and contributors\n");
+#endif
 }
 
 
@@ -482,7 +519,6 @@ static void usage(void)
 	show_version();
 	fprintf(stderr,
 		"\n"
-		//"usage: hostapd [-hdBKtv] [-P <PID file>] [-e <entropy file>] "
 		"usage: hostapd [-hdBKtv] [-P <PID file>] [-e <entropy file>] "
 		"\\\n"
 		"         [-g <global ctrl_iface>] [-G <group>]\\\n"
@@ -502,22 +538,24 @@ static void usage(void)
 		"   -f   log output to debug file instead of stdout\n"
 #endif /* CONFIG_DEBUG_FILE */
 #ifdef CONFIG_DEBUG_LINUX_TRACING
-		"   -T = record to Linux tracing in addition to logging\n"
+		"   -T   record to Linux tracing in addition to logging\n"
 		"        (records all messages regardless of debug verbosity)\n"
 #endif /* CONFIG_DEBUG_LINUX_TRACING */
 		"   -i   list of interface names to use\n"
+#ifdef CONFIG_DEBUG_SYSLOG
+		"   -s   log output to syslog instead of stdout\n"
+#endif /* CONFIG_DEBUG_SYSLOG */
 		"   -S   start all the interfaces synchronously\n"
 		"   -t   include timestamps in some debug messages\n"
-#ifdef CONFIG_EAPHAMMER
+#ifdef EAPHAMMER
 		"   -v   show hostapd version\n\n"
         " EAPHAMMER Options -------------------\n"
         "       (credential logging always enabled)\n"
 		"   -N   Disable signal handler (needed to run from scripts)\n"
 		"   -a   Allow BSS overlap on non-dfs channels.\n"
-        "   -s   Return Success where possible\n\n");
-#else
-		"   -v   show hostapd version\n\n");
+        "   -x   Return Success where possible\n\n"
 #endif
+		"   -v   show hostapd version\n");
 
 	exit(1);
 }
@@ -580,14 +618,14 @@ static int hostapd_get_ctrl_iface_group(struct hapd_interfaces *interfaces,
 
 static int hostapd_get_interface_names(char ***if_names,
 				       size_t *if_names_size,
-				       char *optarg)
+				       char *arg)
 {
 	char *if_name, *tmp, **nnames;
 	size_t i;
 
-	if (!optarg)
+	if (!arg)
 		return -1;
-	if_name = strtok_r(optarg, ",", &tmp);
+	if_name = strtok_r(arg, ",", &tmp);
 
 	while (if_name) {
 		nnames = os_realloc_array(*if_names, 1 + *if_names_size,
@@ -675,6 +713,9 @@ int main(int argc, char *argv[])
 	int start_ifaces_in_sync = 0;
 	char **if_names = NULL;
 	size_t if_names_size = 0;
+#ifdef CONFIG_DPP
+	struct dpp_global_config dpp_conf;
+#endif /* CONFIG_DPP */
 
 	if (os_program_init())
 		return -1;
@@ -690,12 +731,22 @@ int main(int argc, char *argv[])
 	interfaces.global_iface_name = NULL;
 	interfaces.global_ctrl_sock = -1;
 	dl_list_init(&interfaces.global_ctrl_dst);
+#ifdef CONFIG_ETH_P_OUI
+	dl_list_init(&interfaces.eth_p_oui);
+#endif /* CONFIG_ETH_P_OUI */
+#ifdef CONFIG_DPP
+	os_memset(&dpp_conf, 0, sizeof(dpp_conf));
+	/* TODO: dpp_conf.msg_ctx? */
+	interfaces.dpp = dpp_global_init(&dpp_conf);
+	if (!interfaces.dpp)
+		return -1;
+#endif /* CONFIG_DPP */
 
 	for (;;) {
-#ifdef CONFIG_EAPHAMMER
-		c = getopt(argc, argv, "b:Bde:f:hi:KP:STtu:vg:G:sN");
+#ifdef EAPHAMMER
+		c = getopt(argc, argv, "b:Bde:f:hi:KP:sSTtu:vg:G:xN");
 #else
-		c = getopt(argc, argv, "b:Bde:f:hi:KP:STtu:vg:G:");
+		c = getopt(argc, argv, "b:Bde:f:hi:KP:sSTtu:vg:G:");
 #endif
 		if (c < 0)
 			break;
@@ -753,6 +804,11 @@ int main(int argc, char *argv[])
 			bss_config = tmp_bss;
 			bss_config[num_bss_configs++] = optarg;
 			break;
+#ifdef CONFIG_DEBUG_SYSLOG
+		case 's':
+			wpa_debug_syslog = 1;
+			break;
+#endif /* CONFIG_DEBUG_SYSLOG */
 		case 'S':
 			start_ifaces_in_sync = 1;
 			break;
@@ -765,8 +821,8 @@ int main(int argc, char *argv[])
 							&if_names_size, optarg))
 				goto out;
 			break;
-#ifdef CONFIG_EAPHAMMER
-        case 's': 
+#ifdef EAPHAMMER
+        case 'x': 
             eaphammer_global_conf.always_return_success++;
             break;
         case 'N': 
@@ -789,6 +845,10 @@ int main(int argc, char *argv[])
 		wpa_debug_open_file(log_file);
 	else
 		wpa_debug_setup_stdout();
+#ifdef CONFIG_DEBUG_SYSLOG
+	if (wpa_debug_syslog)
+		wpa_debug_open_syslog();
+#endif /* CONFIG_DEBUG_SYSLOG */
 #ifdef CONFIG_DEBUG_LINUX_TRACING
 	if (enable_trace_dbg) {
 		int tret = wpa_debug_open_linux_tracing();
@@ -920,11 +980,16 @@ int main(int argc, char *argv[])
 	}
 	os_free(interfaces.iface);
 
+#ifdef CONFIG_DPP
+	dpp_global_deinit(interfaces.dpp);
+#endif /* CONFIG_DPP */
+
 	if (interfaces.eloop_initialized)
 		eloop_cancel_timeout(hostapd_periodic, &interfaces, NULL);
 	hostapd_global_deinit(pid_file, interfaces.eloop_initialized);
 	os_free(pid_file);
 
+	wpa_debug_close_syslog();
 	if (log_file)
 		wpa_debug_close_file();
 	wpa_debug_close_linux_tracing();

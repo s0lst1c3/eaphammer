@@ -1,6 +1,6 @@
 /*
  * wpa_supplicant/hostapd / common helper functions, etc.
- * Copyright (c) 2002-2007, Jouni Malinen <j@w1.fi>
+ * Copyright (c) 2002-2019, Jouni Malinen <j@w1.fi>
  *
  * This software may be distributed under the terms of the BSD license.
  * See README for more details.
@@ -227,6 +227,16 @@ void inc_byte_array(u8 *counter, size_t len)
 			break;
 		pos--;
 	}
+}
+
+
+void buf_shift_right(u8 *buf, size_t len, size_t bits)
+{
+	size_t i;
+
+	for (i = len - 1; i > 0; i--)
+		buf[i] = (buf[i - 1] << (8 - bits)) | (buf[i] >> bits);
+	buf[0] >>= bits;
 }
 
 
@@ -960,7 +970,7 @@ void str_clear_free(char *str)
 {
 	if (str) {
 		size_t len = os_strlen(str);
-		os_memset(str, 0, len);
+		forced_memzero(str, len);
 		os_free(str);
 	}
 }
@@ -969,7 +979,7 @@ void str_clear_free(char *str)
 void bin_clear_free(void *bin, size_t len)
 {
 	if (bin) {
-		os_memset(bin, 0, len);
+		forced_memzero(bin, len);
 		os_free(bin);
 	}
 }
@@ -1073,7 +1083,8 @@ size_t utf8_unescape(const char *inp, size_t in_size,
 		in_size--;
 	}
 
-	while (in_size--) {
+	while (in_size) {
+		in_size--;
 		if (res_size >= out_size)
 			return 0;
 
@@ -1084,8 +1095,9 @@ size_t utf8_unescape(const char *inp, size_t in_size,
 			return res_size;
 
 		case '\\':
-			if (!in_size--)
+			if (!in_size)
 				return 0;
+			in_size--;
 			inp++;
 			/* fall through */
 
@@ -1116,7 +1128,8 @@ size_t utf8_escape(const char *inp, size_t in_size,
 	if (!in_size)
 		in_size = os_strlen(inp);
 
-	while (in_size--) {
+	while (in_size) {
+		in_size--;
 		if (res_size++ >= out_size)
 			return 0;
 
@@ -1199,4 +1212,69 @@ int ssid_parse(const char *buf, struct wpa_ssid_value *ssid)
 int str_starts(const char *str, const char *start)
 {
 	return os_strncmp(str, start, os_strlen(start)) == 0;
+}
+
+
+/**
+ * rssi_to_rcpi - Convert RSSI to RCPI
+ * @rssi: RSSI to convert
+ * Returns: RCPI corresponding to the given RSSI value, or 255 if not available.
+ *
+ * It's possible to estimate RCPI based on RSSI in dBm. This calculation will
+ * not reflect the correct value for high rates, but it's good enough for Action
+ * frames which are transmitted with up to 24 Mbps rates.
+ */
+u8 rssi_to_rcpi(int rssi)
+{
+	if (!rssi)
+		return 255; /* not available */
+	if (rssi < -110)
+		return 0;
+	if (rssi > 0)
+		return 220;
+	return (rssi + 110) * 2;
+}
+
+
+char * get_param(const char *cmd, const char *param)
+{
+	const char *pos, *end;
+	char *val;
+	size_t len;
+
+	pos = os_strstr(cmd, param);
+	if (!pos)
+		return NULL;
+
+	pos += os_strlen(param);
+	end = os_strchr(pos, ' ');
+	if (end)
+		len = end - pos;
+	else
+		len = os_strlen(pos);
+	val = os_malloc(len + 1);
+	if (!val)
+		return NULL;
+	os_memcpy(val, pos, len);
+	val[len] = '\0';
+	return val;
+}
+
+
+/* Try to prevent most compilers from optimizing out clearing of memory that
+ * becomes unaccessible after this function is called. This is mostly the case
+ * for clearing local stack variables at the end of a function. This is not
+ * exactly perfect, i.e., someone could come up with a compiler that figures out
+ * the pointer is pointing to memset and then end up optimizing the call out, so
+ * try go a bit further by storing the first octet (now zero) to make this even
+ * a bit more difficult to optimize out. Once memset_s() is available, that
+ * could be used here instead. */
+static void * (* const volatile memset_func)(void *, int, size_t) = memset;
+static u8 forced_memzero_val;
+
+void forced_memzero(void *ptr, size_t len)
+{
+	memset_func(ptr, 0, len);
+	if (len)
+		forced_memzero_val = ((u8 *) ptr)[0];
 }

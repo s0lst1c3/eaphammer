@@ -6,9 +6,15 @@ ifndef CFLAGS
 CFLAGS = -MMD -O2 -Wall -g
 endif
 
-# eaphammer start
-CFLAGS += -I/root/openssl-OpenSSL_1_1_1/local/include/
-# eaphammer end
+ifdef TEST_FUZZ
+CFLAGS += -DCONFIG_NO_RANDOM_POOL
+CFLAGS += -DTEST_FUZZ
+endif
+
+# begin eaphammer
+CLFAGS += -fPIC
+CFLAGS += -I/root/openssl-OpenSSL_1_1_1/local/include
+# end eaphammer
 
 CFLAGS += -I.. -I../utils
 

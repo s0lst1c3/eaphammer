@@ -30,7 +30,7 @@ Features
 - Support for Open networks and WPA-EAP/WPA2-EAP
 - No manual configuration necessary for most attacks.
 - No manual configuration necessary for installation and setup process
-- Leverages latest version of hostapd (2.6)
+- Leverages latest version of hostapd (2.8)
 - Support for evil twin and karma attacks
 - Generate timed Powershell payloads for indirect wireless pivots
 - Integrated HTTP server for Hostile Portal attacks
@@ -38,11 +38,13 @@ Features
 - Fast and automated PMKID attacks against PSK networks using hcxtools
 - Password spraying across multiple usernames against a single ESSID
 
-### New (as of Version 0.7.0)(latest)
+### New (as of Version 0.8.0)(latest)
+EAPHammer now uses hostapd 2.8 (latest). 
+
+### Improved Certificate Handling
 EAPHammer's Cert Wizard has been expanded to provide users with the ability to create, import, and manage SSL certificates in a highly flexible manner. Cert Wizard's previous functionality has been preserved as Cert Wizard's Interactive Mode, which uses the same syntax as previous versions. See [XIII - Cert Wizard](#xiii---cert-wizard) for additional details.
 
 ### TLS / SSL Backwards Compatibility
-
 EAPHammer now uses a local build of libssl that exists independently of the systemwide install. This local version is compiled with support for SSLv3, allowing EAPHammer to be used against legacy clients without compromising the integrity of the attacker's operating system.
 
 

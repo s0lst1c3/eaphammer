@@ -719,7 +719,7 @@ static int wpa_driver_ndis_disconnect(struct wpa_driver_ndis_data *drv)
 
 
 static int wpa_driver_ndis_deauthenticate(void *priv, const u8 *addr,
-					  int reason_code)
+					  u16 reason_code)
 {
 	struct wpa_driver_ndis_data *drv = priv;
 	return wpa_driver_ndis_disconnect(drv);
@@ -1220,12 +1220,16 @@ static int wpa_driver_ndis_set_pmkid(struct wpa_driver_ndis_data *drv)
 }
 
 
-static int wpa_driver_ndis_add_pmkid(void *priv, const u8 *bssid,
-				     const u8 *pmkid)
+static int wpa_driver_ndis_add_pmkid(void *priv,
+				     struct wpa_pmkid_params *params)
 {
 	struct wpa_driver_ndis_data *drv = priv;
 	struct ndis_pmkid_entry *entry, *prev;
+	const u8 *bssid = params->bssid;
+	const u8 *pmkid = params->pmkid;
 
+	if (!bssid || !pmkid)
+		return -1;
 	if (drv->no_of_pmkid == 0)
 		return 0;
 
@@ -1261,12 +1265,16 @@ static int wpa_driver_ndis_add_pmkid(void *priv, const u8 *bssid,
 }
 
 
-static int wpa_driver_ndis_remove_pmkid(void *priv, const u8 *bssid,
-		 			const u8 *pmkid)
+static int wpa_driver_ndis_remove_pmkid(void *priv,
+					struct wpa_pmkid_params *params)
 {
 	struct wpa_driver_ndis_data *drv = priv;
 	struct ndis_pmkid_entry *entry, *prev;
+	const u8 *bssid = params->bssid;
+	const u8 *pmkid = params->pmkid;
 
+	if (!bssid || !pmkid)
+		return -1;
 	if (drv->no_of_pmkid == 0)
 		return 0;
 

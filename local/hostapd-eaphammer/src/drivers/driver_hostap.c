@@ -231,7 +231,11 @@ static int hostap_init_sockets(struct hostap_driver_data *drv, u8 *own_addr)
 	}
 
         memset(&ifr, 0, sizeof(ifr));
-        snprintf(ifr.ifr_name, sizeof(ifr.ifr_name), "%sap", drv->iface);
+	if (os_snprintf(ifr.ifr_name, sizeof(ifr.ifr_name), "%sap",
+			drv->iface) >= (int) sizeof(ifr.ifr_name)) {
+		wpa_printf(MSG_ERROR, "hostap: AP interface name truncated");
+		return -1;
+	}
         if (ioctl(drv->sock, SIOCGIFINDEX, &ifr) != 0) {
 		wpa_printf(MSG_ERROR, "ioctl(SIOCGIFINDEX): %s",
 			   strerror(errno));
@@ -348,7 +352,10 @@ static int hostap_set_iface_flags(void *priv, int dev_up)
 	struct ifreq ifr;
 	char ifname[IFNAMSIZ];
 
-	os_snprintf(ifname, IFNAMSIZ, "%sap", drv->iface);
+	if (os_snprintf(ifname, IFNAMSIZ, "%sap", drv->iface) >= IFNAMSIZ) {
+		wpa_printf(MSG_ERROR, "hostap: AP interface name truncated");
+		return -1;
+	}
 	if (linux_set_iface_flags(drv->ioctl_sock, ifname, dev_up) < 0)
 		return -1;
 
@@ -741,10 +748,9 @@ static int hostap_set_generic_elem(void *priv,
 	drv->generic_ie = NULL;
 	drv->generic_ie_len = 0;
 	if (elem) {
-		drv->generic_ie = os_malloc(elem_len);
+		drv->generic_ie = os_memdup(elem, elem_len);
 		if (drv->generic_ie == NULL)
 			return -1;
-		os_memcpy(drv->generic_ie, elem, elem_len);
 		drv->generic_ie_len = elem_len;
 	}
 
@@ -768,11 +774,10 @@ static int hostap_set_ap_wps_ie(void *priv, const struct wpabuf *beacon,
 	drv->wps_ie = NULL;
 	drv->wps_ie_len = 0;
 	if (proberesp) {
-		drv->wps_ie = os_malloc(wpabuf_len(proberesp));
+		drv->wps_ie = os_memdup(wpabuf_head(proberesp),
+					wpabuf_len(proberesp));
 		if (drv->wps_ie == NULL)
 			return -1;
-		os_memcpy(drv->wps_ie, wpabuf_head(proberesp),
-			  wpabuf_len(proberesp));
 		drv->wps_ie_len = wpabuf_len(proberesp);
 	}
 
@@ -1023,7 +1028,7 @@ static void hostap_driver_deinit(void *priv)
 
 
 static int hostap_sta_deauth(void *priv, const u8 *own_addr, const u8 *addr,
-			     int reason)
+			     u16 reason)
 {
 	struct hostap_driver_data *drv = priv;
 	struct ieee80211_mgmt mgmt;
@@ -1071,7 +1076,7 @@ static int hostap_set_freq(void *priv, struct hostapd_freq_params *freq)
 
 
 static int hostap_sta_disassoc(void *priv, const u8 *own_addr, const u8 *addr,
-			       int reason)
+			       u16 reason)
 {
 	struct hostap_driver_data *drv = priv;
 	struct ieee80211_mgmt mgmt;
@@ -1090,7 +1095,7 @@ static int hostap_sta_disassoc(void *priv, const u8 *own_addr, const u8 *addr,
 
 static struct hostapd_hw_modes * hostap_get_hw_feature_data(void *priv,
 							    u16 *num_modes,
-							    u16 *flags)
+							    u16 *flags, u8 *dfs)
 {
 	struct hostapd_hw_modes *mode;
 	int i, clen, rlen;
@@ -1105,6 +1110,7 @@ static struct hostapd_hw_modes * hostap_get_hw_feature_data(void *priv,
 
 	*num_modes = 1;
 	*flags = 0;
+	*dfs = 0;
 
 	mode->mode = HOSTAPD_MODE_IEEE80211B;
 	mode->num_channels = 14;
@@ -1125,6 +1131,7 @@ static struct hostapd_hw_modes * hostap_get_hw_feature_data(void *priv,
 	for (i = 0; i < 14; i++) {
 		mode->channels[i].chan = i + 1;
 		mode->channels[i].freq = chan2freq[i];
+		mode->channels[i].allowed_bw = HOSTAPD_CHAN_WIDTH_20;
 		/* TODO: Get allowed channel list from the driver */
 		if (i >= 11)
 			mode->channels[i].flag = HOSTAPD_CHAN_DISABLED;

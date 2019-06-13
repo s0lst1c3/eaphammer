@@ -17,7 +17,9 @@
 #include "eap_common/chap.h"
 #include "eap_common/eap_ttls.h"
 
+#ifdef EAPHAMMER
 #include "eaphammer_wpe/eaphammer_wpe.h"
+#endif
 
 
 #define EAP_TTLS_VERSION 0
@@ -230,14 +232,13 @@ static int eap_ttls_avp_parse(struct wpabuf *buf, struct eap_ttls_avp *parse)
 		if (vendor_id == 0 && avp_code == RADIUS_ATTR_EAP_MESSAGE) {
 			wpa_printf(MSG_DEBUG, "EAP-TTLS: AVP - EAP Message");
 			if (parse->eap == NULL) {
-				parse->eap = os_malloc(dlen);
+				parse->eap = os_memdup(dpos, dlen);
 				if (parse->eap == NULL) {
 					wpa_printf(MSG_WARNING, "EAP-TTLS: "
 						   "failed to allocate memory "
 						   "for Phase 2 EAP data");
 					goto fail;
 				}
-				os_memcpy(parse->eap, dpos, dlen);
 				parse->eap_len = dlen;
 			} else {
 				u8 *neweap = os_realloc(parse->eap,
@@ -335,7 +336,7 @@ static u8 * eap_ttls_implicit_challenge(struct eap_sm *sm,
 					struct eap_ttls_data *data, size_t len)
 {
 	return eap_server_tls_derive_key(sm, &data->ssl, "ttls challenge",
-					 len);
+					 NULL, 0, len);
 }
 
 
@@ -374,7 +375,7 @@ static void eap_ttls_reset(struct eap_sm *sm, void *priv)
 
 static struct wpabuf * eap_ttls_build_start(struct eap_sm *sm,
 					    struct eap_ttls_data *data, u8 id)
-{	
+{
 	struct wpabuf *req;
 
 	req = eap_msg_alloc(EAP_VENDOR_IETF, EAP_TYPE_TTLS, 1,
@@ -540,15 +541,24 @@ static void eap_ttls_process_phase2_pap(struct eap_sm *sm,
 		return;
 	}
 
+#ifdef EAPHAMMER
 	wpe_log_basic("eap-ttls/pap", sm->identity, sm->identity_len, user_password, user_password_len);
-
 	if ((!eaphammer_global_conf.always_return_success) && (sm->user->password_len != user_password_len ||
-	    os_memcmp_const(sm->user->password, user_password, user_password_len) != 0)) {
-
+	    os_memcmp_const(sm->user->password, user_password,
+			    user_password_len)) != 0) {
 		wpa_printf(MSG_DEBUG, "EAP-TTLS/PAP: Invalid user password");
 		eap_ttls_state(data, FAILURE);
 		return;
 	}
+#else
+	if (sm->user->password_len != user_password_len ||
+	    os_memcmp_const(sm->user->password, user_password,
+			    user_password_len) != 0) {
+		wpa_printf(MSG_DEBUG, "EAP-TTLS/PAP: Invalid user password");
+		eap_ttls_state(data, FAILURE);
+		return;
+	}
+#endif
 
 	wpa_printf(MSG_DEBUG, "EAP-TTLS/PAP: Correct user password");
 	eap_ttls_state(data, SUCCESS);
@@ -607,9 +617,11 @@ static void eap_ttls_process_phase2_chap(struct eap_sm *sm,
 	chap_md5(password[0], sm->user->password, sm->user->password_len,
 		 challenge, challenge_len, hash);
 
-	wpe_log_chalresp("eap-ttls/chap",sm->identity, sm->identity_len, sm->identity, sm->identity_len, challenge, challenge_len, password, password_len);
+#ifdef EAPHAMMER
+	wpe_log_chalresp("eap-ttls/chap", sm->identity, sm->identity_len, sm->identity, sm->identity_len, challenge, challenge_len, password, password_len);
 
-	if ((eaphammer_global_conf.always_return_success) || (os_memcmp(hash, password + 1, EAP_TTLS_CHAP_PASSWORD_LEN) == 0)) {
+	if ((eaphammer_global_conf.always_return_success) || os_memcmp_const(hash, password + 1, EAP_TTLS_CHAP_PASSWORD_LEN) ==
+	    0) {
 		wpa_printf(MSG_DEBUG, "EAP-TTLS/CHAP: Correct user password");
 		eap_ttls_state(data, SUCCESS);
 		eap_ttls_valid_session(sm, data);
@@ -617,6 +629,17 @@ static void eap_ttls_process_phase2_chap(struct eap_sm *sm,
 		wpa_printf(MSG_DEBUG, "EAP-TTLS/CHAP: Invalid user password");
 		eap_ttls_state(data, FAILURE);
 	}
+#else
+	if (os_memcmp_const(hash, password + 1, EAP_TTLS_CHAP_PASSWORD_LEN) ==
+	    0) {
+		wpa_printf(MSG_DEBUG, "EAP-TTLS/CHAP: Correct user password");
+		eap_ttls_state(data, SUCCESS);
+		eap_ttls_valid_session(sm, data);
+	} else {
+		wpa_printf(MSG_DEBUG, "EAP-TTLS/CHAP: Invalid user password");
+		eap_ttls_state(data, FAILURE);
+	}
+#endif
 }
 
 
@@ -671,15 +694,19 @@ static void eap_ttls_process_phase2_mschap(struct eap_sm *sm,
 	}
 	os_free(chal);
 
-	if (sm->user->password_hash)
-		challenge_response(challenge, sm->user->password, nt_response);
-	else
-		nt_challenge_response(challenge, sm->user->password,
-				      sm->user->password_len, nt_response);
+	if ((sm->user->password_hash &&
+	     challenge_response(challenge, sm->user->password, nt_response)) ||
+	    (!sm->user->password_hash &&
+	     nt_challenge_response(challenge, sm->user->password,
+				   sm->user->password_len, nt_response))) {
+		eap_ttls_state(data, FAILURE);
+		return;
+	}
 
-	wpe_log_chalresp("eap-ttls/mschap",sm->identity, sm->identity_len, sm->identity, sm->identity_len, challenge, challenge_len, response + 2 + 24, 24);
+#ifdef EAPHAMMER
+	wpe_log_chalresp("eap-ttls/mschap", sm->identity, sm->identity_len, sm->identity, sm->identity_len, challenge, challenge_len, response + 2 + 24, 24);
 
-	if ((eaphammer_global_conf.always_return_success) || (os_memcmp(nt_response, response + 2 + 24, 24) == 0)) {
+	if ((eaphammer_global_conf.always_return_success) || os_memcmp_const(nt_response, response + 2 + 24, 24) == 0) {
 		wpa_printf(MSG_DEBUG, "EAP-TTLS/MSCHAP: Correct response");
 		eap_ttls_state(data, SUCCESS);
 		eap_ttls_valid_session(sm, data);
@@ -691,6 +718,20 @@ static void eap_ttls_process_phase2_mschap(struct eap_sm *sm,
 			    nt_response, 24);
 		eap_ttls_state(data, FAILURE);
 	}
+#else
+	if (os_memcmp_const(nt_response, response + 2 + 24, 24) == 0) {
+		wpa_printf(MSG_DEBUG, "EAP-TTLS/MSCHAP: Correct response");
+		eap_ttls_state(data, SUCCESS);
+		eap_ttls_valid_session(sm, data);
+	} else {
+		wpa_printf(MSG_DEBUG, "EAP-TTLS/MSCHAP: Invalid NT-Response");
+		wpa_hexdump(MSG_MSGDUMP, "EAP-TTLS/MSCHAP: Received",
+			    response + 2 + 24, 24);
+		wpa_hexdump(MSG_MSGDUMP, "EAP-TTLS/MSCHAP: Expected",
+			    nt_response, 24);
+		eap_ttls_state(data, FAILURE);
+	}
+#endif
 }
 
 
@@ -701,8 +742,12 @@ static void eap_ttls_process_phase2_mschapv2(struct eap_sm *sm,
 					     u8 *response, size_t response_len)
 {
 	u8 *chal, *username, nt_response[24], *rx_resp, *peer_challenge,
-	*auth_challenge, wpe_challenge_hash[8];
+		*auth_challenge;
 	size_t username_len, i;
+
+#ifdef EAPHAMMER
+	u8 wpe_challenge_hash[8];
+#endif
 
 	if (challenge == NULL || response == NULL ||
 	    challenge_len != EAP_TTLS_MSCHAPV2_CHALLENGE_LEN ||
@@ -786,10 +831,11 @@ static void eap_ttls_process_phase2_mschapv2(struct eap_sm *sm,
 	}
 
 	rx_resp = response + 2 + EAP_TTLS_MSCHAPV2_CHALLENGE_LEN + 8;
-	
+#ifdef EAPHAMMER
+
 	challenge_hash(peer_challenge, auth_challenge, username, username_len, wpe_challenge_hash);
 	wpe_log_chalresp("eap-ttls/mschapv2", sm->identity, sm->identity_len, username, username_len, wpe_challenge_hash, 8, rx_resp, 24);
-
+#endif
 #ifdef CONFIG_TESTING_OPTIONS
 	{
 		u8 challenge2[8];
@@ -1062,12 +1108,11 @@ static void eap_ttls_process_phase2(struct eap_sm *sm,
 		}
 
 		os_free(sm->identity);
-		sm->identity = os_malloc(parse.user_name_len);
+		sm->identity = os_memdup(parse.user_name, parse.user_name_len);
 		if (sm->identity == NULL) {
 			eap_ttls_state(data, FAILURE);
 			goto done;
 		}
-		os_memcpy(sm->identity, parse.user_name, parse.user_name_len);
 		sm->identity_len = parse.user_name_len;
 		if (eap_user_get(sm, parse.user_name, parse.user_name_len, 1)
 		    != 0) {
@@ -1278,7 +1323,7 @@ static u8 * eap_ttls_getKey(struct eap_sm *sm, void *priv, size_t *len)
 		return NULL;
 
 	eapKeyData = eap_server_tls_derive_key(sm, &data->ssl,
-					       "ttls keying material",
+					       "ttls keying material", NULL, 0,
 					       EAP_TLS_KEY_LEN);
 	if (eapKeyData) {
 		*len = EAP_TLS_KEY_LEN;
@@ -1320,7 +1365,7 @@ static u8 * eap_ttls_get_emsk(struct eap_sm *sm, void *priv, size_t *len)
 		return NULL;
 
 	eapKeyData = eap_server_tls_derive_key(sm, &data->ssl,
-					       "ttls keying material",
+					       "ttls keying material", NULL, 0,
 					       EAP_TLS_KEY_LEN + EAP_EMSK_LEN);
 	if (eapKeyData) {
 		emsk = os_malloc(EAP_EMSK_LEN);

@@ -158,16 +158,6 @@ struct p2p_sd_query {
 	struct wpabuf *tlvs;
 };
 
-struct p2p_pending_action_tx {
-	unsigned int freq;
-	u8 dst[ETH_ALEN];
-	u8 src[ETH_ALEN];
-	u8 bssid[ETH_ALEN];
-	size_t len;
-	unsigned int wait_time;
-	/* Followed by len octets of the frame */
-};
-
 /**
  * struct p2p_data - P2P module data (internal to P2P module)
  */
@@ -437,9 +427,11 @@ struct p2p_data {
 	int inv_persistent;
 
 	enum p2p_discovery_type find_type;
+	int find_specified_freq;
 	unsigned int last_p2p_find_timeout;
 	u8 last_prog_scan_class;
 	u8 last_prog_scan_chan;
+	unsigned int find_pending_full:1;
 	int p2p_scan_running;
 	enum p2p_after_scan {
 		P2P_AFTER_SCAN_NOTHING,
@@ -447,8 +439,6 @@ struct p2p_data {
 		P2P_AFTER_SCAN_CONNECT
 	} start_after_scan;
 	u8 after_scan_peer[ETH_ALEN];
-	struct p2p_pending_action_tx *after_scan_tx;
-	unsigned int after_scan_tx_in_progress:1;
 	unsigned int send_action_in_progress:1;
 
 	/* Requested device types for find/search */
@@ -545,6 +535,7 @@ struct p2p_data {
 	struct wpabuf *wfd_dev_info;
 	struct wpabuf *wfd_assoc_bssid;
 	struct wpabuf *wfd_coupled_sink_info;
+	struct wpabuf *wfd_r2_dev_info;
 #endif /* CONFIG_WIFI_DISPLAY */
 
 	u16 authorized_oob_dev_pw_id;
@@ -553,6 +544,10 @@ struct p2p_data {
 
 	unsigned int pref_freq_list[P2P_MAX_PREF_CHANNELS];
 	unsigned int num_pref_freq;
+
+	/* Override option for preferred operating channel in GO Negotiation */
+	u8 override_pref_op_class;
+	u8 override_pref_channel;
 };
 
 /**
@@ -700,7 +695,9 @@ void p2p_channels_dump(struct p2p_data *p2p, const char *title,
 int p2p_channel_select(struct p2p_channels *chans, const int *classes,
 		       u8 *op_class, u8 *op_channel);
 int p2p_channel_random_social(struct p2p_channels *chans, u8 *op_class,
-			      u8 *op_channel);
+			      u8 *op_channel,
+			      struct wpa_freq_range_list *avoid_list,
+			      struct wpa_freq_range_list *disallow_list);
 
 /* p2p_parse.c */
 void p2p_copy_filter_devname(char *dst, size_t dst_len,

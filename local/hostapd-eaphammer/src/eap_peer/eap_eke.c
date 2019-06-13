@@ -85,12 +85,11 @@ static void * eap_eke_init(struct eap_sm *sm)
 
 	identity = eap_get_config_identity(sm, &identity_len);
 	if (identity) {
-		data->peerid = os_malloc(identity_len);
+		data->peerid = os_memdup(identity, identity_len);
 		if (data->peerid == NULL) {
 			eap_eke_deinit(sm, data);
 			return NULL;
 		}
-		os_memcpy(data->peerid, identity, identity_len);
 		data->peerid_len = identity_len;
 	}
 
@@ -310,12 +309,11 @@ static struct wpabuf * eap_eke_process_id(struct eap_eke_data *data,
 	wpa_hexdump_ascii(MSG_DEBUG, "EAP-EKE: Server Identity",
 			  pos, end - pos);
 	os_free(data->serverid);
-	data->serverid = os_malloc(end - pos);
+	data->serverid = os_memdup(pos, end - pos);
 	if (data->serverid == NULL) {
 		return eap_eke_build_fail(data, ret, id,
 					  EAP_EKE_FAIL_PRIVATE_INTERNAL_ERROR);
 	}
-	os_memcpy(data->serverid, pos, end - pos);
 	data->serverid_len = end - pos;
 
 	wpa_printf(MSG_DEBUG, "EAP-EKE: Sending EAP-EKE-ID/Response");
@@ -416,7 +414,7 @@ static struct wpabuf * eap_eke_process_commit(struct eap_sm *sm,
 	 */
 	if (eap_eke_dh_init(data->sess.dhgroup, data->dh_priv, pub) < 0) {
 		wpa_printf(MSG_INFO, "EAP-EKE: Failed to initialize DH");
-		os_memset(key, 0, sizeof(key));
+		forced_memzero(key, sizeof(key));
 		return eap_eke_build_fail(data, ret, id,
 					  EAP_EKE_FAIL_PRIVATE_INTERNAL_ERROR);
 	}
@@ -424,7 +422,7 @@ static struct wpabuf * eap_eke_process_commit(struct eap_sm *sm,
 	if (eap_eke_shared_secret(&data->sess, key, data->dh_priv, dhcomp) < 0)
 	{
 		wpa_printf(MSG_INFO, "EAP-EKE: Failed to derive shared secret");
-		os_memset(key, 0, sizeof(key));
+		forced_memzero(key, sizeof(key));
 		return eap_eke_build_fail(data, ret, id,
 					  EAP_EKE_FAIL_PRIVATE_INTERNAL_ERROR);
 	}
@@ -433,7 +431,7 @@ static struct wpabuf * eap_eke_process_commit(struct eap_sm *sm,
 				 data->serverid, data->serverid_len,
 				 data->peerid, data->peerid_len) < 0) {
 		wpa_printf(MSG_INFO, "EAP-EKE: Failed to derive Ke/Ki");
-		os_memset(key, 0, sizeof(key));
+		forced_memzero(key, sizeof(key));
 		return eap_eke_build_fail(data, ret, id,
 					  EAP_EKE_FAIL_PRIVATE_INTERNAL_ERROR);
 	}
@@ -444,7 +442,7 @@ static struct wpabuf * eap_eke_process_commit(struct eap_sm *sm,
 				 data->sess.dhcomp_len + data->sess.pnonce_len,
 				 EAP_EKE_COMMIT);
 	if (resp == NULL) {
-		os_memset(key, 0, sizeof(key));
+		forced_memzero(key, sizeof(key));
 		return eap_eke_build_fail(data, ret, id,
 					  EAP_EKE_FAIL_PRIVATE_INTERNAL_ERROR);
 	}
@@ -454,11 +452,11 @@ static struct wpabuf * eap_eke_process_commit(struct eap_sm *sm,
 	if (eap_eke_dhcomp(&data->sess, key, pub, rpos) < 0) {
 		wpabuf_free(resp);
 		wpa_printf(MSG_INFO, "EAP-EKE: Failed to build DHComponent_P");
-		os_memset(key, 0, sizeof(key));
+		forced_memzero(key, sizeof(key));
 		return eap_eke_build_fail(data, ret, id,
 					  EAP_EKE_FAIL_PRIVATE_INTERNAL_ERROR);
 	}
-	os_memset(key, 0, sizeof(key));
+	forced_memzero(key, sizeof(key));
 
 	wpa_hexdump(MSG_DEBUG, "EAP-EKE: DHComponent_P",
 		    rpos, data->sess.dhcomp_len);
@@ -717,10 +715,9 @@ static u8 * eap_eke_getKey(struct eap_sm *sm, void *priv, size_t *len)
 	if (data->state != SUCCESS)
 		return NULL;
 
-	key = os_malloc(EAP_MSK_LEN);
+	key = os_memdup(data->msk, EAP_MSK_LEN);
 	if (key == NULL)
 		return NULL;
-	os_memcpy(key, data->msk, EAP_MSK_LEN);
 	*len = EAP_MSK_LEN;
 
 	return key;
@@ -735,10 +732,9 @@ static u8 * eap_eke_get_emsk(struct eap_sm *sm, void *priv, size_t *len)
 	if (data->state != SUCCESS)
 		return NULL;
 
-	key = os_malloc(EAP_EMSK_LEN);
+	key = os_memdup(data->emsk, EAP_EMSK_LEN);
 	if (key == NULL)
 		return NULL;
-	os_memcpy(key, data->emsk, EAP_EMSK_LEN);
 	*len = EAP_EMSK_LEN;
 
 	return key;

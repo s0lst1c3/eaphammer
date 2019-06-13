@@ -40,9 +40,6 @@ int tls_prf_sha1_md5(const u8 *secret, size_t secret_len, const char *label,
 	const unsigned char *SHA1_addr[3];
 	size_t SHA1_len[3];
 
-	if (secret_len & 1)
-		return -1;
-
 	MD5_addr[0] = A_MD5;
 	MD5_len[0] = MD5_MAC_LEN;
 	MD5_addr[1] = (unsigned char *) label;
@@ -95,10 +92,10 @@ int tls_prf_sha1_md5(const u8 *secret, size_t secret_len, const char *label,
 		SHA1_pos++;
 	}
 
-	os_memset(A_MD5, 0, MD5_MAC_LEN);
-	os_memset(P_MD5, 0, MD5_MAC_LEN);
-	os_memset(A_SHA1, 0, SHA1_MAC_LEN);
-	os_memset(P_SHA1, 0, SHA1_MAC_LEN);
+	forced_memzero(A_MD5, MD5_MAC_LEN);
+	forced_memzero(P_MD5, MD5_MAC_LEN);
+	forced_memzero(A_SHA1, SHA1_MAC_LEN);
+	forced_memzero(P_SHA1, SHA1_MAC_LEN);
 
 	return 0;
 }

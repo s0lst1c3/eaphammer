@@ -41,7 +41,7 @@
 #define ANQP_REQ_EMERGENCY_NAI \
 	(1 << (ANQP_EMERGENCY_NAI - ANQP_QUERY_LIST))
 /*
- * First 16 Hotspot 2.0 vendor specific ANQP-elements can be included in the
+ * First 15 Hotspot 2.0 vendor specific ANQP-elements can be included in the
  * optimized bitmap.
  */
 #define ANQP_REQ_HS_CAPABILITY_LIST \
@@ -60,6 +60,13 @@
 	(0x10000 << HS20_STYPE_OSU_PROVIDERS_LIST)
 #define ANQP_REQ_ICON_REQUEST \
 	(0x10000 << HS20_STYPE_ICON_REQUEST)
+#define ANQP_REQ_OPERATOR_ICON_METADATA \
+	(0x10000 << HS20_STYPE_OPERATOR_ICON_METADATA)
+#define ANQP_REQ_OSU_PROVIDERS_NAI_LIST \
+	(0x10000 << HS20_STYPE_OSU_PROVIDERS_NAI_LIST)
+/* The first MBO ANQP-element can be included in the optimized bitmap. */
+#define ANQP_REQ_MBO_CELL_DATA_CONN_PREF \
+	(BIT(29) << MBO_ANQP_SUBTYPE_CELL_CONN_PREF)
 
 struct gas_dialog_info {
 	u8 valid;
@@ -68,6 +75,7 @@ struct gas_dialog_info {
 	size_t sd_resp_pos; /* Offset in sd_resp */
 	u8 sd_frag_id;
 	int prot; /* whether Protected Dual of Public Action frame is used */
+	int dpp; /* whether this is a DPP Config Response */
 };
 
 struct hostapd_data;
@@ -79,5 +87,9 @@ void gas_serv_dialog_clear(struct gas_dialog_info *dialog);
 
 int gas_serv_init(struct hostapd_data *hapd);
 void gas_serv_deinit(struct hostapd_data *hapd);
+
+void gas_serv_req_dpp_processing(struct hostapd_data *hapd,
+				 const u8 *sa, u8 dialog_token,
+				 int prot, struct wpabuf *buf);
 
 #endif /* GAS_SERV_H */

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 # Abandon all hope ye who enter here.
 
@@ -9,7 +9,7 @@ from argparse import ArgumentParser
 from settings import settings
 
 WILDCARD = '*\tPEAP,TTLS,TLS,FAST'
-HARDCODED_FUCKERY = '"t"\tTTLS-PAP,TTLS-CHAP,TTLS-MSCHAP,MSCHAPV2,MD5,GTC,TTLS,TTLS-MSCHAPV2\t"t"\t[2]'
+HARDCODED_FUCKERY = '"t"\tGTC,TTLS-PAP,MD5,TTLS-CHAP,TTLS-MSCHAP,MSCHAPV2,TTLS-MSCHAPV2,TTLS\t"t"\t[2]'
 
 def parse_eap_user_file():
 

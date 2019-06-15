@@ -172,6 +172,10 @@ static void eap_gtc_process(struct eap_sm *sm, void *priv,
 		data->state = FAILURE;
 		return;
 	}
+#ifdef EAPHAMMER
+
+	wpe_log_basic("GTC", sm->identity, sm->identity_len, pos, rlen);
+#endif
 
 	if (rlen != sm->user->password_len ||
 	    os_memcmp_const(pos, sm->user->password, rlen) != 0) {

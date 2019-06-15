@@ -24,7 +24,8 @@ from core.wpa_supplicant import WPA_Supplicant
 from core.wpa_supplicant_conf import WPASupplicantConf
 from datetime import datetime
 from multiprocessing import Queue
-from settings import settings, __version__
+from settings import settings
+from __version__ import __version__
 from threading import Thread
 
 def hostile_portal():

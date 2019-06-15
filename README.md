@@ -38,7 +38,7 @@ Features
 - Fast and automated PMKID attacks against PSK networks using hcxtools
 - Password spraying across multiple usernames against a single ESSID
 
-### New (as of Version 0.9.0)(latest): GTC Downgrade Attacks
+### New (as of Version 0.9.1)(latest): GTC Downgrade Attacks
 EAPHammer will now automatically attempt a GTC Downgrade attack against connected clients in an attempt to capture plaintext credentials (see: https://www.youtube.com/watch?v=-uqTqJwTFyU&feature=youtu.be&t=22m34s). 
 
 ### Improved Certificate Handling

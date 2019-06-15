@@ -100,3 +100,6 @@ Ported to hostapd 2.8 base.
 
 0.9.0 - Gabriel Ryan <gryan@specterops.io>
 Support for GTC logging added. GTC Downgrade attack implemented by editing .eap_user file.
+
+0.9.1 - Gabriel Ryan <gryan@specterops.io>
+Version string moved to a more sensible location.

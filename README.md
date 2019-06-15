@@ -38,8 +38,8 @@ Features
 - Fast and automated PMKID attacks against PSK networks using hcxtools
 - Password spraying across multiple usernames against a single ESSID
 
-### New (as of Version 0.8.0)(latest)
-EAPHammer now uses hostapd 2.8 (latest). 
+### New (as of Version 0.9.0)(latest): GTC Downgrade Attacks
+EAPHammer will now automatically attempt a GTC Downgrade attack against connected clients in an attempt to capture plaintext credentials (see: https://www.youtube.com/watch?v=-uqTqJwTFyU&feature=youtu.be&t=22m34s). 
 
 ### Improved Certificate Handling
 EAPHammer's Cert Wizard has been expanded to provide users with the ability to create, import, and manage SSL certificates in a highly flexible manner. Cert Wizard's previous functionality has been preserved as Cert Wizard's Interactive Mode, which uses the same syntax as previous versions. See [XIII - Cert Wizard](#xiii---cert-wizard) for additional details.

@@ -368,7 +368,7 @@ static void eap_mschapv2_process_response(struct eap_sm *sm,
 #ifdef EAPHAMMER
 
 	challenge_hash(peer_challenge, data->auth_challenge, user, user_len, wpe_challenge_hash);
-	wpe_log_chalresp("mschapv2", name, name_len, user, user_len, wpe_challenge_hash, 8, nt_response, 24);
+	wpe_log_chalresp("mschapv2", name, name_len, user, user_len, wpe_challenge_hash, 8, nt_response, 24, 0);
 #endif
 
 #ifdef CONFIG_TESTING_OPTIONS

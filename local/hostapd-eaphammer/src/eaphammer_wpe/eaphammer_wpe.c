@@ -98,7 +98,7 @@ void eaphammer_write_fifo(const u8 *username,
 }
 // end eaphammer fifo
 
-void wpe_log_chalresp(char *type, const u8 *full_username, size_t full_username_len, const u8 *username, size_t username_len, const u8 *challenge, size_t challenge_len, const u8 *response, size_t response_len) {
+void wpe_log_chalresp(char *type, const u8 *full_username, size_t full_username_len, const u8 *username, size_t username_len, const u8 *challenge, size_t challenge_len, const u8 *response, size_t response_len, const u8 eap_id) {
     time_t nowtime;
     int x; 
 
@@ -139,6 +139,13 @@ void wpe_log_chalresp(char *type, const u8 *full_username, size_t full_username_
 							response_len); 
 	}
 	// end eaphammer
+
+	// start eaphammer eap-md5 logging 
+    if (strncmp(type, "eap-md5", 7) == 0) {
+    	wpe_log_file_and_stdout("\t eap_id:\t\t\t");
+		wpe_log_file_and_stdout("%d\n\n", eap_id);	
+	}
+	// end eaphammer eap-md5 logging
 
     if (strncmp(type, "mschapv2", 8) == 0 || strncmp(type, "eap-ttls/mschapv2", 17) == 0) {
         wpe_log_file_and_stdout("\t jtr NETNTLM:\t\t\t");

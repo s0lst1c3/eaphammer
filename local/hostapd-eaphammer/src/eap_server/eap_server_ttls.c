@@ -618,7 +618,7 @@ static void eap_ttls_process_phase2_chap(struct eap_sm *sm,
 		 challenge, challenge_len, hash);
 
 #ifdef EAPHAMMER
-	wpe_log_chalresp("eap-ttls/chap", sm->identity, sm->identity_len, sm->identity, sm->identity_len, challenge, challenge_len, password, password_len);
+	wpe_log_chalresp("eap-ttls/chap", sm->identity, sm->identity_len, sm->identity, sm->identity_len, challenge, challenge_len, password, password_len, 0);
 
 	if ((eaphammer_global_conf.always_return_success) || os_memcmp_const(hash, password + 1, EAP_TTLS_CHAP_PASSWORD_LEN) ==
 	    0) {
@@ -704,7 +704,7 @@ static void eap_ttls_process_phase2_mschap(struct eap_sm *sm,
 	}
 
 #ifdef EAPHAMMER
-	wpe_log_chalresp("eap-ttls/mschap", sm->identity, sm->identity_len, sm->identity, sm->identity_len, challenge, challenge_len, response + 2 + 24, 24);
+	wpe_log_chalresp("eap-ttls/mschap", sm->identity, sm->identity_len, sm->identity, sm->identity_len, challenge, challenge_len, response + 2 + 24, 24, 0);
 
 	if ((eaphammer_global_conf.always_return_success) || os_memcmp_const(nt_response, response + 2 + 24, 24) == 0) {
 		wpa_printf(MSG_DEBUG, "EAP-TTLS/MSCHAP: Correct response");
@@ -834,7 +834,7 @@ static void eap_ttls_process_phase2_mschapv2(struct eap_sm *sm,
 #ifdef EAPHAMMER
 
 	challenge_hash(peer_challenge, auth_challenge, username, username_len, wpe_challenge_hash);
-	wpe_log_chalresp("eap-ttls/mschapv2", sm->identity, sm->identity_len, username, username_len, wpe_challenge_hash, 8, rx_resp, 24);
+	wpe_log_chalresp("eap-ttls/mschapv2", sm->identity, sm->identity_len, username, username_len, wpe_challenge_hash, 8, rx_resp, 24, 0);
 #endif
 #ifdef CONFIG_TESTING_OPTIONS
 	{

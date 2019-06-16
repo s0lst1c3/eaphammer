@@ -145,6 +145,27 @@ void wpe_log_chalresp(char *type, const u8 *full_username, size_t full_username_
     	wpe_log_file_and_stdout("\t eap_id:\t\t\t");
 		wpe_log_file_and_stdout("%d\n\n", eap_id);	
 	}
+
+    if (strncmp(type, "eap-md5", 7) == 0) {
+
+        wpe_log_file_and_stdout("\t hashcat NETNTLM:\t\t");
+
+		// print response
+		for(x = 0; x < response_len; x++) {
+
+			wpe_log_file_and_stdout("%02x", response[x]);
+		}
+        wpe_log_file_and_stdout(":");
+
+		// print response
+        for (x = 0; x < challenge_len; x++)
+            wpe_log_file_and_stdout("%02x", challenge[x]);
+        wpe_log_file_and_stdout(":");
+
+		// print eap_id
+        wpe_log_file_and_stdout("%02x", eap_id);
+        wpe_log_file_and_stdout("\n\n\n");
+	}
 	// end eaphammer eap-md5 logging
 
     if (strncmp(type, "mschapv2", 8) == 0 || strncmp(type, "eap-ttls/mschapv2", 17) == 0) {

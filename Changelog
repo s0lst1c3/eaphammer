@@ -109,3 +109,6 @@ Support for EAP-MD5,EAP-PEAP/MD5, and EAP-TTLS/MD5 added.
 
 1.1.0 - Gabriel Ryan <gryan@specterops.io>
 Added root check.
+
+1.1.1 - Gabriel Ryan <gryan@specterops.io>
+Fixed index error in autocrack.

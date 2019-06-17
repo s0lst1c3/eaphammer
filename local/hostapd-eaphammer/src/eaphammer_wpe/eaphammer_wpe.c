@@ -148,6 +148,29 @@ void wpe_log_chalresp(char *type, const u8 *full_username, size_t full_username_
 
     if (strncmp(type, "eap-md5", 7) == 0) {
 
+        wpe_log_file_and_stdout("\t jtr NETNTLM:\t\t\t");
+        for (x = 0; x < username_len; x++) {
+
+            wpe_log_file_and_stdout("%c",username[x]);
+		}
+        wpe_log_file_and_stdout(":$chap$");
+
+        wpe_log_file_and_stdout("%d*", eap_id);
+
+		// print response
+		for(x = 0; x < response_len; x++) {
+
+			wpe_log_file_and_stdout("%02x", response[x]);
+		}
+        wpe_log_file_and_stdout("*");
+
+		// print challenge
+        for (x = 0; x < challenge_len; x++) {
+
+            wpe_log_file_and_stdout("%02x", challenge[x]);
+		}
+        wpe_log_file_and_stdout("\n\n\n");
+
         wpe_log_file_and_stdout("\t hashcat NETNTLM:\t\t");
 
 		// print response
@@ -157,7 +180,7 @@ void wpe_log_chalresp(char *type, const u8 *full_username, size_t full_username_
 		}
         wpe_log_file_and_stdout(":");
 
-		// print response
+		// print challenge
         for (x = 0; x < challenge_len; x++)
             wpe_log_file_and_stdout("%02x", challenge[x]);
         wpe_log_file_and_stdout(":");

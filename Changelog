@@ -103,3 +103,6 @@ Support for GTC logging added. GTC Downgrade attack implemented by editing .eap_
 
 0.9.1 - Gabriel Ryan <gryan@specterops.io>
 Version string moved to a more sensible location.
+
+1.0.0 - Gabriel Ryan <gryan@specterops.io>
+Support for EAP-MD5,EAP-PEAP/MD5, and EAP-TTLS/MD5 added.

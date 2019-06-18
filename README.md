@@ -38,7 +38,7 @@ Features
 - Fast and automated PMKID attacks against PSK networks using hcxtools
 - Password spraying across multiple usernames against a single ESSID
 
-### New (as of Version 1.2.0)(latest): 
+### New (as of Version 1.3.0)(latest): 
 EAPHammer now supports logging for EAP-MD5,EAP-PEAP/MD5, and EAP-TTLS/MD5.
 
 ### GTC Downgrade Attacks

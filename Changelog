@@ -119,3 +119,6 @@ external dependency.
 
 1.3.0 - Gabriel Ryan <gryan@specterops.io>
 Hostapd now compiled with support for OWE, WPA3, and 802.11ax. However, these protocols have not yet been integrated with the rest of the project.
+
+1.3.1 - Gabriel Ryan <gryan@specterops.io>
+Added libsqlite3-dev and binutils-dev to dependencies file.

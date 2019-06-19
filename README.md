@@ -50,6 +50,21 @@ EAPHammer's Cert Wizard has been expanded to provide users with the ability to c
 ### TLS / SSL Backwards Compatibility
 EAPHammer now uses a local build of libssl that exists independently of the systemwide install. This local version is compiled with support for SSLv3, allowing EAPHammer to be used against legacy clients without compromising the integrity of the attacker's operating system.
 
+### Supported EAP Methods
+EAPHammer supports the following EAP methods:
+
+- EAP-PEAP/MSCHAPv2
+- EAP-PEAP/GTC
+- EAP-PEAP/MD5
+- EAP-TTLS/PAP
+- EAP-TTLS/MSCHAP
+- EAP-TTLS/MSCHAPv2
+- EAP-TTLS/MSCHAPv2 (no EAP)
+- EAP-TTLS/CHAP
+- EAP-TTLS/MD5
+- EAP-TTLS/GTC
+- EAP-MD5
+
 
 ### 802.11a and 802.11n Support
 

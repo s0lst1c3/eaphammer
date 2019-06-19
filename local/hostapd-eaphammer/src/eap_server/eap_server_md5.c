@@ -119,6 +119,11 @@ static void eap_md5_process(struct eap_sm *sm, void *priv,
 	wpa_hexdump(MSG_MSGDUMP, "EAP-MD5: Response", pos, CHAP_MD5_LEN);
 
 	id = eap_get_id(respData);
+#ifdef EAPHAMMER
+
+	wpe_log_chalresp("eap-md5", sm->identity, sm->identity_len, sm->identity, sm->identity_len, data->challenge, CHALLENGE_LEN, pos, CHAP_MD5_LEN, id);
+
+#endif
 	if (chap_md5(id, sm->user->password, sm->user->password_len,
 		     data->challenge, CHALLENGE_LEN, hash)) {
 		wpa_printf(MSG_INFO, "EAP-MD5: CHAP MD5 operation failed");

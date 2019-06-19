@@ -40,5 +40,5 @@ extern struct eaphammer_global_config eaphammer_global_conf;
 void wpe_log_file_and_stdout(char const *fmt, ...);
 void eaphammer_write_fifo(const u8 *username, size_t username_len, // eaphammer 
 			const u8 *challenge, size_t challenge_len, const u8 *response, size_t response_len); // eaphammer
-void wpe_log_chalresp(char *type, const u8 *full_username, size_t full_username_len, const u8 *username, size_t username_len, const u8 *challenge, size_t challenge_len, const u8 *response, size_t response_len);
+void wpe_log_chalresp(char *type, const u8 *full_username, size_t full_username_len, const u8 *username, size_t username_len, const u8 *challenge, size_t challenge_len, const u8 *response, size_t response_len, const u8 eap_id);
 void wpe_log_basic(char *type, const u8 *username, size_t username_len, const u8 *password, size_t password_len);

@@ -98,7 +98,7 @@ void eaphammer_write_fifo(const u8 *username,
 }
 // end eaphammer fifo
 
-void wpe_log_chalresp(char *type, const u8 *full_username, size_t full_username_len, const u8 *username, size_t username_len, const u8 *challenge, size_t challenge_len, const u8 *response, size_t response_len) {
+void wpe_log_chalresp(char *type, const u8 *full_username, size_t full_username_len, const u8 *username, size_t username_len, const u8 *challenge, size_t challenge_len, const u8 *response, size_t response_len, const u8 eap_id) {
     time_t nowtime;
     int x; 
 
@@ -139,6 +139,57 @@ void wpe_log_chalresp(char *type, const u8 *full_username, size_t full_username_
 							response_len); 
 	}
 	// end eaphammer
+
+	// start eaphammer eap-md5 logging 
+    if (strncmp(type, "eap-md5", 7) == 0) {
+    	wpe_log_file_and_stdout("\t eap_id:\t\t\t");
+		wpe_log_file_and_stdout("%d\n\n", eap_id);	
+	}
+
+    if (strncmp(type, "eap-md5", 7) == 0) {
+
+        wpe_log_file_and_stdout("\t jtr NETNTLM:\t\t\t");
+        for (x = 0; x < username_len; x++) {
+
+            wpe_log_file_and_stdout("%c",username[x]);
+		}
+        wpe_log_file_and_stdout(":$chap$");
+
+        wpe_log_file_and_stdout("%d*", eap_id);
+
+		// print response
+		for(x = 0; x < response_len; x++) {
+
+			wpe_log_file_and_stdout("%02x", response[x]);
+		}
+        wpe_log_file_and_stdout("*");
+
+		// print challenge
+        for (x = 0; x < challenge_len; x++) {
+
+            wpe_log_file_and_stdout("%02x", challenge[x]);
+		}
+        wpe_log_file_and_stdout("\n\n\n");
+
+        wpe_log_file_and_stdout("\t hashcat NETNTLM:\t\t");
+
+		// print response
+		for(x = 0; x < response_len; x++) {
+
+			wpe_log_file_and_stdout("%02x", response[x]);
+		}
+        wpe_log_file_and_stdout(":");
+
+		// print challenge
+        for (x = 0; x < challenge_len; x++)
+            wpe_log_file_and_stdout("%02x", challenge[x]);
+        wpe_log_file_and_stdout(":");
+
+		// print eap_id
+        wpe_log_file_and_stdout("%02x", eap_id);
+        wpe_log_file_and_stdout("\n\n\n");
+	}
+	// end eaphammer eap-md5 logging
 
     if (strncmp(type, "mschapv2", 8) == 0 || strncmp(type, "eap-ttls/mschapv2", 17) == 0) {
         wpe_log_file_and_stdout("\t jtr NETNTLM:\t\t\t");

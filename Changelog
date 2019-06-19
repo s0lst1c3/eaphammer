@@ -106,3 +106,6 @@ Version string moved to a more sensible location.
 
 1.0.0 - Gabriel Ryan <gryan@specterops.io>
 Support for EAP-MD5,EAP-PEAP/MD5, and EAP-TTLS/MD5 added.
+
+1.1.0 - Gabriel Ryan <gryan@specterops.io>
+Added root check.

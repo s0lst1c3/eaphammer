@@ -568,6 +568,18 @@ def run_cert_wizard():
     # --cert-type ca|server|all (default: all)
     #list_certs(...
 
+def am_i_rooot():
+
+    print('[?] Am I root?')
+
+    print('[*] Checking for rootness...')
+    if not os.geteuid()==0:
+        print('[!] not root, just really drunk.')
+        sys.exit('[!] EAPHammer must be run as root: aborting.')
+
+    print('[*] I AM ROOOOOOOOOOOOT')
+
+    print('[*] Root privs confirmed! 8D')
 
 def print_banner():
 
@@ -590,6 +602,8 @@ if __name__ == '__main__':
     print_banner()
 
     options = core.cli.set_options()
+
+    am_i_rooot()
 
     if options['debug']:
         print('[debug] Settings:')

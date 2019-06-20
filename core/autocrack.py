@@ -26,9 +26,12 @@ def crack_locally(username, challenge, response, wordlist):
 
     cmd = ASLEAP_CMD % (challenge, response, wordlist)
     output = subprocess.check_output(cmd, shell=True).decode('utf-8')
-    password = output.split('password:')[1].strip()
+    try:
+        password = output.split('password:')[1].strip()
+        append2eap_users(username, password)
+    except IndexError:
+        print('\n\n[autocrack] {}\n'.format(output.strip()))
 
-    append2eap_users(username, password)
 
 def append2eap_users(username, password):
 

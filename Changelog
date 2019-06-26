@@ -112,3 +112,7 @@ Added root check.
 
 1.1.1 - Gabriel Ryan <gryan@specterops.io>
 Fixed index error in autocrack.
+
+1.2.0 - Gabriel Ryan <gryan@specterops.io>
+No longer maintaining a dedicated version of Responder. Instead, relying on
+external dependency.

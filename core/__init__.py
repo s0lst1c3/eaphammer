@@ -1,6 +1,5 @@
 from . import conf_manager
 from . import utils
-from . import poisoners
 from . import responder
 from . import payloads
 from . import autocrack

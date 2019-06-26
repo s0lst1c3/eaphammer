@@ -92,3 +92,8 @@ if __name__ == '__main__':
     print('\n[*] Extracting default wordlist...\n')
     os.system("cd %s && tar xzf %s.tar.gz" % (settings.dict['paths']['directories']['wordlists'], default_wordlist))
     print('\n[*] complete!\n')
+
+    print('\n[*] Retrieving Responder from teh interwebz...\n')
+    os.system("cd %s && git clone https://github.com/lgandx/Responder.git" % (settings.dict['paths']['directories']['local']))
+    print('\n[*] complete!\n')
+

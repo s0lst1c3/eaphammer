@@ -18,8 +18,9 @@ from core.autocrack import Autocrack
 from core import iw_parse
 from core.hostapd import HostapdEaphammer
 from core.hostapd_config import HostapdConfig
+from core.responder_config import ResponderConfig
 from core.lazy_file_reader import LazyFileReader
-from core.servers.redirect_server import RedirectServer
+from core.redirect_server import RedirectServer
 from core.wpa_supplicant import WPA_Supplicant
 from core.wpa_supplicant_conf import WPASupplicantConf
 from datetime import datetime
@@ -90,9 +91,12 @@ def hostile_portal():
 
             settings.dict['core']['responder']['Responder Core']['SMB'] = 'On'
 
+
+        responder_conf = ResponderConfig(settings, options)
+        responder_conf.write()
+
         resp = responder.Responder.get_instance()
-        resp.configure(interface=str(interface))
-        resp.start()
+        resp.start(str(interface))
 
         # set iptables policy, flush all tables for good measure
         utils.Iptables.accept_all()
@@ -106,10 +110,11 @@ def hostile_portal():
         # pause execution until user quits
         input('\n\nPress enter to quit...\n\n')
 
+        resp.stop()
+
         hostapd.stop()
         services.Dnsmasq.kill()
         rs.stop()
-        resp.stop()
         if use_autocrack:
             autocrack.stop()
 
@@ -130,6 +135,8 @@ def hostile_portal():
 
 
     except KeyboardInterrupt:
+
+        resp.stop()
     
         hostapd.stop()
         services.Dnsmasq.kill()

@@ -40,6 +40,19 @@ THIRDPARTY_DIR = os.path.join(ROOT_DIR, 'thirdparty')
 ASLEAP_DIR = os.path.join(LOCAL_DIR, 'asleap')
 HCXDUMPTOOL_DIR = os.path.join(LOCAL_DIR, 'hcxdumptool')
 HCXTOOLS_DIR = os.path.join(LOCAL_DIR, 'hcxtools')
+RESPONDER_DIR = os.path.join(LOCAL_DIR, 'Responder')
+
+# responder paths
+RESPONDER_BIN = os.path.join(RESPONDER_DIR, 'Responder.py')
+RESPONDER_DB = os.path.join(DB_DIR, 'Responder.db')
+RESPONDER_SESSION_LOG = os.path.join(LOG_DIR, 'Responder-Session.log')
+RESPONDER_POISONERS_LOG = os.path.join(LOG_DIR, 'Poisoners-Session.log')
+RESPONDER_ANALYZER_LOG = os.path.join(LOG_DIR, 'Analyzer-Session.log')
+RESPONDER_CONFIG_LOG = os.path.join(LOG_DIR, 'Config-Responder.log')
+RESPONDER_HTML = os.path.join(RESPONDER_DIR, 'files/AccessDenied.html')
+RESPONDER_EXE = os.path.join(RESPONDER_DIR, 'files/BindShell.exe')
+RESPONDER_CERT = os.path.join(RESPONDER_DIR, 'certs/responder.crt')
+RESPONDER_KEY = os.path.join(RESPONDER_DIR, 'certs/responder.key')
 
 # asleap paths
 ASLEAP_BIN = os.path.join(ASLEAP_DIR, 'asleap')
@@ -87,7 +100,7 @@ DH_FILE = os.path.join(CERTS_DIR, 'dh')
 DNSMASQ_LOG = os.path.join(LOG_DIR, 'dnsmasq.log')
 
 DNSMASQ_CONF = os.path.join(TMP_DIR, OutputFile(name='dnsmasq', ext='conf').string())
-RESPONDER_CONF = os.path.join(TMP_DIR, OutputFile(name='Responder', ext='conf').string())
+RESPONDER_CONF = os.path.join(RESPONDER_DIR, 'Responder.conf')
 
 DHCP_SCRIPT = os.path.join(SCRIPT_DIR, 'dhcp_script.py')
 
@@ -111,6 +124,7 @@ paths = {
         'hcxdumptool' : HCXDUMPTOOL_DIR,
         'hcxtools' : HCXTOOLS_DIR,
         'loot' : LOOT_DIR,
+        'responder' : RESPONDER_DIR,
     },
 
     'hcxtools' : {
@@ -174,6 +188,16 @@ paths = {
     'responder' : {
 
         'conf' : RESPONDER_CONF,
+        'bin' : RESPONDER_BIN,
+        'db' : RESPONDER_DB,
+        'session_log' : RESPONDER_SESSION_LOG,
+        'poisoners_log' : RESPONDER_POISONERS_LOG,
+        'analyzer_log' : RESPONDER_ANALYZER_LOG,
+        'config_log' : RESPONDER_CONFIG_LOG,
+        'html' : RESPONDER_HTML,
+        'exe' : RESPONDER_EXE,
+        'cert' : RESPONDER_CERT,
+        'key' : RESPONDER_KEY,
     },
     'dhcp' : {
 

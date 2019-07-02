@@ -116,3 +116,6 @@ Fixed index error in autocrack.
 1.2.0 - Gabriel Ryan <gryan@specterops.io>
 No longer maintaining a dedicated version of Responder. Instead, relying on
 external dependency.
+
+1.3.0 - Gabriel Ryan <gryan@specterops.io>
+Hostapd now compiled with support for OWE, WPA3, and 802.11ax. However, these protocols have not yet been integrated with the rest of the project.

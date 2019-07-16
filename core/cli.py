@@ -21,6 +21,7 @@ BASIC_OPTIONS = [
     'cloaking',
     'auth',
     'karma',
+    'loud',
     'channel_width',
     'auth_alg',
     'wpa_version',
@@ -370,6 +371,11 @@ def set_options():
                                     dest='karma',
                                     action='store_true',
                                     help='Enable karma.')
+
+    access_point_group.add_argument('--loud',
+                                    dest='loud',
+                                    action='store_true',
+                                    help='Enable loud karma mode.')
 
 
     ap_advanced_subgroup = parser.add_argument_group('AP Advanced Options')

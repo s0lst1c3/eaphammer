@@ -319,7 +319,12 @@ class HostapdConfig(object):
         if options['karma'] is None:
             general_configs['use_karma'] = settings.dict['core']['hostapd']['general']['use_karma']
         else:
-            general_configs['use_karma'] = options['karma']
+            general_configs['use_karma'] = '1'
+
+        if options['loud'] is None:
+            general_configs['loud_karma'] = settings.dict['core']['hostapd']['general']['loud_karma']
+        else:
+            general_configs['loud_karma'] = '1'
 
         if options['autocrack'] is None:
             general_configs['use_autocrack'] = str(int(settings.dict['core']['hostapd']['general']['use_autocrack']))

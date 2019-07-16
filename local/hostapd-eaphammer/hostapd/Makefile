@@ -93,11 +93,17 @@ OBJS += ../src/ap/wpa_auth_ie.o
 OBJS += ../src/ap/preauth_auth.o
 OBJS += ../src/ap/pmksa_cache_auth.o
 OBJS += ../src/ap/ieee802_11_shared.o
+OBJS += ../src/ap/eh_ssid_t.o
+OBJS += ../src/ap/eh_sta_t.o
+OBJS += ../src/ap/eh_ssid_table_t.o
+OBJS += ../src/ap/eh_ssid_iter_t.o
+OBJS += ../src/ap/eh_sta_table_t.o
 OBJS += ../src/ap/beacon.o
 OBJS += ../src/ap/bss_load.o
 OBJS += ../src/ap/neighbor_db.o
 OBJS += ../src/ap/rrm.o
 OBJS += ../src/eaphammer_wpe/eaphammer_wpe.o
+OBJS += ../src/eaphammer_wpe/eh_msg_dbg.o
 
 OBJS_c = hostapd_cli.o
 OBJS_c += ../src/common/wpa_ctrl.o

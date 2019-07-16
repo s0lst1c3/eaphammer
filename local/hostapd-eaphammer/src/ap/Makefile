@@ -37,6 +37,11 @@ LIB_OBJS= \
 	dhcp_snoop.o \
 	drv_callbacks.o \
 	eap_user_db.o \
+	eh_ssid_t.o \
+	eh_sta_t.o \
+	eh_ssid_table_t.o \
+	eh_ssid_iter_t.o \
+	eh_sta_table_t.o \
 	eth_p_oui.o \
 	gas_serv.o \
 	hostapd.o \

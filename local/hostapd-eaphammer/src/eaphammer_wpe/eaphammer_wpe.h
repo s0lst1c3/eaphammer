@@ -26,6 +26,7 @@ struct eaphammer_global_config {
 	unsigned int use_autocrack; // eaphammer
     unsigned int always_return_success;
 	u8 use_karma;
+	u8 singed_pants;
 };
 
 extern struct eaphammer_global_config eaphammer_global_conf;

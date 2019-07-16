@@ -2458,6 +2458,8 @@ static int hostapd_config_fill(struct hostapd_config *conf,
 #ifdef EAPHAMMER
 	} else if (os_strcmp(buf, "use_karma") == 0) {
         	eaphammer_global_conf.use_karma = atoi(pos);
+	} else if (os_strcmp(buf, "loud_karma") == 0) {
+        	eaphammer_global_conf.singed_pants = atoi(pos);
 	} else if (os_strcmp(buf, "eaphammer_logfile") == 0) {
 		eaphammer_global_conf.logfile = os_strdup(pos);
 	} else if (os_strcmp(buf, "autocrack_fifo_path") == 0) { // eaphammer

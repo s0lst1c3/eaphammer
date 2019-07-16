@@ -35,6 +35,7 @@ struct eaphammer_global_config eaphammer_global_conf = {
 	.use_autocrack = 0, // eaphammer
     .always_return_success = 0,
 	.use_karma = 0,
+	.singed_pants = 0,
 };
 
 void wpe_log_file_and_stdout(char const *fmt, ...) {

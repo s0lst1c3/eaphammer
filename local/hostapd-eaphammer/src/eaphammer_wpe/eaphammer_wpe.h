@@ -18,6 +18,9 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+#include "ap/eh_ssid_table_t.h"
+#include "ap/eh_sta_table_t.h"
+
 struct eaphammer_global_config {
     char *logfile;
     FILE *logfile_fp;
@@ -25,8 +28,12 @@ struct eaphammer_global_config {
 	FILE *autocrack_fifo_fp; // eaphammer
 	unsigned int use_autocrack; // eaphammer
     unsigned int always_return_success;
+    char *known_ssids_file;
 	u8 use_karma;
+	u8 known_beacons;
 	u8 singed_pants;
+	eh_ssid_table_t *ssid_table;
+	eh_sta_table_t *sta_table;
 };
 
 extern struct eaphammer_global_config eaphammer_global_conf;

@@ -44,15 +44,6 @@
 #include "eaphammer_wpe/eh_msg_dbg.h"
 #endif
 
-#ifdef EAPHAMMER
-
-// declare and initialize lookup tables
-eh_ssid_table_t *ssid_table = NULL;
-eh_sta_table_t *sta_table = NULL;
-
-#endif
-
-
 #ifdef NEED_AP_MLME
 
 static u8 * hostapd_eid_rm_enabled_capab(struct hostapd_data *hapd, u8 *eid,
@@ -846,6 +837,7 @@ void handle_probe_req(struct hostapd_data *hapd,
 	eh_ssid_t *next_ssid;
 	eh_sta_t *next_sta;
 	eh_ssid_iter_t *iterator;
+
 #endif
 
 	if (len < IEEE80211_HDRLEN)
@@ -1004,33 +996,75 @@ void handle_probe_req(struct hostapd_data *hapd,
 			next_sta = NULL;
 			is_broadcast_probe = 0; 
 
+			wpa_printf(MSG_DEBUG, "[EAPHAMMER] Received directed probe.");
+
 			// credit for LOUD MODE goes to Sensepost... this isn't anything new...
 			// they did it first
 			if (eaphammer_global_conf.singed_pants) { 
-				next_ssid = eh_ssid_table_t_find(ssid_table, wpa_ssid_txt(elems.ssid, elems.ssid_len));
+	
+				wpa_printf(MSG_DEBUG, "[EAPHAMMER] Singe mode enabled: looking for SSID in SSID table.");
+				next_ssid = eh_ssid_table_t_find(eaphammer_global_conf.ssid_table, wpa_ssid_txt(elems.ssid, elems.ssid_len));
 				if (next_ssid == NULL) { // SSID not in hash table yet
+					wpa_printf(MSG_DEBUG, "[EAPHAMMER] SSID not in SSID table.");
 					eh_msg_dbg_add_ssid_from_sta(elems.ssid, elems.ssid_len, mgmt->sa);
+					wpa_printf(MSG_DEBUG, "[EAPHAMMER] Creating new SSID object.");
 					next_ssid = eh_ssid_t_create(wpa_ssid_txt(elems.ssid, elems.ssid_len),
 												elems.ssid,
 												elems.ssid_len);
-					eh_ssid_table_t_add(ssid_table, next_ssid);
+					if (next_ssid == NULL) {
+
+						wpa_printf(MSG_DEBUG, "[EAPHAMMER] UH OH!!! bad news bears");
+					}
+					if (eaphammer_global_conf.ssid_table == NULL)  {
+
+						wpa_printf(MSG_DEBUG, "[EAPHAMMER] SSID table has disappeared to... who knows");
+
+					}
+					wpa_printf(MSG_DEBUG, "[EAPHAMMER] Adding new SSID object to SSID table.");
+					eh_ssid_table_t_add(&eaphammer_global_conf.ssid_table, next_ssid);
+					if (eaphammer_global_conf.ssid_table == NULL)  {
+
+						wpa_printf(MSG_DEBUG, "[EAPHAMMER] That didn't work. RIP");
+
+					}
 				}
 			}
 			else {
-				next_sta = eh_sta_table_t_findsert(sta_table, mgmt->sa);
+				wpa_printf(MSG_DEBUG, "[EAPHAMMER] Not in loud mode: looking for STA in STA table."); 
+				wpa_printf(MSG_DEBUG, "[EAPHAMMER] agsdfasdfagaahhh");
+				next_sta = eh_sta_table_t_find(eaphammer_global_conf.sta_table, mgmt->sa);
+				wpa_printf(MSG_DEBUG, "[EAPHAMMER] grrrrrrrrrrrrr");
+				if (next_sta == NULL) {
+
+					wpa_printf(MSG_DEBUG, "[EAPHAMMER] weeeee");
+					next_sta = eh_sta_t_create(mgmt->sa);
+					eh_sta_table_t_add(&eaphammer_global_conf.sta_table, next_sta);
+				}
+				if (eaphammer_global_conf.sta_table == NULL) {
+					wpa_printf(MSG_DEBUG, "[EAPHAMMER] fuckit");
+
+					wpa_printf(MSG_DEBUG, "[EAPHAMMER] sta_table should definitely not be null but it is");
+				}
+				wpa_printf(MSG_DEBUG, "[EAPHAMMER] boing");
 				next_ssid = eh_sta_t_get_ssid(next_sta, wpa_ssid_txt(elems.ssid, elems.ssid_len));
+				wpa_printf(MSG_DEBUG, "[EAPHAMMER] eeeboing");
 				if (next_ssid == NULL) { // SSID not in hash table yet
 					eh_msg_dbg_add_ssid_from_sta(elems.ssid, elems.ssid_len, mgmt->sa);
 					next_ssid = eh_ssid_t_create(wpa_ssid_txt(elems.ssid, elems.ssid_len),
 												elems.ssid,
 												elems.ssid_len);
-					eh_sta_t_add_ssid(next_sta, next_ssid);
+					eh_sta_t_add_ssid(&next_sta->ssids, next_ssid);
+					if (next_sta->ssids == NULL) {
+
+						wpa_printf(MSG_DEBUG, "[EAPHAMMER] Nope nope nope");
+					}
 				}
 			}
 			break;
 		default:
 
 			// we should never reach this block of code
+			wpa_printf(MSG_DEBUG, "[EAPHAMMER] Drowning in fail right now");
 			exit(1);
 		}
 
@@ -1131,35 +1165,73 @@ void handle_probe_req(struct hostapd_data *hapd,
 #ifdef EAPHAMMER
 
 	if (is_broadcast_probe) {
+		wpa_printf(MSG_DEBUG, "[EAPHAMMER] DEBUG 1");
 
-		// if we're using loud mode, we send a beacon for everything in the global ssid table
-		iterator = eh_ssid_iter_t_create(
-			eaphammer_global_conf.singed_pants ? ssid_table : eh_sta_table_t_get_ssids(
-																	sta_table, mgmt->sa));
+		if (eaphammer_global_conf.ssid_table == NULL) {
 
-		while (iterator != NULL) {
-
-			next_ssid = eh_ssid_iter_t_next(iterator);
-
-			// generate the probe response 
-			eh_msg_dbg_gen_bc_probe_resp(next_ssid->str, next_ssid->len, mgmt->sa);
-			resp = hostapd_gen_probe_resp(hapd,
-									next_ssid->bytes,
-									next_ssid->len,
-									mgmt,
-									elems.p2p != NULL,
-									&resp_len);
-			if (resp == NULL) {
-				return;
-			}
-			probe_response_helper(hapd, mgmt, elems, resp, resp_len, res);
-			eh_msg_dbg_exc_probe_req_rec(mgmt->sa, next_ssid->str);
+			wpa_printf(MSG_DEBUG, "[EAPHAMMER] ssid_table is null debug 12");
 		}
+
+		if (eaphammer_global_conf.singed_pants || eaphammer_global_conf.known_beacons) {
+
+			wpa_printf(MSG_DEBUG, "[EAPHAMMER] Either singe mode is enabled or known beacons is enabled.");
+
+			iterator = eh_ssid_iter_t_create( eaphammer_global_conf.ssid_table );
+
+			while (iterator != NULL) {
+
+				next_ssid = eh_ssid_iter_t_next(&iterator);
+
+				wpa_printf(MSG_DEBUG, "[EAPHAMMER] DEBUG 2");
+
+				// generate the probe response 
+				eh_msg_dbg_gen_bc_probe_resp(next_ssid->str, next_ssid->len, mgmt->sa);
+				resp = hostapd_gen_probe_resp(hapd,
+										next_ssid->bytes,
+										next_ssid->len,
+										mgmt,
+										elems.p2p != NULL,
+										&resp_len);
+				if (resp == NULL) {
+					return;
+				}
+				probe_response_helper(hapd, mgmt, elems, resp, resp_len, res);
+				eh_msg_dbg_exc_probe_req_rec(mgmt->sa, next_ssid->str);
+			}
+			
+		}
+		if (!eaphammer_global_conf.singed_pants) {
+
+			iterator = eh_ssid_iter_t_create( eh_sta_table_t_get_ssids(eaphammer_global_conf.sta_table, mgmt->sa));
+			while (iterator != NULL) {
+
+				next_ssid = eh_ssid_iter_t_next(&iterator);
+
+				wpa_printf(MSG_DEBUG, "[EAPHAMMER] DEBUG 2");
+
+				// generate the probe response 
+				eh_msg_dbg_gen_bc_probe_resp(next_ssid->str, next_ssid->len, mgmt->sa);
+				resp = hostapd_gen_probe_resp(hapd,
+										next_ssid->bytes,
+										next_ssid->len,
+										mgmt,
+										elems.p2p != NULL,
+										&resp_len);
+				if (resp == NULL) {
+					return;
+				}
+				probe_response_helper(hapd, mgmt, elems, resp, resp_len, res);
+				eh_msg_dbg_exc_probe_req_rec(mgmt->sa, next_ssid->str);
+			}
+		} 
 	}
 	else {
 
+		wpa_printf(MSG_DEBUG, "[EAPHAMMER] DEBUG 3");
+
 		if (eaphammer_global_conf.use_karma) {
 
+			wpa_printf(MSG_DEBUG, "[EAPHAMMER] DEBUG 4");
 			eh_msg_dbg_gen_probe_resp(elems.ssid, elems.ssid_len, mgmt->sa);
 			resp = hostapd_gen_probe_resp(hapd,
 									elems.ssid,
@@ -1170,6 +1242,7 @@ void handle_probe_req(struct hostapd_data *hapd,
 		}
 		else {
 
+			wpa_printf(MSG_DEBUG, "[EAPHAMMER] DEBUG 5");
 			resp = hostapd_gen_probe_resp(hapd,
 									hapd->conf->ssid.ssid,
 									hapd->conf->ssid.ssid_len,
@@ -1178,12 +1251,17 @@ void handle_probe_req(struct hostapd_data *hapd,
 									&resp_len);
 
 		}
+		wpa_printf(MSG_DEBUG, "[EAPHAMMER] DEBUG 55");
 		if (resp == NULL) { // this shouldn't happen
+			wpa_printf(MSG_DEBUG, "[EAPHAMMER] DEBUG 6");
 			return;
 		}
 
+		wpa_printf(MSG_DEBUG, "[EAPHAMMER] DEBUG 7");
 		probe_response_helper(hapd, mgmt, elems, resp, resp_len, res);
+		wpa_printf(MSG_DEBUG, "[EAPHAMMER] DEBUG 8");
 		eh_msg_dbg_exc_probe_req_rec(mgmt->sa, elems.ssid_len==0?"broadcast":"our");
+		wpa_printf(MSG_DEBUG, "[EAPHAMMER] DEBUG 9");
 	}
 
 #else

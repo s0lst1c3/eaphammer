@@ -14,6 +14,7 @@ class HostapdConfig(object):
             'general' : self.populate_general(settings, options),
         }
 
+
         if options['hw_mode'] is None:
             hw_mode = settings.dict['core']['hostapd']['general']['hw_mode']
         else:
@@ -316,15 +317,6 @@ class HostapdConfig(object):
         else:
             general_configs['channel'] = options['channel']
 
-        if options['karma']:
-            general_configs['use_karma'] = '1'
-        else:
-            general_configs['use_karma'] = settings.dict['core']['hostapd']['general']['use_karma']
-
-        if options['loud'] is None:
-            general_configs['loud_karma'] = settings.dict['core']['hostapd']['general']['loud_karma']
-        else:
-            general_configs['loud_karma'] = '1'
 
         if options['autocrack'] is None:
             general_configs['use_autocrack'] = str(int(settings.dict['core']['hostapd']['general']['use_autocrack']))
@@ -449,5 +441,23 @@ class HostapdConfig(object):
         general_configs['logger_stdout'] = settings.dict['core']['hostapd']['general']['logger_stdout']
         general_configs['logger_stdout_level'] = settings.dict['core']['hostapd']['general']['logger_stdout_level']
         general_configs['macaddr_acl'] = settings.dict['core']['hostapd']['general']['macaddr_acl']
+
+        if options['karma']:
+            general_configs['use_karma'] = '1'
+        else:
+            general_configs['use_karma'] = settings.dict['core']['hostapd']['general']['use_karma']
+
+        if options['loud']:
+            general_configs['loud_karma'] = '1'
+        else:
+            general_configs['loud_karma'] = settings.dict['core']['hostapd']['general']['loud_karma']
+
+        if options['known_beacons']:
+            general_configs['known_beacons'] = '1'
+            general_configs['known_ssids_file'] = options['known_ssids_file']
+        else:
+            general_configs['known_beacons'] = settings.dict['core']['hostapd']['general']['known_beacons']
+
+            
 
         return general_configs

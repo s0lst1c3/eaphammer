@@ -22,6 +22,7 @@ BASIC_OPTIONS = [
     'auth',
     'karma',
     'loud',
+    'known_beacons',
     'channel_width',
     'auth_alg',
     'wpa_version',
@@ -34,6 +35,7 @@ BASIC_OPTIONS = [
     'interface_pool',
     'user_list',
     'bootstrap',
+    'known_ssids_file',
 ]
 
 ROGUE_AP_ATTACKS = [
@@ -83,7 +85,7 @@ def set_options():
                               help=('Shorthand for "--cert-wizard create '
                                     '--self-signed"'))
 
-    modes_group_.add_argument('--creds',
+    modes_group_.add_argument('--creds', '--brad',
                               dest='reap_creds',
                               action='store_true',
                               help='Harvest EAP creds using evil twin attack')
@@ -372,11 +374,28 @@ def set_options():
                                     action='store_true',
                                     help='Enable karma.')
 
-    access_point_group.add_argument('--loud',
+    karma_group = parser.add_argument_group('Karma Options')
+
+    karma_group.add_argument('--loud', '--singe',
                                     dest='loud',
                                     action='store_true',
                                     help='Enable loud karma mode.')
 
+    karma_group.add_argument('--known-beacons',
+                                    dest='known_beacons',
+                                    action='store_true',
+                                    help='Enable persistent known beacons attack.')
+
+    default_ssid_list = os.path.join(
+        settings.dict['paths']['directories']['wordlists'],
+        settings.dict['core']['eaphammer']['general']['default_ssid_list'],
+    )
+    karma_group.add_argument('--known-ssids-file',
+                           dest='known_ssids_file',
+                           default=default_ssid_list,
+                           type=str,
+                           help='Specify the wordlist to use with '
+                                'the --known-beacons features.')
 
     ap_advanced_subgroup = parser.add_argument_group('AP Advanced Options')
 

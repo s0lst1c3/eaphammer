@@ -8,6 +8,6 @@
 typedef eh_ssid_t eh_ssid_iter_t;
 
 eh_ssid_iter_t *eh_ssid_iter_t_create(eh_ssid_table_t *ssid_table);
-eh_ssid_t *eh_ssid_iter_t_next(eh_ssid_iter_t *iterator);
+eh_ssid_t *eh_ssid_iter_t_next(eh_ssid_iter_t **iterator);
 
 #endif

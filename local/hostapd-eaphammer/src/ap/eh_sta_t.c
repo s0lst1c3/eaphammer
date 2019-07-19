@@ -21,7 +21,7 @@ eh_ssid_t *eh_sta_t_get_ssid(eh_sta_t *my_sta, const char *ssid_str) {
 	return next_ssid;
 }
 
-void eh_sta_t_add_ssid(eh_sta_t *my_sta, eh_ssid_t *next_ssid) {
+void eh_sta_t_add_ssid(eh_ssid_t **my_ssids, eh_ssid_t *next_ssid) {
 
-	HASH_ADD_STR(my_sta->ssids, str, next_ssid);
+	HASH_ADD_STR(*my_ssids, str, next_ssid);
 }

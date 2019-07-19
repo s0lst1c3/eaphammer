@@ -6,16 +6,16 @@ eh_ssid_iter_t *eh_ssid_iter_t_create(eh_ssid_table_t *ssid_table) {
 
 	eh_ssid_iter_t *iterator;
 
-	iterator = ssid_table;
+	iterator = (eh_ssid_iter_t*)ssid_table;
 
 	return iterator;
 }
 
-eh_ssid_t *eh_ssid_iter_t_next(eh_ssid_iter_t *iterator) {
+eh_ssid_t *eh_ssid_iter_t_next(eh_ssid_iter_t **iterator) {
 
-	eh_ssid_iter_t *prev = iterator;
+	eh_ssid_iter_t *prev = *iterator;
 
-	iterator = (eh_ssid_iter_t*)(iterator->hh.next);
+	*iterator = (eh_ssid_iter_t*)(prev->hh.next);
 
 	return prev;
 }

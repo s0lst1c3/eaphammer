@@ -25,6 +25,7 @@
 
 #ifdef EAPHAMMER
 #include "eaphammer_wpe/eaphammer_wpe.h"
+#include "ap/eh_ssid_table_t.h"
 #endif
 
 
@@ -2458,12 +2459,16 @@ static int hostapd_config_fill(struct hostapd_config *conf,
 #ifdef EAPHAMMER
 	} else if (os_strcmp(buf, "use_karma") == 0) {
         	eaphammer_global_conf.use_karma = atoi(pos);
+	} else if (os_strcmp(buf, "known_beacons") == 0) {
+        eaphammer_global_conf.known_beacons = atoi(pos);
 	} else if (os_strcmp(buf, "loud_karma") == 0) {
         	eaphammer_global_conf.singed_pants = atoi(pos);
 	} else if (os_strcmp(buf, "eaphammer_logfile") == 0) {
 		eaphammer_global_conf.logfile = os_strdup(pos);
 	} else if (os_strcmp(buf, "autocrack_fifo_path") == 0) { // eaphammer
 		eaphammer_global_conf.autocrack_fifo = os_strdup(pos);
+	} else if (os_strcmp(buf, "known_ssids_file") == 0) {
+		eaphammer_global_conf.known_ssids_file = os_strdup(pos);
 	} else if (os_strcmp(buf, "use_autocrack") == 0) { // eaphammer
 		eaphammer_global_conf.use_autocrack = atoi(pos);
 #endif
@@ -4667,6 +4672,12 @@ struct hostapd_config * hostapd_config_read(const char *fname)
 		conf = NULL;
 	}
 #endif /* WPA_IGNORE_CONFIG_ERRORS */
+
+#ifdef EAPHAMMER
+		//const char input_file[] = "/root/owe/eaphammer/local/hostapd-eaphammer/src/ap/ssids.txt";
+		eh_ssid_table_t_load_file(&eaphammer_global_conf.ssid_table,
+				eaphammer_global_conf.known_ssids_file);
+#endif
 
 	return conf;
 }

@@ -739,6 +739,22 @@ def set_options():
                     print(msg, end='')
                     sys.exit()
 
+        if options['loud'] and not options['karma']:
+
+            parser.print_usage()
+            print()
+            msg = ('[!] Cannot use --loud flag without --karma flag.')
+            print(msg, end='')
+            sys.exit()
+
+        if options['known_beacons'] and not options['karma']:
+
+            parser.print_usage()
+            print()
+            msg = ('[!] Cannot use --known-beacons flag without --karma flag.')
+            print(msg, end='')
+            sys.exit()
+
         if any([ options[a] for a in ROGUE_AP_ATTACKS ]):
 
                 if options['server_cert'] is None:

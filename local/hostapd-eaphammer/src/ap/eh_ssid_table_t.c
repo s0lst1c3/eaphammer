@@ -41,6 +41,7 @@ int eh_ssid_table_t_load_file(eh_ssid_table_t **ssid_table, const char *input_fi
 	// set up
 	input_handle = fopen(input_file, "r");
 	if (input_handle == NULL) {
+		wpa_printf(MSG_DEBUG, "[EAPHAMMER] Could not open known SSID file for writing: %s", input_file);
 		exit(1);
 	}
 

@@ -16,6 +16,7 @@ BASIC_OPTIONS = [
     'interface',
     'essid',
     'bssid',
+    'pmf',
     'channel',
     'hw_mode',
     'cloaking',
@@ -368,6 +369,15 @@ def set_options():
                                          'default: open )'
                                          '(creds default: wpa).')
 
+    access_point_group.add_argument('--pmf',
+                                    dest='pmf',
+                                    type=str,
+                                    choices=['disable', 'enable', 'require'],
+                                    default=None,
+                                    help='Enable, disaable, or require the use of '
+                                         'Protected Management Frames (PMF) '
+                                         '(802.11w) (default: disable) '
+                                         '(OWE default: require).')
 
     access_point_group.add_argument('--karma',
                                     dest='karma',

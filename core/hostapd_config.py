@@ -458,6 +458,16 @@ class HostapdConfig(object):
         else:
             general_configs['known_beacons'] = settings.dict['core']['hostapd']['general']['known_beacons']
 
-            
+        if options['pmf'] is None:
+            general_configs['ieee80211w'] = settings.dict['core']['hostapd']['general']['ieee80211w']
+        elif options['pmf'] == 'disable':
+            general_configs['ieee80211w'] = '0'
+        elif options['pmf'] == 'enable':
+            general_configs['ieee80211w'] = '1'
+        elif options['pmf'] == 'require':
+            general_configs['ieee80211w'] = '2'
+        else:
+            raise Exception('[hostapd_conf] PMF not set to known value. This should never happen.')
+
 
         return general_configs

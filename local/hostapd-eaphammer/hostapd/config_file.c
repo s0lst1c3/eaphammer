@@ -25,6 +25,7 @@
 
 #ifdef EAPHAMMER
 #include "eaphammer_wpe/eaphammer_wpe.h"
+#include "ap/eh_ssid_table_t.h"
 #endif
 
 
@@ -2457,13 +2458,33 @@ static int hostapd_config_fill(struct hostapd_config *conf,
 		os_strlcpy(bss->bridge, pos, sizeof(bss->bridge));
 #ifdef EAPHAMMER
 	} else if (os_strcmp(buf, "use_karma") == 0) {
+			wpa_printf(MSG_DEBUG, "[EAPHAMMER] test 1");
         	eaphammer_global_conf.use_karma = atoi(pos);
+			wpa_printf(MSG_DEBUG, "[EAPHAMMER] test 2");
+	} else if (os_strcmp(buf, "known_beacons") == 0) {
+			wpa_printf(MSG_DEBUG, "[EAPHAMMER] test 3");
+        eaphammer_global_conf.known_beacons = atoi(pos);
+			wpa_printf(MSG_DEBUG, "[EAPHAMMER] test 4");
+	} else if (os_strcmp(buf, "loud_karma") == 0) {
+			wpa_printf(MSG_DEBUG, "[EAPHAMMER] test 5");
+        	eaphammer_global_conf.singed_pants = atoi(pos);
+			wpa_printf(MSG_DEBUG, "[EAPHAMMER] test 6");
 	} else if (os_strcmp(buf, "eaphammer_logfile") == 0) {
+			wpa_printf(MSG_DEBUG, "[EAPHAMMER] test 7");
 		eaphammer_global_conf.logfile = os_strdup(pos);
+			wpa_printf(MSG_DEBUG, "[EAPHAMMER] test 8");
 	} else if (os_strcmp(buf, "autocrack_fifo_path") == 0) { // eaphammer
+			wpa_printf(MSG_DEBUG, "[EAPHAMMER] test 9");
 		eaphammer_global_conf.autocrack_fifo = os_strdup(pos);
+			wpa_printf(MSG_DEBUG, "[EAPHAMMER] test 10");
+	} else if (os_strcmp(buf, "known_ssids_file") == 0) {
+			wpa_printf(MSG_DEBUG, "[EAPHAMMER] test 11");
+		eaphammer_global_conf.known_ssids_file = os_strdup(pos);
+			wpa_printf(MSG_DEBUG, "[EAPHAMMER] test 12");
 	} else if (os_strcmp(buf, "use_autocrack") == 0) { // eaphammer
+			wpa_printf(MSG_DEBUG, "[EAPHAMMER] test 13");
 		eaphammer_global_conf.use_autocrack = atoi(pos);
+			wpa_printf(MSG_DEBUG, "[EAPHAMMER] test 14");
 #endif
 	} else if (os_strcmp(buf, "vlan_bridge") == 0) {
 		os_strlcpy(bss->vlan_bridge, pos, sizeof(bss->vlan_bridge));
@@ -4665,6 +4686,18 @@ struct hostapd_config * hostapd_config_read(const char *fname)
 		conf = NULL;
 	}
 #endif /* WPA_IGNORE_CONFIG_ERRORS */
+
+#ifdef EAPHAMMER
+		//const char input_file[] = "/root/owe/eaphammer/local/hostapd-eaphammer/src/ap/ssids.txt";
+		wpa_printf(MSG_DEBUG, "[EAPHAMMER] test 15");
+		if (eaphammer_global_conf.known_beacons) {
+			wpa_printf(MSG_DEBUG, "[EAPHAMMER] test 17");
+			eh_ssid_table_t_load_file(&eaphammer_global_conf.ssid_table,
+					eaphammer_global_conf.known_ssids_file);
+			wpa_printf(MSG_DEBUG, "[EAPHAMMER] test 18");
+		}
+		wpa_printf(MSG_DEBUG, "[EAPHAMMER] test 19");
+#endif
 
 	return conf;
 }

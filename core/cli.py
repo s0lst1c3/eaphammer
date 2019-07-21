@@ -6,6 +6,9 @@ from settings import settings
 
 from cert_wizard import cert_utils
 
+# Python3 FTW
+from pathlib import Path
+
 BASIC_OPTIONS = [
     'cert_wizard',
     'reap_creds',
@@ -16,11 +19,14 @@ BASIC_OPTIONS = [
     'interface',
     'essid',
     'bssid',
+    'pmf',
     'channel',
     'hw_mode',
     'cloaking',
     'auth',
     'karma',
+    'loud',
+    'known_beacons',
     'channel_width',
     'auth_alg',
     'wpa_version',
@@ -33,6 +39,7 @@ BASIC_OPTIONS = [
     'interface_pool',
     'user_list',
     'bootstrap',
+    'known_ssids_file',
 ]
 
 ROGUE_AP_ATTACKS = [
@@ -82,7 +89,7 @@ def set_options():
                               help=('Shorthand for "--cert-wizard create '
                                     '--self-signed"'))
 
-    modes_group_.add_argument('--creds',
+    modes_group_.add_argument('--creds', '--brad',
                               dest='reap_creds',
                               action='store_true',
                               help='Harvest EAP creds using evil twin attack')
@@ -365,12 +372,43 @@ def set_options():
                                          'default: open )'
                                          '(creds default: wpa).')
 
+    access_point_group.add_argument('--pmf',
+                                    dest='pmf',
+                                    type=str,
+                                    choices=['disable', 'enable', 'require'],
+                                    default=None,
+                                    help='Enable, disaable, or require the use of '
+                                         'Protected Management Frames (PMF) '
+                                         '(802.11w) (default: disable) '
+                                         '(OWE default: require).')
 
     access_point_group.add_argument('--karma',
                                     dest='karma',
                                     action='store_true',
                                     help='Enable karma.')
 
+    karma_group = parser.add_argument_group('Karma Options')
+
+    karma_group.add_argument('--loud', '--singe',
+                                    dest='loud',
+                                    action='store_true',
+                                    help='Enable loud karma mode.')
+
+    karma_group.add_argument('--known-beacons',
+                                    dest='known_beacons',
+                                    action='store_true',
+                                    help='Enable persistent known beacons attack.')
+
+    default_ssid_list = os.path.join(
+        settings.dict['paths']['directories']['wordlists'],
+        settings.dict['core']['eaphammer']['general']['default_ssid_list'],
+    )
+    karma_group.add_argument('--known-ssids-file',
+                           dest='known_ssids_file',
+                           default=None,
+                           type=str,
+                           help='Specify the wordlist to use with '
+                                'the --known-beacons features.')
 
     ap_advanced_subgroup = parser.add_argument_group('AP Advanced Options')
 
@@ -703,6 +741,45 @@ def set_options():
                            'certificate using the --server-cert flag.')
                     print(msg, end='')
                     sys.exit()
+
+        if options['loud'] and not options['karma']:
+
+            parser.print_usage()
+            print()
+            msg = ('[!] Cannot use --loud flag without --karma flag.')
+            print(msg, end='')
+            sys.exit()
+
+        # sanity checks for known beacons attack
+        if options['known_beacons']:
+
+            if not options['karma']:
+
+                parser.print_usage()
+                print()
+                msg = ('[!] Cannot use --known-beacons flag without --karma flag.')
+                print(msg, end='')
+                sys.exit()
+
+            if options['known_ssids_file'] is None:
+
+                parser.print_usage()
+                print()
+                msg = ('[!] Cannot use --known-beacons without known SSIDS file. '
+                       'Please specify path to known SSIDS file with --known-ssids flag.')
+                print(msg, end='')
+                sys.exit()
+                
+    
+
+            if not Path(options['known_ssids_file']).is_file():
+
+                parser.print_usage()
+                print()
+                msg = ('[!] Specified known SSID file not found: {}'.format(options['known_ssids_file']))
+                print(msg, end='')
+                sys.exit()
+                
 
         if any([ options[a] for a in ROGUE_AP_ATTACKS ]):
 

@@ -1,7 +1,7 @@
 eaphammer
 =========
 
-by Gabriel Ryan ([s0lst1c3](https://twitter.com/s0lst1c3))
+by Gabriel Ryan ([s0lst1c3](https://twitter.com/s0lst1c3))(gryan[at]specterops.io)
 
 [![Foo](https://rawcdn.githack.com/toolswatch/badges/8bd9be6dac2a1d445367001f2371176cc50a5707/arsenal/usa/2017.svg)](https://www.blackhat.com/us-17/arsenal.html#eaphammer)
 
@@ -38,8 +38,8 @@ Features
 - Fast and automated PMKID attacks against PSK networks using hcxtools
 - Password spraying across multiple usernames against a single ESSID
 
-### New (as of Version 1.3.0)(latest): 
-EAPHammer now supports logging for EAP-MD5,EAP-PEAP/MD5, and EAP-TTLS/MD5.
+### New (as of Version 1.4.0)(latest): 
+EAPHammer now supports 802.11w (Protected Management Frames), Loud Karma attacks, and Known Beacon attacks (documentation coming soon).
 
 ### GTC Downgrade Attacks
 EAPHammer will now automatically attempt a GTC Downgrade attack against connected clients in an attempt to capture plaintext credentials (see: https://www.youtube.com/watch?v=-uqTqJwTFyU&feature=youtu.be&t=22m34s). 

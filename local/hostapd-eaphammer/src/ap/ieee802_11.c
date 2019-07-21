@@ -2485,19 +2485,11 @@ static u16 check_ssid(struct hostapd_data *hapd, struct sta_info *sta,
 		return WLAN_STATUS_UNSPECIFIED_FAILURE;
 
 #ifdef EAPHAMMER
-	// begin karma
-	if ((ssid_ie_len != hapd->conf->ssid.ssid_len ||
-	    os_memcmp(ssid_ie, hapd->conf->ssid.ssid, ssid_ie_len) != 0) &&
-	    !eaphammer_global_conf.use_karma) {
-
-		hostapd_logger(hapd, sta->addr, HOSTAPD_MODULE_IEEE80211,
-			       HOSTAPD_LEVEL_INFO,
-			       "Station tried to associate with unknown SSID "
-			       "'%s'", wpa_ssid_txt(ssid_ie, ssid_ie_len));
-		return WLAN_STATUS_UNSPECIFIED_FAILURE;
+	if (eaphammer_global_conf.use_karma) {
+		wpa_printf(MSG_MSGDUMP, "[EAPHAMMER] Checking SSID for start of association, pass through %s", wpa_ssid_txt(ssid_ie, ssid_ie_len));
+		return WLAN_STATUS_SUCCESS;
 	}
-	// end karma
-#else
+#endif
 	if (ssid_ie_len != hapd->conf->ssid.ssid_len ||
 	    os_memcmp(ssid_ie, hapd->conf->ssid.ssid, ssid_ie_len) != 0) {
 		hostapd_logger(hapd, sta->addr, HOSTAPD_MODULE_IEEE80211,
@@ -2506,7 +2498,6 @@ static u16 check_ssid(struct hostapd_data *hapd, struct sta_info *sta,
 			       "'%s'", wpa_ssid_txt(ssid_ie, ssid_ie_len));
 		return WLAN_STATUS_UNSPECIFIED_FAILURE;
 	}
-#endif
 
 	return WLAN_STATUS_SUCCESS;
 }

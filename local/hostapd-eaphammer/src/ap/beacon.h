@@ -30,4 +30,15 @@ sta_track_seen_on(struct hostapd_iface *iface, const u8 *addr,
 void sta_track_claim_taxonomy_info(struct hostapd_iface *iface, const u8 *addr,
 				   struct wpabuf **probe_ie_taxonomy);
 
+//#ifdef EAPHAMMER
+//
+////int probe_response_helper(struct hostapd_data *hapd,
+////							const struct ieee80211_mgmt *mgmt,
+////							struct ieee802_11_elems elems,
+////							u8 *resp,
+////							size_t resp_len,
+////							enum ssid_match_result res);
+//
+//#endif
+
 #endif /* BEACON_H */

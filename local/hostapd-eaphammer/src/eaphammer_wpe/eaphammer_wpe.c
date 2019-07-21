@@ -18,6 +18,7 @@
 #include "common.h"
 #include "eaphammer_wpe/eaphammer_wpe.h"
 #include "utils/wpa_debug.h"
+#include "ap/eh_ssid_table_t.h"
 
 #define logfile_default_location "./hostapd-wpe.log"
 #define autocrack_fifo_default_location "./eaphammer-fifo.node" // eaphammer
@@ -35,6 +36,10 @@ struct eaphammer_global_config eaphammer_global_conf = {
 	.use_autocrack = 0, // eaphammer
     .always_return_success = 0,
 	.use_karma = 0,
+	.known_beacons = 0,
+	.singed_pants = 0,
+	.ssid_table = NULL,
+	.sta_table = NULL,
 };
 
 void wpe_log_file_and_stdout(char const *fmt, ...) {

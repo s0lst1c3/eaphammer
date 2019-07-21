@@ -26,7 +26,7 @@ from core.wpa_supplicant_conf import WPASupplicantConf
 from datetime import datetime
 from multiprocessing import Queue
 from settings import settings
-from __version__ import __version__
+from __version__ import __version__, __tagline__, __author__, __contact__, __codename__
 from threading import Thread
 
 def hostile_portal():
@@ -599,10 +599,15 @@ _/ __ \\\\__  \\ \\____ \\|  |  \\\\__  \\  /     \\ /     \\_/ __ \\_  __ \\
  \\___  >____  /   __/|___|  (____  /__|_|  /__|_|  /\\___  >__|   
      \\/     \\/|__|        \\/     \\/      \\/      \\/     \\/       
 
-                            "Unrelenting Force"
 
-                                v%s
-    ''' % (__version__))
+                        %s
+
+                             Version:  %s
+                            Codename:  %s
+                              Author:  %s
+                             Contact:  %s
+
+    ''' % (__tagline__, __version__, __codename__, __author__, __contact__))
 
 if __name__ == '__main__':
 

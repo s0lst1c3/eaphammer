@@ -6,6 +6,9 @@ from settings import settings
 
 from cert_wizard import cert_utils
 
+# Python3 FTW
+from pathlib import Path
+
 BASIC_OPTIONS = [
     'cert_wizard',
     'reap_creds',
@@ -402,7 +405,7 @@ def set_options():
     )
     karma_group.add_argument('--known-ssids-file',
                            dest='known_ssids_file',
-                           default=default_ssid_list,
+                           default=None,
                            type=str,
                            help='Specify the wordlist to use with '
                                 'the --known-beacons features.')
@@ -747,13 +750,36 @@ def set_options():
             print(msg, end='')
             sys.exit()
 
-        if options['known_beacons'] and not options['karma']:
+        # sanity checks for known beacons attack
+        if options['known_beacons']:
 
-            parser.print_usage()
-            print()
-            msg = ('[!] Cannot use --known-beacons flag without --karma flag.')
-            print(msg, end='')
-            sys.exit()
+            if not options['karma']:
+
+                parser.print_usage()
+                print()
+                msg = ('[!] Cannot use --known-beacons flag without --karma flag.')
+                print(msg, end='')
+                sys.exit()
+
+            if options['known_ssids_file'] is None:
+
+                parser.print_usage()
+                print()
+                msg = ('[!] Cannot use --known-beacons without known SSIDS file. '
+                       'Please specify path to known SSIDS file with --known-ssids flag.')
+                print(msg, end='')
+                sys.exit()
+                
+    
+
+            if not Path(options['known_ssids_file']).is_file():
+
+                parser.print_usage()
+                print()
+                msg = ('[!] Specified known SSID file not found: {}'.format(options['known_ssids_file']))
+                print(msg, end='')
+                sys.exit()
+                
 
         if any([ options[a] for a in ROGUE_AP_ATTACKS ]):
 

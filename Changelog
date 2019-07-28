@@ -122,3 +122,6 @@ Hostapd now compiled with support for OWE, WPA3, and 802.11ax. However, these pr
 
 1.4.0 - Gabriel Ryan <gryan@specterops.io>
 Added support for advanced karma attacks: known beacon (credit: Census Labs) and loud mode (credit: Sensepost). Added support for 802.11w (Protected Management Frames).
+
+1.5.0 - Gabriel Ryan <gryan@specterops.io>
+Added support for rogue AP attacks against networks that use OWE and OWE Transition Mode.

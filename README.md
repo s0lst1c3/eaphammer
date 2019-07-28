@@ -38,7 +38,10 @@ Features
 - Fast and automated PMKID attacks against PSK networks using hcxtools
 - Password spraying across multiple usernames against a single ESSID
 
-### New (as of Version 1.4.0)(latest): 
+### New (as of Version 1.5.0)(latest): 
+EAPHammer now supports rogue AP attacks against OWE and OWE-Transition mode networks.
+
+### PMF (added as of Version 1.4.0)
 EAPHammer now supports 802.11w (Protected Management Frames), Loud Karma attacks, and Known Beacon attacks (documentation coming soon).
 
 ### GTC Downgrade Attacks

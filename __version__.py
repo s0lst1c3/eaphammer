@@ -1,4 +1,4 @@
-__version__ = '1.4.0'
+__version__ = '1.5.0'
 __codename__ = 'Unrelenting Force'
 __author__ = '@s0lst1c3'
 __contact__ = 'gryan@specterops.io'

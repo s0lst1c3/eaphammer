@@ -10,6 +10,7 @@ from cert_wizard import cert_utils
 from pathlib import Path
 
 BASIC_OPTIONS = [
+
     'cert_wizard',
     'reap_creds',
     'pmkid',
@@ -20,6 +21,8 @@ BASIC_OPTIONS = [
     'essid',
     'bssid',
     'pmf',
+    'owe_transition_bssid',
+    'owe_transition_ssid',
     'channel',
     'hw_mode',
     'cloaking',
@@ -365,7 +368,13 @@ def set_options():
     access_point_group.add_argument('--auth',
                                     dest='auth',
                                     type=str,
-                                    choices=['open', 'wpa'],
+                                    choices=[
+                                        'open',
+                                        'wpa',
+                                        'owe',
+                                        'owe-transition',
+                                        'owe-psk',
+                                    ],
                                     default=None,
                                     help='Specify authentication mechanism '
                                          '(hostile and captive portal '
@@ -602,6 +611,24 @@ def set_options():
                            default=None,
                            help='Set WPA version. (default: 2)')
 
+    owe_transition_group = parser.add_argument_group(
+                        'OWE Transition Mode Options',
+                        ('Only applicable if --auth '
+                            'owe-transition is used'),
+    )
+
+    owe_transition_group.add_argument('--transition-bssid',
+                        dest='owe_transition_bssid',
+                        type=str,
+                        default=None,
+                        help='Set BSSID for OPEN AP')
+
+    owe_transition_group.add_argument('--transition-ssid',
+                        dest='owe_transition_ssid',
+                        type=str,
+                        default=None,
+                        help='Set SSID for OPEN AP')
+
     eap_group = parser.add_argument_group(
                         'EAP Options',
                         'Only applicable if --auth wpa is used',
@@ -618,7 +645,7 @@ def set_options():
                                 '--autocrack is used',
     )
 
-    eap_group.add_argument('--remote-cracking-rig',
+    autocrack_group.add_argument('--remote-cracking-rig',
                            dest='remote_rig',
                            type=str,
                            metavar='server:port',

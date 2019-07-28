@@ -30,6 +30,13 @@ class HostapdConfig(object):
         if options['wmm']:
             configs['wmm'] = self.populate_wmm(settings, options)
 
+        if options['auth'] == 'owe':
+            configs['owe'] = self.populate_owe(settings, options)
+
+        if options['auth'] == 'owe-transition':
+            configs['owe_transition'] = self.populate_owe_transition(settings, options)
+            configs['populate_owe_transition_open_bss'] = self.populate_owe_transition_open_bss(settings, options)
+
         self.dict = configs
 
         if options['debug']:
@@ -325,7 +332,10 @@ class HostapdConfig(object):
 
 
         if options['cloaking'] is None:
-            general_configs['ignore_broadcast_ssid'] = settings.dict['core']['hostapd']['general']['ignore_broadcast_ssid']
+            if options['auth'] == 'owe-transition':
+                general_configs['ignore_broadcast_ssid'] = settings.dict['core']['hostapd']['owe_transition']['owe_transition_ignore_broadcast_ssid']
+            else:
+                general_configs['ignore_broadcast_ssid'] = settings.dict['core']['hostapd']['general']['ignore_broadcast_ssid']
 
         else:
 
@@ -459,7 +469,15 @@ class HostapdConfig(object):
             general_configs['known_beacons'] = settings.dict['core']['hostapd']['general']['known_beacons']
 
         if options['pmf'] is None:
-            general_configs['ieee80211w'] = settings.dict['core']['hostapd']['general']['ieee80211w']
+            if options['auth'] == 'owe':
+                general_configs['ieee80211w'] = settings.dict['core']['hostapd']['owe']['owe_ieee80211w']
+            elif options['auth'] == 'owe-transition':
+                general_configs['ieee80211w'] = settings.dict['core']['hostapd']['owe_transition']['owe_transition_ieee80211w']
+            #if options['auth'] == 'owe-psk':
+            #    general_configs['ieee80211w'] = settings.dict['core']['hostapd']['owe']['owe_psk_ieee80211w']
+
+            else:
+                general_configs['ieee80211w'] = settings.dict['core']['hostapd']['general']['ieee80211w']
         elif options['pmf'] == 'disable':
             general_configs['ieee80211w'] = '0'
         elif options['pmf'] == 'enable':
@@ -471,3 +489,67 @@ class HostapdConfig(object):
 
 
         return general_configs
+
+    def populate_owe(self, settings, options):
+
+        owe_configs = {
+                
+            'wpa' : settings.dict['core']['hostapd']['owe']['wpa'],
+            'wpa_key_mgmt' : settings.dict['core']['hostapd']['owe']['wpa_key_mgmt'],
+            'rsn_pairwise' : settings.dict['core']['hostapd']['owe']['rsn_pairwise'],
+        }
+
+        return owe_configs
+
+    def populate_owe_transition(self, settings, options):
+
+        owe_transition_configs = {
+
+            'wpa' : settings.dict['core']['hostapd']['owe_transition']['wpa'],
+            'wpa_key_mgmt' : settings.dict['core']['hostapd']['owe_transition']['wpa_key_mgmt'],
+            'rsn_pairwise' : settings.dict['core']['hostapd']['owe_transition']['rsn_pairwise'],
+        }
+
+        if options['owe_transition_ssid'] is None:
+            owe_transition_configs['owe_transition_ssid'] = '"{}"'.format(settings.dict['core']['hostapd']['owe_transition']['owe_transition_ssid'])
+        else:
+            owe_transition_configs['owe_transition_ssid'] = '"{}"'.format(options['owe_transition_ssid'])
+
+        if options['owe_transition_bssid'] is None:
+            owe_transition_configs['owe_transition_bssid'] = settings.dict['core']['hostapd']['owe_transition']['owe_transition_bssid']
+        else:
+            owe_transition_configs['owe_transition_bssid'] = options['owe_transition_ssid']
+
+        return owe_transition_configs
+
+    def populate_owe_transition_open_bss(self, settings, options):
+
+        owe_transition_open_bss_configs = {
+
+            'bss' : '{}_0'.format(options['interface']),
+        }
+
+        # set bssid and ssid values for open BSS ------------------
+        if options['owe_transition_ssid'] is None:
+            owe_transition_open_bss_configs['ssid'] = settings.dict['core']['hostapd']['owe_transition']['owe_transition_ssid']
+        else:
+            owe_transition_open_bss_configs['ssid'] = options['owe_transition_ssid']
+
+        if options['owe_transition_bssid'] is None:
+            owe_transition_open_bss_configs['bssid'] = settings.dict['core']['hostapd']['owe_transition']['owe_transition_bssid']
+        else:
+            owe_transition_open_bss_configs['bssid'] = options['owe_transition_ssid']
+
+        # set owe_transition_bssid and owe_transition_ssid values for open BSS ---
+        if options['essid'] is None:
+            owe_transition_open_bss_configs['owe_transition_ssid'] = '"{}"'.format(settings.dict['core']['hostapd']['general']['ssid'])
+        else:
+            owe_transition_open_bss_configs['owe_transition_ssid'] = '"{}"'.format(options['essid'])
+
+        if options['bssid'] is None:
+            owe_transition_open_bss_configs['owe_transition_bssid'] = settings.dict['core']['hostapd']['general']['bssid']
+        else:
+            owe_transition_open_bss_configs['owe_transition_bssid'] = options['bssid']
+
+        return owe_transition_open_bss_configs
+

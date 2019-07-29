@@ -125,3 +125,6 @@ Added support for advanced karma attacks: known beacon (credit: Census Labs) and
 
 1.5.0 - Gabriel Ryan <gryan@specterops.io>
 Added support for rogue AP attacks against networks that use OWE and OWE Transition Mode.
+
+1.6.0 - Gabriel Ryan <gryan@specterops.io>
+Added support for rogue AP attacks using WPA2-PSK (with handshake captures)(credit: Sensepost for original hostapd patch).

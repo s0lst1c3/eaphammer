@@ -637,4 +637,3 @@ if __name__ == '__main__':
         eap_spray()
     else:
         reap_creds()
-

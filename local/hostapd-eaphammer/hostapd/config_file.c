@@ -2481,6 +2481,14 @@ static int hostapd_config_fill(struct hostapd_config *conf,
 			wpa_printf(MSG_DEBUG, "[EAPHAMMER] test 11");
 		eaphammer_global_conf.known_ssids_file = os_strdup(pos);
 			wpa_printf(MSG_DEBUG, "[EAPHAMMER] test 12");
+	} else if (os_strcmp(buf, "psk_capture_file") == 0) {
+			wpa_printf(MSG_DEBUG, "[EAPHAMMER] test 12.1");
+		eaphammer_global_conf.psk_capture_file = os_strdup(pos);
+			wpa_printf(MSG_DEBUG, "[EAPHAMMER] test 12.2");
+	} else if (os_strcmp(buf, "capture_wpa_handshakes") == 0) { // eaphammer
+			wpa_printf(MSG_DEBUG, "[EAPHAMMER] test 12.3");
+		eaphammer_global_conf.capture_wpa_handshakes = atoi(pos);
+			wpa_printf(MSG_DEBUG, "[EAPHAMMER] test 12.4");
 	} else if (os_strcmp(buf, "use_autocrack") == 0) { // eaphammer
 			wpa_printf(MSG_DEBUG, "[EAPHAMMER] test 13");
 		eaphammer_global_conf.use_autocrack = atoi(pos);

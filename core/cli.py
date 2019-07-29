@@ -13,6 +13,8 @@ BASIC_OPTIONS = [
 
     'cert_wizard',
     'reap_creds',
+    'capture_wpa_handshakes',
+    'psk_capture_file',
     'pmkid',
     'hostile_portal',
     'captive_portal',
@@ -607,6 +609,23 @@ def set_options():
                             'WPA Options',
                             'Only applicable if --auth wpa-psk or wpa-eap are used',
     )
+
+    wpa_group.add_argument('--capture-wpa-handshakes',
+                           dest='capture_wpa_handshakes',
+                           type=str,
+                           choices=['yes', 'no'],
+                           default=None,
+                           help='Capture 4-way WPA handshakes '
+                                '(wpa-psk default: yes) '
+                                '(wpa-eap and sae defaults: no)')
+
+    wpa_group.add_argument('--psk-capture-file',
+                           dest='psk_capture_file',
+                           type=str,
+                           default=None,
+                           help='Path to which to write WPA handshake'
+                                'files (default: automatically generated '
+                                'from nonce and current timestamp)')
 
     wpa_group.add_argument('--auth-alg',
                            dest='auth_alg',

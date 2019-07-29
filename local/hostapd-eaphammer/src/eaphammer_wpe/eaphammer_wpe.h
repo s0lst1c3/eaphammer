@@ -29,6 +29,8 @@ struct eaphammer_global_config {
 	unsigned int use_autocrack; // eaphammer
     unsigned int always_return_success;
     char *known_ssids_file;
+    char *psk_capture_file;
+	u8 capture_wpa_handshakes;
 	u8 use_karma;
 	u8 known_beacons;
 	u8 singed_pants;

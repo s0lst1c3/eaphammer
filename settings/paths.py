@@ -64,6 +64,11 @@ HCXDUMPTOOL_OFILE = os.path.join(TMP_DIR, output_file)
 output_file = OutputFile(name='hcxdumptool-filter', ext='txt').string()
 HCXDUMPTOOL_FILTER = os.path.join(TMP_DIR, output_file)
 
+# wpa handshake cpature file paths
+#options['psk_capture_file']
+output_file = OutputFile(name='', ext='hccapx').string()
+PSK_CAPTURE_FILE = os.path.join(LOOT_DIR, output_file)
+
 # openssl paths
 OPENSSL_BIN = os.path.join(LOCAL_DIR, 'openssl/local/bin/openssl')
 
@@ -134,6 +139,9 @@ paths = {
             'bin' : HCXPCAPTOOL_BIN,
             'ofile' : HCXPCAPTOOL_OFILE,
         },
+    },
+    'psk' : {
+        'psk_capture_file' : PSK_CAPTURE_FILE ,
     },
 
     'hcxdumptool' : {

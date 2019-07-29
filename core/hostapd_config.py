@@ -86,6 +86,19 @@ class HostapdConfig(object):
             'wpa_key_mgmt' : settings.dict['core']['hostapd']['eap']['wpa_key_mgmt'],
         }
 
+        if options['capture_wpa_handshakes'] is None:
+            eap_configs['capture_wpa_handshakes'] = settings.dict['core']['hostapd']['eap']['capture_wpa_handshakes']
+        elif options['capture_wpa_handshakes'] == 'yes':
+            eap_configs['capture_wpa_handshakes'] = '1'
+        elif options['capture_wpa_handshakes'] == 'no':
+            eap_configs['capture_wpa_handshakes'] = '0'
+        else:
+            raise Exception('This should never happen.')
+
+        if options['psk_capture_file'] is None:
+            eap_configs['psk_capture_file'] = settings.dict['paths']['psk']['psk_capture_file']
+        else:
+            eap_configs['psk_capture_file'] = options['psk_capture_file'] 
         
         if options['dh_file'] is not None:
             # if the user specified a dh file manually, use this
@@ -178,6 +191,22 @@ class HostapdConfig(object):
             psk_configs['wpa_passphrase'] = settings.dict['core']['hostapd']['psk']['wpa_passphrase']
         else:
             psk_configs['wpa_passphrase'] = options['wpa_passphrase']
+
+        if options['capture_wpa_handshakes'] is None:
+            psk_configs['capture_wpa_handshakes'] = settings.dict['core']['hostapd']['psk']['capture_wpa_handshakes']
+        elif options['capture_wpa_handshakes'] == 'yes':
+            psk_configs['capture_wpa_handshakes'] = '1'
+        elif options['capture_wpa_handshakes'] == 'no':
+            psk_configs['capture_wpa_handshakes'] = '0'
+        else:
+            raise Exception('This should never happen.')
+
+        if options['psk_capture_file'] is None:
+            psk_configs['psk_capture_file'] = settings.dict['paths']['psk']['psk_capture_file']
+        else:
+            psk_configs['psk_capture_file'] = options['psk_capture_file'] 
+
+        
 
         return psk_configs
 

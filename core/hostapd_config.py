@@ -23,7 +23,10 @@ class HostapdConfig(object):
         if hw_mode == 'n':
             configs['80211n'] = self.populate_80211n(settings, options)
 
-        if options['auth'] == 'wpa-eap' or options['reap_creds']:
+        if options['reap_creds'] and options['auth'] is None:
+            options['auth'] = 'wpa-eap'
+
+        if options['auth'] == 'wpa-eap':
             configs['wpa'] = self.populate_wpa(settings, options)
             configs['eap'] = self.populate_eap(settings, options)
         elif options['auth'] == 'wpa-psk':
@@ -99,6 +102,8 @@ class HostapdConfig(object):
             eap_configs['psk_capture_file'] = settings.dict['paths']['psk']['psk_capture_file']
         else:
             eap_configs['psk_capture_file'] = options['psk_capture_file'] 
+
+        print('[*] WPA handshakes will be saved to {}'.format(eap_configs['psk_capture_file']))
         
         if options['dh_file'] is not None:
             # if the user specified a dh file manually, use this
@@ -206,6 +211,7 @@ class HostapdConfig(object):
         else:
             psk_configs['psk_capture_file'] = options['psk_capture_file'] 
 
+        print('[*] WPA handshakes will be saved to {}'.format(psk_configs['psk_capture_file']))
         
 
         return psk_configs

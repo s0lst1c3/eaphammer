@@ -33,6 +33,7 @@ BASIC_OPTIONS = [
     'channel_width',
     'auth_alg',
     'wpa_version',
+    'wpa_passphrase',
     'autocrack',
     'remote_rig',
     'wordlist',
@@ -370,7 +371,8 @@ def set_options():
                                     type=str,
                                     choices=[
                                         'open',
-                                        'wpa',
+                                        'wpa-psk',
+                                        'wpa-eap',
                                         'owe',
                                         'owe-transition',
                                         'owe-psk',
@@ -379,7 +381,7 @@ def set_options():
                                     help='Specify authentication mechanism '
                                          '(hostile and captive portal '
                                          'default: open )'
-                                         '(creds default: wpa).')
+                                         '(creds default: wpa-eap).')
 
     access_point_group.add_argument('--pmf',
                                     dest='pmf',
@@ -591,9 +593,19 @@ def set_options():
                                                   'If not set, 3839 '
                                                   'octets are used.')
 
+    psk_group = parser.add_argument_group(
+                            'WPA-PSK Options',
+                            'Only applicable if --auth wpa-psk is used',
+    )
+    psk_group.add_argument('--wpa-passphrase',
+                           dest='wpa_passphrase',
+                           type=str,
+                           default=None,
+                           help='Set WPA Passphrase for AP.')
+
     wpa_group = parser.add_argument_group(
                             'WPA Options',
-                            'Only applicable if --auth wpa is used',
+                            'Only applicable if --auth wpa-psk or wpa-eap are used',
     )
 
     wpa_group.add_argument('--auth-alg',

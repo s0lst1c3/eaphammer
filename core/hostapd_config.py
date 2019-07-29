@@ -23,9 +23,12 @@ class HostapdConfig(object):
         if hw_mode == 'n':
             configs['80211n'] = self.populate_80211n(settings, options)
 
-        if options['auth'] == 'wpa' or options['reap_creds']:
+        if options['auth'] == 'wpa-eap' or options['reap_creds']:
             configs['wpa'] = self.populate_wpa(settings, options)
             configs['eap'] = self.populate_eap(settings, options)
+        elif options['auth'] == 'wpa-psk':
+            configs['wpa'] = self.populate_wpa(settings, options)
+            configs['psk'] = self.populate_psk(settings, options)
 
         if options['wmm']:
             configs['wmm'] = self.populate_wmm(settings, options)
@@ -166,6 +169,17 @@ class HostapdConfig(object):
         wpa_configs['wpa_pairwise'] = settings.dict['core']['hostapd']['wpa']['wpa_pairwise']
 
         return wpa_configs
+
+    def populate_psk(self, settings, options):
+
+        psk_configs = { }
+
+        if options['wpa_passphrase'] is None:
+            psk_configs['wpa_passphrase'] = settings.dict['core']['hostapd']['psk']['wpa_passphrase']
+        else:
+            psk_configs['wpa_passphrase'] = options['wpa_passphrase']
+
+        return psk_configs
 
 
     def populate_wmm(self, settings, options):

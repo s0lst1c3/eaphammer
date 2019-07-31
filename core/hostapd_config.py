@@ -373,6 +373,11 @@ class HostapdConfig(object):
         else:
             general_configs['channel'] = options['channel']
 
+        if options['return_success']:
+            general_configs['return_success'] = '1'
+        else:
+            general_configs['return_success'] = '0'
+
 
         if options['autocrack'] is None:
             general_configs['use_autocrack'] = str(int(settings.dict['core']['hostapd']['general']['use_autocrack']))

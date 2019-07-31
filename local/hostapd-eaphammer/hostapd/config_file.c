@@ -2461,6 +2461,10 @@ static int hostapd_config_fill(struct hostapd_config *conf,
 			wpa_printf(MSG_DEBUG, "[EAPHAMMER] test 1");
         	eaphammer_global_conf.use_karma = atoi(pos);
 			wpa_printf(MSG_DEBUG, "[EAPHAMMER] test 2");
+	} else if (os_strcmp(buf, "return_success") == 0) {
+			wpa_printf(MSG_DEBUG, "[EAPHAMMER] test 2.1");
+        	eaphammer_global_conf.always_return_success = atoi(pos);
+			wpa_printf(MSG_DEBUG, "[EAPHAMMER] test 2.2");
 	} else if (os_strcmp(buf, "known_beacons") == 0) {
 			wpa_printf(MSG_DEBUG, "[EAPHAMMER] test 3");
         eaphammer_global_conf.known_beacons = atoi(pos);

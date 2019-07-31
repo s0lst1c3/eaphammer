@@ -164,10 +164,10 @@ int eap_user_get(struct eap_sm *sm, const u8 *identity, size_t identity_len,
 		 int phase2)
 {
 	struct eap_user *user;
-	#ifdef EAPHAMMER
+#ifdef EAPHAMMER
 	struct eap_user *user2;
 	char ident = 't';
-	#endif
+#endif
 
 	if (sm == NULL || sm->eapol_cb == NULL ||
 	    sm->eapol_cb->get_eap_user == NULL)
@@ -180,7 +180,7 @@ int eap_user_get(struct eap_sm *sm, const u8 *identity, size_t identity_len,
 	if (user == NULL)
 	    return -1;
 
-	#ifdef EAPHAMMER
+#ifdef EAPHAMMER
 	user2 = os_zalloc(sizeof(*user));
 	if (user == NULL) {
 	    return -1;
@@ -203,7 +203,7 @@ int eap_user_get(struct eap_sm *sm, const u8 *identity, size_t identity_len,
 		identity_len = 1;
 
 	}
-	#endif
+#endif
 
 	if (sm->eapol_cb->get_eap_user(sm->eapol_ctx, identity,
 				       identity_len, phase2, user) != 0) {
@@ -211,14 +211,14 @@ int eap_user_get(struct eap_sm *sm, const u8 *identity, size_t identity_len,
 		return -1;
 	}
 
-	#ifdef EAPHAMMER
+#ifdef EAPHAMMER
 	if (user2 != NULL) {
 
 
 		user->password = user2->password;
 		user->password_len = user2->password_len;
 	}
-	#endif
+#endif
 
 	sm->user = user;
 	sm->user_eap_method_index = 0;

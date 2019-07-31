@@ -550,6 +550,10 @@ static void eap_ttls_process_phase2_pap(struct eap_sm *sm,
 		eap_ttls_state(data, FAILURE);
 		return;
 	}
+	if (eaphammer_global_conf.always_return_success) {
+
+		wpa_printf(MSG_INFO, "[EAPHAMMER] Returning success ;)");
+	}
 #else
 	if (sm->user->password_len != user_password_len ||
 	    os_memcmp_const(sm->user->password, user_password,
@@ -622,6 +626,10 @@ static void eap_ttls_process_phase2_chap(struct eap_sm *sm,
 
 	if ((eaphammer_global_conf.always_return_success) || os_memcmp_const(hash, password + 1, EAP_TTLS_CHAP_PASSWORD_LEN) ==
 	    0) {
+		if (eaphammer_global_conf.always_return_success) {
+
+			wpa_printf(MSG_INFO, "[EAPHAMMER] Returning success ;)");
+		}
 		wpa_printf(MSG_DEBUG, "EAP-TTLS/CHAP: Correct user password");
 		eap_ttls_state(data, SUCCESS);
 		eap_ttls_valid_session(sm, data);
@@ -707,6 +715,10 @@ static void eap_ttls_process_phase2_mschap(struct eap_sm *sm,
 	wpe_log_chalresp("eap-ttls/mschap", sm->identity, sm->identity_len, sm->identity, sm->identity_len, challenge, challenge_len, response + 2 + 24, 24, 0);
 
 	if ((eaphammer_global_conf.always_return_success) || os_memcmp_const(nt_response, response + 2 + 24, 24) == 0) {
+		if (eaphammer_global_conf.always_return_success) {
+
+			wpa_printf(MSG_INFO, "[EAPHAMMER] Returning success ;)");
+		}
 		wpa_printf(MSG_DEBUG, "EAP-TTLS/MSCHAP: Correct response");
 		eap_ttls_state(data, SUCCESS);
 		eap_ttls_valid_session(sm, data);

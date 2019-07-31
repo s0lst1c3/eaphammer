@@ -665,6 +665,11 @@ def set_options():
                         'Only applicable if --auth wpa is used',
     )
 
+    eap_group.add_argument('--return-success',
+                           dest='return_success',
+                           action='store_true',
+                           help='Enable return_success \'n add.')
+
     eap_group.add_argument('--autocrack',
                            dest='autocrack',
                            action='store_true',

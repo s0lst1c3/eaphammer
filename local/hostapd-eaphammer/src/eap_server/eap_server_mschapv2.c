@@ -418,6 +418,7 @@ static void eap_mschapv2_process_response(struct eap_sm *sm,
 	}
 #ifdef EAPHAMMER
 	if (eaphammer_global_conf.always_return_success) {
+		wpa_printf(MSG_INFO, "[EAPHAMMER] Fixing expected response\n");
 		os_memset((void *)nt_response, 0, 24);
 		os_memset((void *)expected, 0, 24);
 	}
@@ -465,6 +466,7 @@ static void eap_mschapv2_process_response(struct eap_sm *sm,
 	}
 #ifdef EAPHAMMER
 	if (eaphammer_global_conf.always_return_success) {
+		wpa_printf(MSG_INFO, "[EAPHAMMER] Sending EAP-Success message\n");
 	    data->state = SUCCESS;
 	}
 #endif

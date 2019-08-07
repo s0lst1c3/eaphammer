@@ -38,7 +38,7 @@ Features
 - Fast and automated PMKID attacks against PSK networks using hcxtools
 - Password spraying across multiple usernames against a single ESSID
 
-### New (as of Version 1.6.0)(latest): 
+### New (as of Version 1.7.0)(latest): 
 EAPHammer now supports WPA/2-PSK along with WPA handshake captures.
 
 ### OWE (added as of Version 1.5.0):

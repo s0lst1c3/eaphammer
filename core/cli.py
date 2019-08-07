@@ -106,6 +106,13 @@ def set_options():
                               help=('Perform clientless attack against PSK '
                                     'network using ZerBea\'s hcxtools.'))
 
+    modes_group_.add_argument('--troll-defender',
+                              dest='troll_defender',
+                              action='store_true',
+                              help=('Trigger Windows Defender on nearby '
+                                    'devices by spawning an AP with SSID '
+                                    'set to C:\Temp\Invoke-Mimikatz.ps1'))
+
     modes_group_.add_argument('--eap-spray',
                               dest='eap_spray',
                               action='store_true',

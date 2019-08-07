@@ -128,3 +128,7 @@ Added support for rogue AP attacks against networks that use OWE and OWE Transit
 
 1.6.0 - Gabriel Ryan <gryan@specterops.io>
 Added support for rogue AP attacks using WPA2-PSK (with handshake captures)(credit: Sensepost for original hostapd patch).
+
+1.7.0 - Gabriel Ryan <gryan@specterops.io>
+Added "Troll Defender" option that triggers Windows Defender on nearby Windows
+devices.

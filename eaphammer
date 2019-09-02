@@ -18,6 +18,7 @@ from core.autocrack import Autocrack
 from core import iw_parse
 from core.hostapd import HostapdEaphammer
 from core.hostapd_config import HostapdConfig
+from core.eap_user_file import EAPUserFile
 from core.responder_config import ResponderConfig
 from core.lazy_file_reader import LazyFileReader
 from core.redirect_server import RedirectServer
@@ -56,6 +57,12 @@ def hostile_portal():
         # prepare environment
         interface.nm_off()
         utils.set_ipforward(1)
+
+        if options['auth'] == 'wpa-eap':
+
+            # generate eap user file and write to tmp directory
+            eap_user_file = EAPUserFile(settings, options)
+            eap_user_file.generate()
 
         # write hostapd config file to tmp directory
         hostapd_conf = HostapdConfig(settings, options)
@@ -123,6 +130,11 @@ def hostile_portal():
             hostapd_conf.save()
         hostapd_conf.remove()
 
+        if options['auth'] == 'wpa-eap':
+
+            # remove eap user file from tmp directory
+            eap_user_file.remove()
+
         # restore iptables to a clean state (policy, flush tables)
         utils.Iptables.accept_all()
         utils.Iptables.flush()
@@ -149,6 +161,11 @@ def hostile_portal():
         if save_config:
             hostapd_conf.save()
         hostapd_conf.remove()
+
+        if options['auth'] == 'wpa-eap':
+
+            # remove eap user file from tmp directory
+            eap_user_file.remove()
         
         # restore iptables to a clean state (policy, flush tables)
         utils.Iptables.accept_all()
@@ -185,6 +202,12 @@ def captive_portal():
             autocrack = Autocrack.get_instance()
             autocrack.configure(wordlist=wordlist)
             autocrack.start()
+
+        if options['auth'] == 'wpa-eap':
+
+            # generate eap user file and write to tmp directory
+            eap_user_file = EAPUserFile(settings, options)
+            eap_user_file.generate()
 
         # write hostapd config file to tmp directory
         hostapd_conf = HostapdConfig(settings, options)
@@ -227,6 +250,11 @@ def captive_portal():
         if save_config:
             hostapd_conf.save()
         hostapd_conf.remove()
+
+        if options['auth'] == 'wpa-eap':
+
+            # remove eap user file from tmp directory
+            eap_user_file.remove()
         
         # restore iptables to a clean state (policy, flush tables)
         utils.Iptables.accept_all()
@@ -250,6 +278,11 @@ def captive_portal():
         if save_config:
             hostapd_conf.save()
         hostapd_conf.remove()
+
+        if options['auth'] == 'wpa-eap':
+
+            # remove eap user file from tmp directory
+            eap_user_file.remove()
         
         # restore iptables to a clean state (policy, flush tables)
         utils.Iptables.accept_all()
@@ -273,6 +306,12 @@ def troll_defender():
 
         options['essid'] = 'C:\\Temp\\Invoke-Mimikatz.ps1'
 
+        if options['auth'] == 'wpa-eap':
+
+            # generate eap user file and write to tmp directory
+            eap_user_file = EAPUserFile(settings, options)
+            eap_user_file.generate()
+
         # write hostapd config file to tmp directory
         hostapd_conf = HostapdConfig(settings, options)
         hostapd_conf.write()
@@ -287,6 +326,11 @@ def troll_defender():
         hostapd.stop()
         hostapd_conf.remove()
 
+        if options['auth'] == 'wpa-eap':
+
+            # remove eap user file from tmp directory
+            eap_user_file.remove()
+
         # cleanly allow network manager to regain control of interface
         interface.nm_on()
 
@@ -295,6 +339,11 @@ def troll_defender():
         hostapd.stop()
 
         hostapd_conf.remove()
+
+        if options['auth'] == 'wpa-eap':
+
+            # remove eap user file from tmp directory
+            eap_user_file.remove()
 
         # cleanly allow network manager to regain control of interface
         interface.nm_on()
@@ -323,6 +372,12 @@ def reap_creds():
 
         interface.nm_off()
 
+        if options['auth'] == 'wpa-eap':
+
+            # generate eap user file and write to tmp directory
+            eap_user_file = EAPUserFile(settings, options)
+            eap_user_file.generate()
+
         # write hostapd config file to tmp directory
         hostapd_conf = HostapdConfig(settings, options)
         hostapd_conf.write()
@@ -343,6 +398,11 @@ def reap_creds():
             hostapd_conf.save()
         hostapd_conf.remove()
 
+        if options['auth'] == 'wpa-eap':
+
+            # remove eap user file from tmp directory
+            eap_user_file.remove()
+
         # cleanly allow network manager to regain control of interface
         interface.nm_on()
 
@@ -356,6 +416,11 @@ def reap_creds():
         if save_config:
             hostapd_conf.save()
         hostapd_conf.remove()
+
+        if options['auth'] == 'wpa-eap':
+
+            # remove eap user file from tmp directory
+            eap_user_file.remove()
 
         # cleanly allow network manager to regain control of interface
         interface.nm_on()

@@ -46,6 +46,7 @@ BASIC_OPTIONS = [
     'user_list',
     'bootstrap',
     'known_ssids_file',
+    'negotiate',
 ]
 
 ROGUE_AP_ATTACKS = [
@@ -669,7 +670,7 @@ def set_options():
 
     eap_group = parser.add_argument_group(
                         'EAP Options',
-                        'Only applicable if --auth wpa is used',
+                        'Only applicable if --auth wpa-eap is used',
     )
 
     eap_group.add_argument('--autocrack',
@@ -677,9 +678,54 @@ def set_options():
                            action='store_true',
                            help='Enable autocrack \'n add.')
 
+    eap_group.add_argument('--negotiate',
+                           dest='negotiate',
+                           choices=[
+                                'balanced',
+                                'speed',
+                                'weakest',
+                                'gtc-downgrade',
+                                'manual',
+                           ],
+                           type=str,
+                           default='balanced',
+                           help='Specify EAP negotiation approach.')
+
+    eap_group.add_argument('--eap-user-file',
+                           dest='eap_user_file',
+                           default=None,
+                           type=str,
+                           help=('Manually specify path to '
+                                 'eap_user_file (instead of '
+                                 'using EAPHammer\'s accounting '
+                                 'system)'))
+
+    eap_group.add_argument('--phase-1-methods',
+                          dest='eap_methods_phase_1',
+                          default='PEAP,TTLS,TLS,FAST',
+                          type=str,
+                          help=('Manually specify EAP phase 1 methods for '
+                                'for wildcard user EAP negotiate.'))
+
+    eap_group.add_argument('--phase-2-methods',
+                          dest='eap_methods_phase_2',
+                          default=('GTC,TTLS-PAP,MD5,TTLS-CHAP,'
+                                   'TTLS-MSCHAP,MSCHAPV2,'
+                                   'TTLS-MSCHAPV2,TTLS'),
+                          type=str,
+                          help=('Manually specify EAP phase 2 methods for '
+                                'for wildcard user EAP negotiate.'))
+
+    eap_group.add_argument('--peap-version',
+                           dest='peap_version',
+                           choices=[1, 2],
+                           type=int,
+                           default=None,
+                           help='Specify EAP negotiation approach.')
+
     autocrack_group = parser.add_argument_group(
                                 'Autocrack Options',
-                                'Only applicable if --auth wpa  '
+                                'Only applicable if --auth wpa-eap  '
                                 '--autocrack is used',
     )
 
@@ -944,5 +990,8 @@ def set_options():
                    'interface in your config file.')
             print(msg)
             sys.exit()
+
+    if options['negotiate'] == 'gtc-downgrade':
+        options['negotiate'] = 'gtc_downgrade'
 
     return options

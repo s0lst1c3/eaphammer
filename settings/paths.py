@@ -90,8 +90,13 @@ HOSTAPD_CONF = os.path.join(TMP_DIR, output_file)
 HOSTAPD_SAVE = os.path.join(SAVE_DIR, output_file)
 FIFO_PATH = os.path.join(TMP_DIR, OutputFile(ext='fifo').string())
 
-EAP_USER_FILE = os.path.join(DB_DIR, 'eaphammer.eap_user')
-EAP_USER_HEADER = os.path.join(DB_DIR, 'eap_user_header.txt')
+#EAP_USER_FILE = os.path.join(DB_DIR, 'eaphammer.eap_user')
+output_file = OutputFile(ext='eap_user').string()
+EAP_USER_FILE = os.path.join(TMP_DIR, output_file)
+#EAP_USER_HEADER = os.path.join(DB_DIR, 'eap_user_header.txt')
+EAP_USER_HEADER = os.path.join(DB_DIR, 'eap_user.header')
+PHASE1_ACCOUNTS = os.path.join(DB_DIR, 'phase1.accounts')
+PHASE2_ACCOUNTS = os.path.join(DB_DIR, 'phase2.accounts')
 
 # cert paths
 CA_CERTS_DIR = os.path.join(CERTS_DIR, 'ca')
@@ -168,6 +173,8 @@ paths = {
         'log' : HOSTAPD_LOG,
         'eap_user'  : EAP_USER_FILE,
         'eap_user_header'  : EAP_USER_HEADER,
+        'phase1_accounts' : PHASE1_ACCOUNTS,
+        'phase2_accounts' : PHASE2_ACCOUNTS,
         'fifo' : FIFO_PATH,
         'conf' : HOSTAPD_CONF,
         'save' : HOSTAPD_SAVE,

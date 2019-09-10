@@ -442,6 +442,12 @@ For victims with weak passwords, you can use the --autocrack flag in order to pe
 
 ### VIII.2 - Controlling EAP Negotiation (EAP Downgrade Attacks)
 
+EAPHammer supports the ability to perform a variety of EAP Downgrade attacks (including the GTC Downgrade attack) to attempt to force client devices to surrender plaintext credentials.
+
+This is actually a pretty lengthy topic, so please refer to the following blog post if you want to understand more about this functionality:
+
+- [http://solstice.sh/wireless/eaphammer/2019/09/09/eap-downgrade-attacks/](http://solstice.sh/wireless/eaphammer/2019/09/09/eap-downgrade-attacks/)
+
 #### VIII.2.a - Balanced Approach (default)
 
 EAPHammer's default bevahior is to suggest the following sequences of EAP methods during EAP negotiation:

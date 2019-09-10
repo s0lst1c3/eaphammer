@@ -372,7 +372,7 @@ def reap_creds():
 
         interface.nm_off()
 
-        if options['auth'] == 'wpa-eap':
+        if options['auth'] == 'wpa-eap' or (options['reap_creds'] and options['auth'] is None):
 
             # generate eap user file and write to tmp directory
             eap_user_file = EAPUserFile(settings, options)

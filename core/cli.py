@@ -534,7 +534,7 @@ def set_options():
 
     hwm80211n_advanced_subgroup.add_argument('--max-spatial-streams',
                                              dest='max_spatial_streams',
-                                             type=str,
+                                             type=int,
                                              choices=[1,2,3],
                                              default=None,
                                              help='Specifies maximum '

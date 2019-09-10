@@ -132,3 +132,6 @@ Added support for rogue AP attacks using WPA2-PSK (with handshake captures)(cred
 1.7.0 - Gabriel Ryan <gryan@specterops.io>
 Added "Troll Defender" option that triggers Windows Defender on nearby Windows
 devices.
+
+1.8.0 - Gabriel Ryan <gryan@specterops.io>
+Improved EAP Downgrades. Users now have greater control over EAP Negotiation process. See [http://solstice.sh/wireless/eaphammer/2019/09/09/eap-downgrade-attacks/](http://solstice.sh/wireless/eaphammer/2019/09/09/eap-downgrade-attacks/) for additional details.

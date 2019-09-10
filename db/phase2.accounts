@@ -1,0 +1,6 @@
+
+
+# Phase 2 users
+"t-md5"	MD5	"password"	[2]
+"DOMAIN\t-mschapv2"	MSCHAPV2	"password"	[2]
+"t-gtc"	GTC	"password"	[2]

@@ -116,15 +116,22 @@ Table of Contents
       * [VII - Hardware Modes: 802.11b / 802.11g / 802.11a / 802.11n / etc](#vii---hardware-modes-80211b--80211g--80211a--80211n--etc)
       * [VIII - Attacking WPA-EAP and WPA2-EAP Networks](#viii---attacking-wpa-eap-and-wpa2-eap-networks)
          * [VIII.1 - Considerations When Attacking WPA2-EAP Networks](#viii1---considerations-when-attacking-wpa2-eap-networks)
-         * [VIII.2 - Using AutoCrack](#viii2---using-autocrack)
-         * [VIII.3 - EAPHammer User Database](#viii3---eaphammer-user-database)
-            * [VIII.3.a - Basic Usage](#viii3a---basic-usage)
-               * [VIII.3.aa - Listing Users](#viii3aa---listing-users)
-               * [VIII.3.ab - Adding Users](#viii3ab---adding-users)
-          BB     * [VIII.3.ac - Deleting Users](#viii3ac---deleting-users)
-               * [VIII.3.ad - Updating Users](#viii3ad---updating-users)
-               * [VIII.3.ae - Search Filters](#viii3ae---search-filters)
-            * [VIII.4.b - Advanced Usage](#viii4b---advanced-usage)
+         * [VIII.2 - Controlling EAP Negotiation (EAP Downgrade Attacks)](#viii2---controlling-eap-negotiation-eap-downgrade-attacks)
+            * [VIII.2.a - Balanced Approach (default)](#viii2a---balanced-approach-default)
+            * [VIII.2.b Full EAP downgrade (weakest to strongest)](#viii2b-full-eap-downgrade-weakest-to-strongest)
+            * [VIII.2.c Speed optimized approach (strongest to weakest)](#viii2c-speed-optimized-approach-strongest-to-weakest)
+            * [VIII.2.d Explicit GTC downgrade attack](#viii2d-explicit-gtc-downgrade-attack)
+            * [VIII.2.e Manually controlling EAP negotiation](#viii2e-manually-controlling-eap-negotiation)
+            * [VIII.2.f Custom EAP User files](#viii2f-custom-eap-user-files)
+         * [VIII.3 - Using AutoCrack](#viii3---using-autocrack)
+         * [VIII.4 - EAPHammer User Database](#viii4---eaphammer-user-database)
+            * [VIII.4.a - Basic Usage](#viii4a---basic-usage)
+               * [VIII.4.aa - Listing Users](#viii4aa---listing-users)
+               * [VIII.4.ab - Adding Users](#viii4ab---adding-users)
+                 * [VIII.4.ac - Deleting Users](#viii4ac---deleting-users)
+               * [VIII.4.ad - Updating Users](#viii4ad---updating-users)
+               * [VIII.4.ae - Search Filters](#viii4ae---search-filters)
+            * [VIII.5.b - Advanced Usage](#viii5b---advanced-usage)
       * [IX - ESSID Cloaking](#ix---essid-cloaking)
       * [X - Using Karma](#x---using-karma)
       * [XI - PMKID Attacks Against WPA-PSK and WPA2-PSK Networks](#xi---pmkid-attacks-against-wpa-psk-and-wpa2-psk-networks)
@@ -142,9 +149,6 @@ Table of Contents
          * [XIII.5 - Regenerating Diffie Hellman (DH) Parameters](#xiii5---regenerating-diffie-hellman-dh-parameters---cert-wizard-dh)
          * [XIII.6 - Overriding EAPHammer's Static Configuration](#xiii6---overriding-eaphammers-static-configuration)
       * [XIV - Advanced Granular Controls](#xiv---advanced-granular-controls)
-
-
-
 
 Setup Guide
 ===========
@@ -436,7 +440,140 @@ Fortunately, you have a couple of options available to you. The first option is 
 
 For victims with weak passwords, you can use the --autocrack flag in order to perform an auto crack 'n add attack (see [VI.1 - Using AutoCrack](#vi1---using-autocrack) for usage instructions, see [Improvements In Rogue AP Attacks - MANA 1/2](https://sensepost.com/blog/2015/improvements-in-rogue-ap-attacks-mana-1%2F2/) for details on how this attack works).
 
-### VIII.2 - Using AutoCrack
+### VIII.2 - Controlling EAP Negotiation (EAP Downgrade Attacks)
+
+EAPHammer supports the ability to perform a variety of EAP Downgrade attacks (including the GTC Downgrade attack) to attempt to force client devices to surrender plaintext credentials.
+
+This is actually a pretty lengthy topic, so please refer to the following blog post if you want to understand more about this functionality:
+
+- [http://solstice.sh/wireless/eaphammer/2019/09/09/eap-downgrade-attacks/](http://solstice.sh/wireless/eaphammer/2019/09/09/eap-downgrade-attacks/)
+
+#### VIII.2.a - Balanced Approach (default)
+
+EAPHammer's default bevahior is to suggest the following sequences of EAP methods during EAP negotiation:
+
+    # Phase 1 (outer authentication)
+    PEAP,TTLS,TLS,FAST
+
+    # Phase 2  (inner authentication)
+    GTC,MSCHAPV2,TTLS-MSCHAPV2,TTLS,TTLS-CHAP,TTLS-PAP,TTLS-MSCHAP,MD5
+
+EAPHammer first attempts to downgrade to GTC, and then immediately falls back to stronger EAP methods if the attempt fails. This balanced approach is designed to maximize impact while minimizing the risk of protracted EAP negotiations.
+
+To execute this attack, run EAPHammer with the `--negotiate balanced` flag:
+
+```bash
+./eaphammer --interface wlan0 \
+	--negotiate balanced \
+	--auth wpa-eap \
+	--essid example \
+	--creds
+```
+
+Alternatively, just omit the `--negotiate` flag altogether:
+
+```bash
+./eaphammer --interface wlan0 \
+	--auth wpa-eap \
+	--essid example \
+	--creds
+```
+
+#### VIII.2.b Full EAP downgrade (weakest to strongest)
+
+Should you want to perform a full EAP downgrade attack, you can do so using the `--negotiate weakest` flag:
+
+```bash
+./eaphammer --interface wlan0 \
+	--negotiate weakest \
+	--auth wpa-eap \
+	--essid example \
+	--creds
+```
+
+This will instruct EAPHammer to suggest the following sequences of EAP methods during EAP negotiation:
+
+	# Phase 1 (outer authentication)
+	PEAP,TTLS,TLS,FAST
+
+	# Phase 2 (inner authentication)
+	GTC,TTLS-PAP,MD5,TTLS-CHAP,TTLS-MSCHAP,MSCHAPV2,TTLS-MSCHAPV2,TTLS
+
+Keep in mind that using this option may lead to long EAP negotiation times, which can be detrimental to the overall effectiveness of your attack.
+
+#### VIII.2.c Speed optimized approach (strongest to weakest)
+
+In this mode, EAPHammer proposes the EAP methods that are most likely to succeed first:
+
+```bash
+./eaphammer --interface wlan0 \
+	--negotiate speed \
+	--auth wpa-eap \
+	--essid example \
+	--creds
+```
+
+This will instruct EAPHammer to suggest the following sequences of EAP methods during EAP negotiation:
+
+	# Phase 1 (outer authentication)
+	PEAP,TTLS,TLS,FAST
+
+	# Phase 2 (inner authentication)
+	MSCHAPV2,TTLS-MSCHAPV2,TTLS,TTLS-CHAP,GTC,TTLS-PAP,TTLS-MSCHAP,MD5
+
+Use this mode if you have trouble getting clients to finish the EAP authentication process using the default mode.
+
+#### VIII.2.d Explicit GTC downgrade attack
+
+To execute [@W00Tock](https://twitter.com/W00Tock)'s highly efficient GTC downgrade implementation, use the `--negotiate gtc-downgrade` flag:
+
+```bash
+./eaphammer --interface wlan0 \
+	--negotiate gtc-downgrade \
+	--auth wpa-eap \
+	--essid example \
+	--creds
+```
+
+This will instruct EAPHammer to suggest the following sequences of EAP methods during EAP negotiation:
+
+	# Phase 1 (outer authentication)
+	PEAP [ver=1]
+
+	# Phase 2 (inner authentication)
+	GTC
+
+See [https://twitter.com/w00tock/status/1019251419310972930](https://twitter.com/w00tock/status/1019251419310972930) for source of this attack.
+
+#### VIII.2.e Manually controlling EAP negotiation
+
+To manually control which EAP methods are used by EAPHammer, as well as the order in which they are suggested to the client, use the `--negotiate manual` flag in conjuction with the `--phase-2-methods` and `--phase-1-methods` flags:
+
+```bash
+./eaphammer --interface wlan0 \
+	--negotiate manual \
+	--phase-1-methods PEAP,TTLS \
+	--phase-2-methods MSCHAPV2,GTC,TTLS-MSCHAP \
+	--auth wpa-eap \
+	--essid example \
+	--creds
+```
+
+Manual control over the EAP negotiation process is useful in situations where the access point's behavior must be mimicked in order to evade detection.
+
+#### VIII.2.f Custom EAP User files
+
+To use your own EAP User file, instead of relying on EAPHammer's automated processes, run EAPHammer with the `--eap-user-file` flag:
+
+```bash
+./eaphammer --interface wlan0 \
+	--eap-user-file /tmp/i-like-to-write-things-by-hand.eap_user \
+	--auth wpa-eap \
+	--essid painful \
+	--creds
+```
+
+### VIII.3 - Using AutoCrack
 
 "Autocrack 'n add" is a technique introduced by Dominic White and Ian de Villiers in 2014 which was first introduced into their [Mana Toolkit](https://github.com/sensepost/mana). When autocrack ‘n add is used, the captured MS-CHAPv2 challenge and response is immediately sent to a cracking rig (local or remote) before the authentication response is sent to the victim. The cracked credentials are then appended to the end of the eap\_user file. If the challenge and response are cracked fast enough, the cracked credentials are added to eap\_user file before hostapd attempts to retrieve them. Even if the challenge and response cannot be cracked in time, the attack will succeed when the client attempts to reauthenticate provided the password can be cracked within a short period of time. When weak passwords are used, this process can take seconds. See the original [Improvements In Rogue AP Attacks - MANA 1/2](https://sensepost.com/blog/2015/improvements-in-rogue-ap-attacks-mana-1%2F2/) blog post for a more detailed explanation of this attack.
 
@@ -446,15 +583,15 @@ To use EAPHammer's builtin AutoCrack capability, just include the --autocrack fl
 
 Note that at this time, EAPHammer only supports performing an autocrack 'n add using EAPHammer's internal hash cracking capability. Unless you're using a cracking rig to run EAPHammer, this is going to be very slow. Support for sending hashes to a remote cracking rig will be added in the future.
 
-### VIII.3 - EAPHammer User Database
+### VIII.4 - EAPHammer User Database
 
-For now, EAPHammer's database is really just an interface to hostapd's eap\_user file. This will change in subsequent versions.
+EAPHammer's database is really just an interface to hostapd's eap\_user file. 
 
 For most use cases, just stick with the [VIII.3.a - Basic Usage](#viii3a---basic-usage) section found below.
 
-#### VIII.3.a - Basic Usage
+#### VIII.4.a - Basic Usage
 
-##### VIII.3.aa - Listing Users
+##### VIII.4.aa - Listing Users
 
 To list entries in the database, use the --list flag as shown below:
 
@@ -462,7 +599,7 @@ To list entries in the database, use the --list flag as shown below:
 
 You can also filter for users that match specific attributes. Please see [VIII.3.ae - Search Filters](#viii3ae---search-filters) for additional information.
 
-##### VIII.3.ab - Adding Users
+##### VIII.4.ab - Adding Users
 
 At minimum, each user that you add to the database needs to have the following attributes:
 
@@ -481,7 +618,7 @@ There are other attributes that you can specify as well (see [VIII.3.b - Advance
 the default attributes will work in the vast majority of situations, so try not to worry about those
 unless you absolutely have to.
 
-##### VIII.3.ac - Deleting Users
+##### VIII.4.ac - Deleting Users
 
 To remove an identity from the database:
 
@@ -493,11 +630,11 @@ To remove all identities from the datbase:
 
 You can also delete multiple users at once by using search filters. Please see [VIII.3.ae - Search Filters](#viii3ae---search-filters) for additional information.
 
-##### VIII.3.ad - Updating Users
+##### VIII.4.ad - Updating Users
 
 To update a user's password (or other attribute), just use the --add flag. The existing user entry will be updated to reflect your modifications.
 
-##### VIII.3.ae - Search Filters
+##### VIII.4.ae - Search Filters
 
 You can use search filters to narrow the output of the --list flag and to delete multiple users using the --delete flag.
 
@@ -780,4 +917,3 @@ You can also save hostapd configurations for reuse using the --save-config flag.
 You can even use the --save-config-only flag to generate a config file without actually executing an attack:
 
 	./eaphammer -i wlan0 -e saveForLater --creds --save-config-only myconfig.conf
-

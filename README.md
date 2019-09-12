@@ -52,40 +52,76 @@ We use [SemVer](http://semver.org/) for versioning (or at least make an effort t
 This project is licensed under the GNU Public License 3.0 - see the [LICENSE.md](LICENSE.md) file for details.
 
 ## Acknowledgments
-This tool either builds upon, is inspired by, or directly incorporates over ten years of prior research and development from the following awesome people:
+This tool either builds upon, is inspired by, or directly incorporates nearly fifteen years of prior research and development from the following awesome people:
 
-Original WPE Patches
+#### Original WPE Patches
+Name(s):
 * Brad Antoniewicz
 * Joshua Wright
 
-Original Karma Patches
+Relevant work:
+* [PEAP: Pwnd Extensible Authentication Protocol](http://www.willhackforsushi.com/presentations/PEAP_Shmoocon2008_Wright_Antoniewicz.pdf)
+
+#### Original Karma Patches
+Name(s):
 * Robin Wood
 * Dino Dai Zovi
 * Shane Macauly
 
-EAP Research, Karma Research, Original Autocrack and Improved Karma
-* @singe (domanic@sensepost.com)
-* Ian de Villiers (ian@sensepost.com)
-* Michael Kruger (@\_cablethief)
+Relevant work:
+* [Improvements in Rogue AP Attacks](https://sensepost.com/blog/2015/improvements-in-rogue-ap-attacks-mana-1%2F2/)
+* [PEAP Relay Attacks With WPA Sycophant](https://sensepost.com/blog/2019/peap-relay-attacks-with-wpa_sycophant/)
+* [Handling Randomized MAC Addresses In Mana](https://sensepost.com/blog/2016/handling-randomised-mac-addresses-in-mana/)
 
-Attacks Against MSCHAPv2
+#### EAP Research, Karma Research, Original Autocrack and Improved Karma
+Name(s):
+* Domanic White
+* Ian de Villiers
+* Michael Kruger
+
+Relevant work:
+* [Improvements in Rogue AP Attacks Mana](https://sensepost.com/blog/2015/improvements-in-rogue-ap-attacks-mana-1%2F2/)
+
+#### Attacks Against MSCHAPv2
+Name(s):
 * Moxie Marlinspike
 * David Hulton
 
-GTC Downgrade Attacks
+Relevant work:
+* [Cracking MS-CHAPv2](http://web.archive.org/web/20160203043946/https:/www.cloudcracker.com/blog/2012/07/29/cracking-ms-chap-v2/)
+
+#### Original GTC Downgrade Attacks
+Name(s):
 * Josh Hoover
 * James Snodgrass
+
+Relevant work:
+* [BYO-Disaster and Why Corporate Wireless Security Still Sucks](https://www.youtube.com/watch?v=-uqTqJwTFyU&feature=youtu.be&t=22m34s)
+
+#### More GTC Downgrade Wisdom
+Name(s):
 * Adam Toscher
 
-Known Beacons Attack
+Relevant work:
+* [https://twitter.com/w00tock/status/1019251419310972930](https://twitter.com/w00tock/status/1019251419310972930)
+
+
+#### Known Beacons Attack
+Name(s):
 * George Chatzisofroniou
 
-Opportunistic Wireless Encryption (OWE)
+Relevant work:
+* [The Known Beacons Attack](https://census-labs.com/news/2018/02/01/known-beacons-attack-34c3/)
+
+#### Opportunistic Wireless Encryption (OWE)
+Name(s):
 * Mathy Vanhoef
 
-- [Josh Wright and Brad Antoniewicz - Attacks Against Weak EAP Methods](http://www.willhackforsushi.com/presentations/PEAP_Shmoocon2008_Wright_Antoniewicz.pdf)
-- [Dom White and Ian de Villier - More Attacks Against Weak EAP Methods](https://sensepost.com/blog/2015/improvements-in-rogue-ap-attacks-mana-1%2F2/)
-- [Moxie Marlinspike and David Hulton - Attacks Against MS-CHAPv2](http://web.archive.org/web/20160203043946/https:/www.cloudcracker.com/blog/2012/07/29/cracking-ms-chap-v2/)
+Relevant work:
+* [WPA3: A Missed Opportunity](https://www.mathyvanhoef.com/2018/06/wpa3-missed-opportunity.html)
+
+
+
 
 Leverages a modified  version of [hostapd-wpe](https://github.com/opensecurityresearch/hostapd-wpe) (shoutout to [Brad Anton](https://github.com/brad-anton) for creating the original), _dnsmasq_, [asleap](https://github.com/joswr1ght/asleap), [hcxpcaptool](https://github.com/ZerBea/hcxtools) and [hcxdumptool](https://github.com/ZerBea/hcxdumptool) for PMKID attacks, [Responder](https://github.com/SpiderLabs/Responder), and _Python 3.5+_.
 

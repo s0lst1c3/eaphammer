@@ -138,3 +138,6 @@ Improved EAP Downgrades. Users now have greater control over EAP Negotiation pro
 
 1.8.1 - Gabriel Ryan <gryan@specterops.io>
 Bug fix, resolves #109.
+
+1.9.0 - Gabriel Ryan <gryan@specterops.io>
+Documentation overhauled and moved to Wiki (thanks [FreqyXin](https://twitter.com/FreqyXin)!)

@@ -54,11 +54,40 @@ This project is licensed under the GNU Public License 3.0 - see the [LICENSE.md]
 ## Acknowledgments
 This tool either builds upon, is inspired by, or directly incorporates over ten years of prior research and development from the following awesome people:
 
+Original WPE Patches
+* Brad Antoniewicz
+* Joshua Wright
+
+Original Karma Patches
+* Robin Wood
+* Dino Dai Zovi
+* Shane Macauly
+
+EAP Research, Karma Research, Original Autocrack and Improved Karma
+* @singe (domanic@sensepost.com)
+* Ian de Villiers (ian@sensepost.com)
+* Michael Kruger (@\_cablethief)
+
+Attacks Against MSCHAPv2
+* Moxie Marlinspike
+* David Hulton
+
+GTC Downgrade Attacks
+* Josh Hoover
+* James Snodgrass
+* Adam Toscher
+
+Known Beacons Attack
+* George Chatzisofroniou
+
+Opportunistic Wireless Encryption (OWE)
+* Mathy Vanhoef
+
 - [Josh Wright and Brad Antoniewicz - Attacks Against Weak EAP Methods](http://www.willhackforsushi.com/presentations/PEAP_Shmoocon2008_Wright_Antoniewicz.pdf)
 - [Dom White and Ian de Villier - More Attacks Against Weak EAP Methods](https://sensepost.com/blog/2015/improvements-in-rogue-ap-attacks-mana-1%2F2/)
 - [Moxie Marlinspike and David Hulton - Attacks Against MS-CHAPv2](http://web.archive.org/web/20160203043946/https:/www.cloudcracker.com/blog/2012/07/29/cracking-ms-chap-v2/)
 
-Leverages a [lightly modified](https://github.com/s0lst1c3/hostapd-eaphammer) version of [hostapd-wpe](https://github.com/opensecurityresearch/hostapd-wpe) (shoutout to [Brad Anton](https://github.com/brad-anton) for creating the original), _dnsmasq_, [asleap](https://github.com/joswr1ght/asleap), [hcxpcaptool](https://github.com/ZerBea/hcxtools) and [hcxdumptool](https://github.com/ZerBea/hcxdumptool) for PMKID attacks, [Responder](https://github.com/SpiderLabs/Responder), and _Python 3.5+_.
+Leverages a modified  version of [hostapd-wpe](https://github.com/opensecurityresearch/hostapd-wpe) (shoutout to [Brad Anton](https://github.com/brad-anton) for creating the original), _dnsmasq_, [asleap](https://github.com/joswr1ght/asleap), [hcxpcaptool](https://github.com/ZerBea/hcxtools) and [hcxdumptool](https://github.com/ZerBea/hcxdumptool) for PMKID attacks, [Responder](https://github.com/SpiderLabs/Responder), and _Python 3.5+_.
 
 
 Features

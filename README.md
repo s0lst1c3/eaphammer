@@ -39,43 +39,6 @@ For complete usage and setup instructions, please refer to the project's wiki pa
 
 - [https://github.com/s0lst1c3/eaphammer/wiki](https://github.com/s0lst1c3/eaphammer/wiki)
 
-## Contributing
-
-Contributions are encouraged and more than welcome. Please attempt to adhere to the provided issue and feature request templates.
-
-## Versioning
-
-We use [SemVer](http://semver.org/) for versioning (or at least make an effort to). For the versions available, see  [https://github.com/s0lst1c3/eaphammer/releases](https://github.com/s0lst1c3/eaphammer/releases). 
-
-## License
-
-This project is licensed under the GNU Public License 3.0 - see the [LICENSE.md](LICENSE.md) file for details.
-
-## Acknowledgments
-This tool either builds upon, is inspired by, or directly incorporates nearly fifteen years of prior research and development from the following awesome people:
-
-* Brad Antoniewicz
-* Joshua Wright
-* Robin Wood
-* Dino Dai Zovi
-* Shane Macauly
-* Domanic White
-* Ian de Villiers
-* Michael Kruger
-* Moxie Marlinspike
-* David Hulton
-* Josh Hoover
-* James Snodgrass
-* Adam Toscher
-* George Chatzisofroniou
-* Mathy Vanhoef
-
-For a complete description of what each of these people has contributed to the current wireless security landscape and this tool, please see:
-
-* [https://github.com/s0lst1c3/eaphammer/wiki/Acknowledgements](https://github.com/s0lst1c3/eaphammer/wiki/Acknowledgements)
-
-EAPHammer leverages a modified  version of [hostapd-wpe](https://github.com/opensecurityresearch/hostapd-wpe) (shoutout to [Brad Anton](https://github.com/brad-anton) for creating the original), _dnsmasq_, [asleap](https://github.com/joswr1ght/asleap), [hcxpcaptool](https://github.com/ZerBea/hcxtools) and [hcxdumptool](https://github.com/ZerBea/hcxdumptool) for PMKID attacks, [Responder](https://github.com/SpiderLabs/Responder), and _Python 3.5+_.
-
 Features
 --------
 
@@ -149,4 +112,41 @@ Upcoming Features
 - directed rogue AP attacks (deauth then evil twin from PNL, deauth then karma + ACL)
 - Integrated website cloner for cloning captive portal login pages
 - Integrated HTTP server for captive portals
+
+## Contributing
+
+Contributions are encouraged and more than welcome. Please attempt to adhere to the provided issue and feature request templates.
+
+## Versioning
+
+We use [SemVer](http://semver.org/) for versioning (or at least make an effort to). For the versions available, see  [https://github.com/s0lst1c3/eaphammer/releases](https://github.com/s0lst1c3/eaphammer/releases). 
+
+## License
+
+This project is licensed under the GNU Public License 3.0 - see the [LICENSE.md](LICENSE.md) file for details.
+
+## Acknowledgments
+This tool either builds upon, is inspired by, or directly incorporates nearly fifteen years of prior research and development from the following awesome people:
+
+* Brad Antoniewicz
+* Joshua Wright
+* Robin Wood
+* Dino Dai Zovi
+* Shane Macauly
+* Domanic White
+* Ian de Villiers
+* Michael Kruger
+* Moxie Marlinspike
+* David Hulton
+* Josh Hoover
+* James Snodgrass
+* Adam Toscher
+* George Chatzisofroniou
+* Mathy Vanhoef
+
+For a complete description of what each of these people has contributed to the current wireless security landscape and this tool, please see:
+
+* [https://github.com/s0lst1c3/eaphammer/wiki/Acknowledgements](https://github.com/s0lst1c3/eaphammer/wiki/Acknowledgements)
+
+EAPHammer leverages a modified  version of [hostapd-wpe](https://github.com/opensecurityresearch/hostapd-wpe) (shoutout to [Brad Anton](https://github.com/brad-anton) for creating the original), _dnsmasq_, [asleap](https://github.com/joswr1ght/asleap), [hcxpcaptool](https://github.com/ZerBea/hcxtools) and [hcxdumptool](https://github.com/ZerBea/hcxdumptool) for PMKID attacks, [Responder](https://github.com/SpiderLabs/Responder), and _Python 3.5+_.
 

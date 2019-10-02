@@ -149,3 +149,5 @@ For a complete description of what each of these people has contributed to the c
 
 EAPHammer leverages a modified  version of [hostapd-wpe](https://github.com/opensecurityresearch/hostapd-wpe) (shoutout to [Brad Anton](https://github.com/brad-anton) for creating the original), _dnsmasq_, [asleap](https://github.com/joswr1ght/asleap), [hcxpcaptool](https://github.com/ZerBea/hcxtools) and [hcxdumptool](https://github.com/ZerBea/hcxdumptool) for PMKID attacks, [Responder](https://github.com/SpiderLabs/Responder), and _Python 3.5+_.
 
+Finally, huge shoutout to the [SpecterOps](https://specterops.io/) crew for supporting this project and being a constant source of inspiration.
+

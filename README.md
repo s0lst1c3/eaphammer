@@ -1,5 +1,4 @@
-eaphammer
-=========
+![logo](https://rawcdn.githack.com/s0lst1c3/eaphammer/ab8202de4a298957a2bc5662f986cdfb195490e4/docs/img/logo.png)
 
 by Gabriel Ryan ([s0lst1c3](https://twitter.com/s0lst1c3))(gryan[at]specterops.io)
 

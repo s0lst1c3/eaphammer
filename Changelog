@@ -149,4 +149,4 @@ Added logo to documentation.
 Added ssid and mac address level ACLs.
 
 1.11.0 - Gabriel Ryan <gryan@specterops.io>
-Added beacon forger
+Added beacon forger for executing known SSID bursts

@@ -136,9 +136,13 @@ int hostapd_acl_comp(const void *a, const void *b)
 	return os_memcmp(aa->addr, bb->addr, sizeof(macaddr));
 }
 
-
+#ifdef EAPHAMMER
+int hostapd_add_acl_maclist(struct mac_acl_entry **acl, int *num,
+			    int vlan_id, const u8 *addr, const u8 *mask)
+#else
 int hostapd_add_acl_maclist(struct mac_acl_entry **acl, int *num,
 			    int vlan_id, const u8 *addr)
+#endif
 {
 	struct mac_acl_entry *newacl;
 
@@ -150,6 +154,7 @@ int hostapd_add_acl_maclist(struct mac_acl_entry **acl, int *num,
 
 	*acl = newacl;
 	os_memcpy((*acl)[*num].addr, addr, ETH_ALEN);
+	os_memcpy((*acl)[*num].mask, mask, ETH_ALEN);
 	os_memset(&(*acl)[*num].vlan_id, 0, sizeof((*acl)[*num].vlan_id));
 	(*acl)[*num].vlan_id.untagged = vlan_id;
 	(*acl)[*num].vlan_id.notempty = !!vlan_id;
@@ -157,7 +162,6 @@ int hostapd_add_acl_maclist(struct mac_acl_entry **acl, int *num,
 
 	return 0;
 }
-
 
 void hostapd_remove_acl_mac(struct mac_acl_entry **acl, int *num,
 			    const u8 *addr)
@@ -174,6 +178,79 @@ void hostapd_remove_acl_mac(struct mac_acl_entry **acl, int *num,
 	}
 }
 
+#ifdef EAPHAMMER
+static int hostapd_config_read_ssidlist(const char *fname,
+									struct ssid_acl_node **ssid_acl,
+									size_t *ssid_acl_len) {
+
+	FILE *f;
+	char buf[128];
+	char *pos;
+	int line = 0;
+	struct ssid_acl_node *next_ssid_acl;
+
+	f = fopen(fname, "r");
+	if (!f) {
+
+		wpa_printf(MSG_DEBUG, "[eaphammer] SSID list file '%s' not found.", fname);
+		return -1;
+	}
+
+	bzero(buf, 128);
+	while (fgets(buf, sizeof(buf), f)) {
+
+		// increment linecount by 1
+		line++;
+		
+		// if the line is a comment, skip it
+		if (buf[0] == '#') {
+			continue;
+		}
+	
+		// replace the ending newline with a null terminator
+		pos = buf;
+		while (*pos != '\0') {
+			if (*pos == '\n') {
+				*pos = '\0';
+				break;
+			}
+			pos++;
+		}
+
+		// if line is blank, skip
+		if (buf[0] == '\0') {
+			continue;
+		}
+		
+		pos = buf;
+		if (os_strlen(pos) > SSID_MAX_LEN) {
+
+			wpa_printf(MSG_DEBUG, "[eaphammer] On line %d of %s, length of SSID %s exceeds max length of %d. Skipping.\n", line, fname, pos, SSID_MAX_LEN);
+			continue;
+		}
+
+		next_ssid_acl = os_realloc_array(*ssid_acl, *ssid_acl_len+1, sizeof(**ssid_acl));
+		if ( !next_ssid_acl ) {
+
+			wpa_printf(MSG_DEBUG, "[eaphammer] Unable to reallocate SSID filter. Aborting.");
+			fclose(f);
+			return -1;
+		}
+
+		*ssid_acl = next_ssid_acl;
+		os_memcpy( (*ssid_acl)[*ssid_acl_len].text, pos, strnlen(pos, SSID_MAX_LEN));
+		(*ssid_acl_len)++;
+		wpa_printf(MSG_DEBUG, "[eaphammer] Successfully added SSID %s to ACL.\n", pos);
+		bzero(buf, 128);
+	}
+
+	fclose(f);
+
+	return 0;
+}
+					
+
+#endif
 
 static int hostapd_config_read_maclist(const char *fname,
 				       struct mac_acl_entry **acl, int *num)
@@ -184,19 +261,39 @@ static int hostapd_config_read_maclist(const char *fname,
 	u8 addr[ETH_ALEN];
 	int vlan_id;
 
+	char addr_str[18]; // 18 == length of ascii mac representation + null terminator
+	char mask_str[18]; // 18 == length of ascii mac representation + null terminator
+	int addr_str_index; 
+	int mask_str_index; 
+	
+	u8 mask[ETH_ALEN];
+
+	int i;
+
+	// open the file and bail if not found
 	f = fopen(fname, "r");
 	if (!f) {
 		wpa_printf(MSG_ERROR, "MAC list file '%s' not found.", fname);
 		return -1;
 	}
 
+	// assume we aren't dealing with wildcards
+	eaphammer_global_conf.acl_has_wildcards = 0;
+
+
 	while (fgets(buf, sizeof(buf), f)) {
+
+		// assume that we're not removing this entry
 		int rem = 0;
 
+		// increment linecount by 1
 		line++;
 
+		// if the line is a comment, skip it
 		if (buf[0] == '#')
 			continue;
+
+		// replace newline with null terminator
 		pos = buf;
 		while (*pos != '\0') {
 			if (*pos == '\n') {
@@ -205,48 +302,140 @@ static int hostapd_config_read_maclist(const char *fname,
 			}
 			pos++;
 		}
+
+		// if line is blank, skip
 		if (buf[0] == '\0')
 			continue;
+
+		// if the line starts with '-', then flag for removal and increment pos to point at
+		// second character in line
 		pos = buf;
 		if (buf[0] == '-') {
 			rem = 1;
 			pos++;
 		}
 
-		if (hwaddr_aton(pos, addr)) {
+		// START wildcard handling code
+
+		// increment to the first null terminator or instance of whitespace
+		// (whichever comes first) 
+		addr_str[18] = ""; // 18 == length of ascii mac representation + null terminator
+		mask_str[18] = "ff:ff:ff:ff:ff:ff"; // 18 == length of ascii mac representation + null terminator
+		addr_str_index = 0;
+		mask_str_index = 0;
+		while (*pos != '\0' && *pos != ' ' && *pos != '\t') {
+	
+			if (*pos == '*') {
+
+				eaphammer_global_conf.acl_has_wildcards = 1;
+				
+				addr_str[addr_str_index] = '0';
+				addr_str_index++;
+				addr_str[addr_str_index] = '0';
+				addr_str_index++;
+	
+				mask_str[mask_str_index] = '0';
+				mask_str_index++;
+				mask_str[mask_str_index] = '0';
+				mask_str_index++;
+			
+			}
+			else if (*pos == ':') {
+
+				addr_str[addr_str_index] = *pos;
+				addr_str_index++;
+				mask_str[mask_str_index] = *pos;
+				mask_str_index++;
+			}
+			else {
+				addr_str[addr_str_index] = *pos;
+				addr_str_index++;
+				mask_str[mask_str_index] = 'f';
+				mask_str_index++;
+			}
+			pos++;
+		}
+		addr_str[addr_str_index] = '\0';
+		mask_str[mask_str_index] = '\0';
+		// END wildcard handling code
+
+
+		// hwaddr_aton converts an ascii string to a 6 byte mac address 
+		// returns 0 on success, -1 on failure
+		//
+		// hwaddr_aton calls hwaddr_parse, which only operates on the first 6 bytes of the string
+		//
+		// take address starting at position pointed to by pos (buf[1] if flagged for removal else buf[0]),
+		// convert to 6 byte MAC address, and store in addr. bail if operation fails
+		//if (hwaddr_aton(pos, addr)) {
+		if (hwaddr_aton(addr_str, addr)) {
 			wpa_printf(MSG_ERROR, "Invalid MAC address '%s' at "
 				   "line %d in '%s'", pos, line, fname);
 			fclose(f);
 			return -1;
 		}
 
+		if (hwaddr_aton(mask_str, mask)) {
+			wpa_printf(MSG_ERROR, "Invalid MAC address mask '%s' at "
+				   "line %d in '%s'", pos, line, fname);
+			fclose(f);
+			return -1;
+		}
+		// START transformation code
+		for (i = 0; i < ETH_ALEN; addr[i] &= mask[i++]); 
+		// END transformation code
+
+		// if flagged for removal, remove addr from acl
 		if (rem) {
 			hostapd_remove_acl_mac(acl, num, addr);
 			continue;
 		}
+
+		// assume we're using the default vlan (vlan ID == 0) 
 		vlan_id = 0;
+
+		// point pos to the beginner of buf
 		pos = buf;
+
+		// increment to the first null terminator or instance of whitespace
+		// (whichever comes first)
 		while (*pos != '\0' && *pos != ' ' && *pos != '\t')
 			pos++;
+
+		// if pos is pointing to whitespace, keep incrementing pos until it's no longer
+		// pointing to whitespace
 		while (*pos == ' ' || *pos == '\t')
 			pos++;
+
+		// at this point, pos is going to point to either a vlan ID or a null terminator 
+		// (the latter indicates the end of a line). if it's not pointing to a null terminiator
+		// at this point then it must be pointing to a vlan ID, in which case we convert the vlan
+		// ID from an ASCII character to an integer and store it in vlan_id
 		if (*pos != '\0')
 			vlan_id = atoi(pos);
+        printf("addr_str: %s\n", addr_str);
+        printf("mask_str: %s\n", mask_str);
+        printf("vlan_id: %d\n", vlan_id);
 
-		if (hostapd_add_acl_maclist(acl, num, vlan_id, addr) < 0) {
+
+		// attempt to add the MAC address and its vlan ID to our ACL, and bail if this fails
+		//if (hostapd_add_acl_maclist(acl, num, vlan_id, addr, mask) < 0) {
+		if (hostapd_add_acl_maclist(acl, num, vlan_id, addr, mask) < 0) {
 			fclose(f);
 			return -1;
 		}
 	}
 
+	// close the input handle
 	fclose(f);
 
+	// our ACL isn't null, sort it
 	if (*acl)
 		qsort(*acl, *num, sizeof(**acl), hostapd_acl_comp);
 
+	// return success
 	return 0;
 }
-
 
 #ifdef EAP_SERVER
 
@@ -2557,6 +2746,26 @@ static int hostapd_config_fill(struct hostapd_config *conf,
 		os_free(str);
 	} else if (os_strcmp(buf, "utf8_ssid") == 0) {
 		bss->ssid.utf8_ssid = atoi(pos) > 0;
+#ifdef EAPHAMMER
+	} else if (os_strcmp(buf, "ssid_acl_mode") == 0) {
+	
+		eaphammer_global_conf.ssid_acl_mode = atoi(pos);
+		if (eaphammer_global_conf.ssid_acl_mode < 0 || 
+			eaphammer_global_conf.ssid_acl_mode > 1) {
+			wpa_printf(MSG_ERROR, "Line %d: unknown ssid_acl_mode %d",
+				   line, eaphammer_global_conf.ssid_acl_mode);
+			return 1;
+		}
+
+	} else if (os_strcmp(buf, "ssid_acl_file") == 0) {
+		if (hostapd_config_read_ssidlist(pos, &bss->ssid_acl,
+						&bss->ssid_acl_len)) {
+			wpa_printf(MSG_ERROR, "Line %d: Failed to read ssid_acl_file '%s'",
+				   line, pos);
+			return 1;
+		}
+		eaphammer_global_conf.use_ssid_acl = 1;
+#endif
 	} else if (os_strcmp(buf, "macaddr_acl") == 0) {
 		enum macaddr_acl acl = atoi(pos);
 

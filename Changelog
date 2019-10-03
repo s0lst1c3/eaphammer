@@ -148,3 +148,5 @@ Added logo to documentation.
 1.10.0 - Gabriel Ryan <gryan@specterops.io>
 Added ssid and mac address level ACLs.
 
+1.11.0 - Gabriel Ryan <gryan@specterops.io>
+Added beacon forger

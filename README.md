@@ -4,7 +4,7 @@ by Gabriel Ryan ([s0lst1c3](https://twitter.com/s0lst1c3))(gryan[at]specterops.i
 
 [![Foo](https://rawcdn.githack.com/toolswatch/badges/8bd9be6dac2a1d445367001f2371176cc50a5707/arsenal/usa/2017.svg)](https://www.blackhat.com/us-17/arsenal.html#eaphammer)
 
-Current release: [v1.10.0](https://github.com/s0lst1c3/eaphammer/releases/tag/v1.10.0)
+Current release: [v1.11.0](https://github.com/s0lst1c3/eaphammer/releases/tag/v1.11.0)
 
 Supports _Python 3.5+_.
 

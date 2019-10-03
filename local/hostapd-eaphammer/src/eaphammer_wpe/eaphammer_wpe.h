@@ -27,6 +27,9 @@ struct eaphammer_global_config {
 	char *autocrack_fifo; // eaphammer
 	FILE *autocrack_fifo_fp; // eaphammer
 	unsigned int use_autocrack; // eaphammer
+	u8 acl_has_wildcards; // eaphammer
+	u8 use_ssid_acl;
+	u8 ssid_acl_mode;
     unsigned int always_return_success;
     char *known_ssids_file;
     char *psk_capture_file;

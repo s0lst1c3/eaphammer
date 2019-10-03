@@ -19,6 +19,8 @@ from core import iw_parse
 from core.hostapd import HostapdEaphammer
 from core.hostapd_config import HostapdConfig
 from core.eap_user_file import EAPUserFile
+from core.hostapd_mac_acl import HostapdMACACL
+from core.hostapd_ssid_acl import HostapdSSIDACL
 from core.responder_config import ResponderConfig
 from core.lazy_file_reader import LazyFileReader
 from core.redirect_server import RedirectServer
@@ -63,6 +65,14 @@ def hostile_portal():
             # generate eap user file and write to tmp directory
             eap_user_file = EAPUserFile(settings, options)
             eap_user_file.generate()
+
+        if options['mac_whitelist'] is not None or options['mac_blacklist'] is not None:
+            hostapd_acl = HostapdMACACL(settings, options)
+            hostapd_acl.generate()
+
+        if options['ssid_whitelist'] is not None or options['ssid_blacklist'] is not None:
+            hostapd_ssid_acl = HostapdSSIDACL(settings, options)
+            hostapd_ssid_acl.generate()
 
         # write hostapd config file to tmp directory
         hostapd_conf = HostapdConfig(settings, options)
@@ -135,6 +145,16 @@ def hostile_portal():
             # remove eap user file from tmp directory
             eap_user_file.remove()
 
+        if options['mac_whitelist'] is not None or options['mac_blacklist'] is not None:
+
+            # remove acl file from tmp directory
+            hostapd_acl.remove()
+
+        if options['ssid_whitelist'] is not None or options['ssid_blacklist'] is not None:
+
+            # remove acl file from tmp directory
+            hostapd_ssid_acl.remove()
+
         # restore iptables to a clean state (policy, flush tables)
         utils.Iptables.accept_all()
         utils.Iptables.flush()
@@ -166,6 +186,16 @@ def hostile_portal():
 
             # remove eap user file from tmp directory
             eap_user_file.remove()
+
+        if options['mac_whitelist'] is not None or options['mac_blacklist'] is not None:
+
+            # remove acl file from tmp directory
+            hostapd_acl.remove()
+
+        if options['ssid_whitelist'] is not None or options['ssid_blacklist'] is not None:
+
+            # remove acl file from tmp directory
+            hostapd_ssid_acl.remove()
         
         # restore iptables to a clean state (policy, flush tables)
         utils.Iptables.accept_all()
@@ -208,6 +238,14 @@ def captive_portal():
             # generate eap user file and write to tmp directory
             eap_user_file = EAPUserFile(settings, options)
             eap_user_file.generate()
+
+        if options['mac_whitelist'] is not None or options['mac_blacklist'] is not None:
+            hostapd_acl = HostapdMACACL(settings, options)
+            hostapd_acl.generate()
+
+        if options['ssid_whitelist'] is not None or options['ssid_blacklist'] is not None:
+            hostapd_ssid_acl = HostapdSSIDACL(settings, options)
+            hostapd_ssid_acl.generate()
 
         # write hostapd config file to tmp directory
         hostapd_conf = HostapdConfig(settings, options)
@@ -255,6 +293,16 @@ def captive_portal():
 
             # remove eap user file from tmp directory
             eap_user_file.remove()
+
+        if options['mac_whitelist'] is not None or options['mac_blacklist'] is not None:
+
+            # remove acl file from tmp directory
+            hostapd_acl.remove()
+
+        if options['ssid_whitelist'] is not None or options['ssid_blacklist'] is not None:
+
+            # remove acl file from tmp directory
+            hostapd_ssid_acl.remove()
         
         # restore iptables to a clean state (policy, flush tables)
         utils.Iptables.accept_all()
@@ -283,6 +331,16 @@ def captive_portal():
 
             # remove eap user file from tmp directory
             eap_user_file.remove()
+
+        if options['mac_whitelist'] is not None or options['mac_blacklist'] is not None:
+
+            # remove acl file from tmp directory
+            hostapd_acl.remove()
+
+        if options['ssid_whitelist'] is not None or options['ssid_blacklist'] is not None:
+
+            # remove acl file from tmp directory
+            hostapd_ssid_acl.remove()
         
         # restore iptables to a clean state (policy, flush tables)
         utils.Iptables.accept_all()
@@ -311,6 +369,14 @@ def troll_defender():
             # generate eap user file and write to tmp directory
             eap_user_file = EAPUserFile(settings, options)
             eap_user_file.generate()
+
+        if options['mac_whitelist'] is not None or options['mac_blacklist'] is not None:
+            hostapd_acl = HostapdMACACL(settings, options)
+            hostapd_acl.generate()
+
+        if options['ssid_whitelist'] is not None or options['ssid_blacklist'] is not None:
+            hostapd_ssid_acl = HostapdSSIDACL(settings, options)
+            hostapd_ssid_acl.generate()
 
         # write hostapd config file to tmp directory
         hostapd_conf = HostapdConfig(settings, options)
@@ -344,6 +410,16 @@ def troll_defender():
 
             # remove eap user file from tmp directory
             eap_user_file.remove()
+
+        if options['mac_whitelist'] is not None or options['mac_blacklist'] is not None:
+
+            # remove acl file from tmp directory
+            hostapd_acl.remove()
+
+        if options['ssid_whitelist'] is not None or options['ssid_blacklist'] is not None:
+
+            # remove acl file from tmp directory
+            hostapd_ssid_acl.remove()
 
         # cleanly allow network manager to regain control of interface
         interface.nm_on()
@@ -378,6 +454,14 @@ def reap_creds():
             eap_user_file = EAPUserFile(settings, options)
             eap_user_file.generate()
 
+        if options['mac_whitelist'] is not None or options['mac_blacklist'] is not None:
+            hostapd_acl = HostapdMACACL(settings, options)
+            hostapd_acl.generate()
+
+        if options['ssid_whitelist'] is not None or options['ssid_blacklist'] is not None:
+            hostapd_ssid_acl = HostapdSSIDACL(settings, options)
+            hostapd_ssid_acl.generate()
+
         # write hostapd config file to tmp directory
         hostapd_conf = HostapdConfig(settings, options)
         hostapd_conf.write()
@@ -403,6 +487,16 @@ def reap_creds():
             # remove eap user file from tmp directory
             eap_user_file.remove()
 
+        if options['mac_whitelist'] is not None or options['mac_blacklist'] is not None:
+
+            # remove acl file from tmp directory
+            hostapd_acl.remove()
+
+        if options['ssid_whitelist'] is not None or options['ssid_blacklist'] is not None:
+
+            # remove acl file from tmp directory
+            hostapd_ssid_acl.remove()
+
         # cleanly allow network manager to regain control of interface
         interface.nm_on()
 
@@ -421,6 +515,16 @@ def reap_creds():
 
             # remove eap user file from tmp directory
             eap_user_file.remove()
+
+        if options['mac_whitelist'] is not None or options['mac_blacklist'] is not None:
+
+            # remove acl file from tmp directory
+            hostapd_acl.remove()
+
+        if options['ssid_whitelist'] is not None or options['ssid_blacklist'] is not None:
+
+            # remove acl file from tmp directory
+            hostapd_ssid_acl.remove()
 
         # cleanly allow network manager to regain control of interface
         interface.nm_on()
@@ -633,51 +737,6 @@ def run_cert_wizard():
 
         raise Exception('Invalid argument passed to --cert-wizard')
             
-
-    # --cert-wizard import
-    # mandatory flags
-    #       --server-cert <path>
-    # optional flags
-    #       --private-key <path> 
-    #       --private-key-passwd <passwd>
-    #       --ca-cert <path>
-    #import_cert(...
-
-    # --cert-wizard create
-    # mandatory flags:
-    #       --cn
-    # optional flags
-    #       --self-signed
-    #       --signing-cert [required if not self-signed]
-    #       --signing-key [required if not self-signed]
-    #       --signing-key-passwd
-    #       
-    #       --country
-    #       --state
-    #       --locale
-    #       --org
-    #       --org-unit
-    #       --email
-    #       
-    #       --not-before
-    #       --not-after
-    #       --algorithm
-    #       --key-length
-
-    # --bootstrap (alias for --cert-wizard create --self-signed
-    #bootstrap(...
-
-    # --cert-wizard interactive 
-    #interactive(...
-
-    # --cert-wizard (alias for --cert-wizard interactive)
-    #interactive(...
-    
-
-    # --cert-wizard list
-    # --cert-type ca|server|all (default: all)
-    #list_certs(...
-
 def am_i_rooot():
 
     print('[?] Am I root?')

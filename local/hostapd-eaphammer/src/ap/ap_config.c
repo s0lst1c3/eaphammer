@@ -23,6 +23,11 @@
 #include "airtime_policy.h"
 #include "ap_config.h"
 
+#ifdef EAPHAMMER
+#include "eaphammer_wpe/eaphammer_wpe.h"
+
+#endif
+
 
 static void hostapd_config_free_vlan(struct hostapd_bss_config *bss)
 {
@@ -835,6 +840,80 @@ void hostapd_config_free(struct hostapd_config *conf)
  *
  * Perform a binary search for given MAC address from a pre-sorted list.
  */
+#ifdef EAPHAMMER
+int hostapd_maclist_found(struct mac_acl_entry *list, int num_entries,
+			  const u8 *addr, struct vlan_description *vlan_id)
+{
+	int start, end, middle, res;
+	int i, j;
+	u8 addr_cpy[ETH_ALEN];
+	
+	if ( eaphammer_global_conf.acl_has_wildcards ) {
+
+		wpa_printf(MSG_DEBUG,
+			"[eaphammer] ACL contains wildcards: disabling binary search.");
+
+		// unfortunately, we can't do a binary search against a list
+		// containing wildcards
+		for (i = 0; i < num_entries; i++) {
+
+			wpa_printf(MSG_DEBUG,
+				"[eaphammer] applying mask " MACSTR " to " MACSTR,
+				MAC2STR(list[i].mask),
+				MAC2STR(addr));
+
+			// we need to use memcpy to copy addr into addr_cpy, since
+			// addr is a constant pointer
+			memcpy(addr_cpy, addr, ETH_ALEN);
+
+			for (j = 0; j < ETH_ALEN; addr_cpy[j] &= list[i].mask[j++]);
+			
+			wpa_printf(MSG_DEBUG,
+				"[eaphammer] comparing " MACSTR "/" MACSTR " against " MACSTR,
+				MAC2STR(list[i].addr),
+				MAC2STR(list[i].mask),
+				MAC2STR(addr));
+
+			res = os_memcmp(list[i].addr, addr_cpy, ETH_ALEN);
+			if (res == 0) {
+				if (vlan_id) {
+					*vlan_id = list[i].vlan_id;
+				}
+				return 1;
+			}
+		}
+	}
+	else {
+
+		// no wildcards? awesome - do the binary search
+		wpa_printf(MSG_DEBUG,
+			"[eaphammer] ACL does not contain wildcards: "
+				"enabling binary search.");
+
+		start = 0;
+		end = num_entries - 1;
+
+		while (start <= end) {
+			middle = (start + end) / 2;
+			res = os_memcmp(list[middle].addr, addr, ETH_ALEN);
+			if (res == 0) {
+				if (vlan_id) {
+					*vlan_id = list[middle].vlan_id;
+				}
+				return 1;
+			}
+			if (res < 0) {
+				start = middle + 1;
+			}
+			else {
+				end = middle - 1;
+			}
+		}
+	}
+
+	return 0;
+}
+#else
 int hostapd_maclist_found(struct mac_acl_entry *list, int num_entries,
 			  const u8 *addr, struct vlan_description *vlan_id)
 {
@@ -859,7 +938,41 @@ int hostapd_maclist_found(struct mac_acl_entry *list, int num_entries,
 
 	return 0;
 }
+#endif
 
+#ifdef EAPHAMMER
+char hostapd_ssid_acl_accept(struct ssid_acl_node *ssid_acl,
+						size_t ssid_acl_len,
+						const char *ssid) {
+
+	// This is not an original idea... hostapd-mana did
+	// this first (and probably has a better implementation).
+	// See https://github.com/sensepost/hostapd-mana.
+
+	int i;
+	int result;
+
+	// basic linear search for matching essid
+	result = 0;
+	wpa_printf(MSG_DEBUG, "[eaphammer] Initializing result to %d", result);
+	for (i = 0; i < ssid_acl_len; i++) {
+
+		wpa_printf(MSG_DEBUG, "[eaphammer] Comparing %s against ACL entry %s", ssid, ssid_acl[i].text);
+		// return true if we find a match
+		if (!os_strcmp(ssid_acl[i].text, ssid)) {
+
+			wpa_printf(MSG_DEBUG, "[eaphammer] Match found, setting result to 1");
+			result = 1;
+			break;
+		}
+	}
+	wpa_printf(MSG_DEBUG, "[eaphammer] Result is still: %d", result);
+	// ssid_acl_mode == 0 == whitelist
+	// ssid_acl_mode == 1 == blacklist
+	wpa_printf(MSG_DEBUG, "[eaphammer] Returning: !(%d ^ %d) == %d", eaphammer_global_conf.ssid_acl_mode, result, !(eaphammer_global_conf.ssid_acl_mode ^ result));
+	return !(eaphammer_global_conf.ssid_acl_mode ^ result);
+}
+#endif
 
 int hostapd_rate_found(int *list, int rate)
 {

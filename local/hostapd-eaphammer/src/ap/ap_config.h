@@ -60,8 +60,17 @@ typedef u8 macaddr[ETH_ALEN];
 
 struct mac_acl_entry {
 	macaddr addr;
+#ifdef EAPHAMMER
+	macaddr mask;	
+#endif
 	struct vlan_description vlan_id;
 };
+
+#ifdef EAPHAMMER
+struct ssid_acl_node {
+	char text[SSID_MAX_LEN+1];
+};
+#endif
 
 struct hostapd_radius_servers;
 struct ft_remote_r0kh;
@@ -346,6 +355,10 @@ struct hostapd_bss_config {
 	int num_deny_mac;
 	int wds_sta;
 	int isolate;
+#ifdef EAPHAMMER
+	struct ssid_acl_node *ssid_acl;
+	size_t ssid_acl_len;
+#endif
 	int start_disabled;
 
 	int auth_algs; /* bitfield of allowed IEEE 802.11 authentication
@@ -1098,5 +1111,7 @@ int hostapd_config_check(struct hostapd_config *conf, int full_config);
 void hostapd_set_security_params(struct hostapd_bss_config *bss,
 				 int full_config);
 int hostapd_sae_pw_id_in_use(struct hostapd_bss_config *conf);
+
+char hostapd_ssid_acl_accept(struct ssid_acl_node *ssid_acl, size_t ssid_acl_len, const char *ssid);
 
 #endif /* HOSTAPD_CONFIG_H */

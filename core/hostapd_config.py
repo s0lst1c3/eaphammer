@@ -499,7 +499,20 @@ class HostapdConfig(object):
         general_configs['logger_syslog_level'] = settings.dict['core']['hostapd']['general']['logger_syslog_level']
         general_configs['logger_stdout'] = settings.dict['core']['hostapd']['general']['logger_stdout']
         general_configs['logger_stdout_level'] = settings.dict['core']['hostapd']['general']['logger_stdout_level']
-        general_configs['macaddr_acl'] = settings.dict['core']['hostapd']['general']['macaddr_acl']
+
+        if options['mac_whitelist'] is not None:
+            general_configs['accept_mac_file'] = settings.dict['paths']['hostapd']['mac_whitelist']
+            general_configs['macaddr_acl'] = '1'
+        elif options['mac_blacklist'] is not None:
+            general_configs['deny_mac_file'] = settings.dict['paths']['hostapd']['mac_blacklist']
+            general_configs['macaddr_acl'] = '0'
+
+        if options['ssid_whitelist'] is not None:
+            general_configs['ssid_acl_file'] = settings.dict['paths']['hostapd']['ssid_whitelist']
+            general_configs['ssid_acl_mode'] = '0'
+        elif options['ssid_blacklist'] is not None:
+            general_configs['ssid_acl_file'] = settings.dict['paths']['hostapd']['ssid_blacklist']
+            general_configs['ssid_acl_mode'] = '1'
 
         if options['karma']:
             general_configs['use_karma'] = '1'

@@ -98,6 +98,17 @@ EAP_USER_HEADER = os.path.join(DB_DIR, 'eap_user.header')
 PHASE1_ACCOUNTS = os.path.join(DB_DIR, 'phase1.accounts')
 PHASE2_ACCOUNTS = os.path.join(DB_DIR, 'phase2.accounts')
 
+# ACL Files
+output_file = OutputFile(ext='accept').string()
+HOSTAPD_MAC_WHITELIST = os.path.join(TMP_DIR, output_file)
+output_file = OutputFile(ext='deny').string()
+HOSTAPD_MAC_BLACKLIST = os.path.join(TMP_DIR, output_file)
+
+output_file = OutputFile(ext='accept').string()
+HOSTAPD_SSID_WHITELIST = os.path.join(TMP_DIR, output_file)
+output_file = OutputFile(ext='deny').string()
+HOSTAPD_SSID_BLACKLIST = os.path.join(TMP_DIR, output_file)
+
 # cert paths
 CA_CERTS_DIR = os.path.join(CERTS_DIR, 'ca')
 SERVER_CERTS_DIR = os.path.join(CERTS_DIR, 'server')
@@ -178,6 +189,10 @@ paths = {
         'fifo' : FIFO_PATH,
         'conf' : HOSTAPD_CONF,
         'save' : HOSTAPD_SAVE,
+        'mac_whitelist' : HOSTAPD_MAC_WHITELIST,
+        'mac_blacklist' : HOSTAPD_MAC_BLACKLIST,
+        'ssid_whitelist' : HOSTAPD_SSID_WHITELIST,
+        'ssid_blacklist' : HOSTAPD_SSID_BLACKLIST,
     },
 
     'certs' : {
@@ -219,4 +234,3 @@ paths = {
         'script' : DHCP_SCRIPT,
     },
 }
-

@@ -145,3 +145,6 @@ Documentation overhauled and moved to Wiki (thanks [FreqyXin](https://twitter.co
 1.9.1 - Gabriel Ryan <gryan@specterops.io>
 Added logo to documentation.
 
+1.10.0 - Gabriel Ryan <gryan@specterops.io>
+Added ssid and mac address level ACLs.
+

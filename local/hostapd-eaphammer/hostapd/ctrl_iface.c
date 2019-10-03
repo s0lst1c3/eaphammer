@@ -2897,7 +2897,13 @@ static int hostapd_ctrl_iface_acl_add_mac(struct mac_acl_entry **acl, int *num,
 		vlanid = atoi(pos + 8);
 
 	if (!hostapd_maclist_found(*acl, *num, addr, &vlan_id)) {
+#ifdef EAPHAMMER
+		// using the NULL is kind of cludgy, but I don't feel like implementing
+		// this so whatever
+		ret = hostapd_add_acl_maclist(acl, num, vlanid, addr, NULL);
+#else
 		ret = hostapd_add_acl_maclist(acl, num, vlanid, addr);
+#endif
 		if (ret != -1 && *acl)
 			qsort(*acl, *num, sizeof(**acl), hostapd_acl_comp);
 	}

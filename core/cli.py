@@ -16,6 +16,10 @@ BASIC_OPTIONS = [
     'capture_wpa_handshakes',
     'psk_capture_file',
     'pmkid',
+    'mac_whitelist',
+    'mac_blacklist',
+    'ssid_whitelist',
+    'ssid_blacklist',
     'hostile_portal',
     'captive_portal',
     'debug',
@@ -407,6 +411,38 @@ def set_options():
                                     dest='karma',
                                     action='store_true',
                                     help='Enable karma.')
+
+    access_point_group.add_argument('--mac-whitelist',
+                                    dest='mac_whitelist',
+                                    type=str,
+                                    default=None,
+                                    help='Enable MAC address whitelisting '
+                                         'and specify path to whitelist '
+                                         'file.')
+
+    access_point_group.add_argument('--mac-blacklist',
+                                    dest='mac_blacklist',
+                                    type=str,
+                                    default=None,
+                                    help='Enable MAC address blacklisting '
+                                         'and specify path to blacklist '
+                                         'file.')
+
+    access_point_group.add_argument('--ssid-whitelist',
+                                    dest='ssid_whitelist',
+                                    type=str,
+                                    default=None,
+                                    help='Enable MAC address whitelisting '
+                                         'and specify path to whitelist '
+                                         'file.')
+
+    access_point_group.add_argument('--ssid-blacklist',
+                                    dest='ssid_blacklist',
+                                    type=str,
+                                    default=None,
+                                    help='Enable MAC address blacklisting '
+                                         'and specify path to blacklist '
+                                         'file.')
 
     karma_group = parser.add_argument_group('Karma Options')
 
@@ -965,6 +1001,57 @@ def set_options():
                 invalid_args = True
             if invalid_args:
                 sys.exit()
+
+        if options['mac_whitelist'] is not None and options['mac_blacklist'] is not None:
+
+            parser.print_usage()
+            print()
+            msg = ('[!] Cannot use --mac-whitelist and '
+                   '--mac-blacklist flags simultaneously.')
+            print(msg, end='')
+            sys.exit()
+
+        if options['ssid_whitelist'] is not None and options['ssid_blacklist'] is not None:
+
+            parser.print_usage()
+            print()
+            msg = ('[!] Cannot use --ssid-whitelist and '
+                   '--ssid-blacklist flags simultaneously.')
+            print(msg, end='')
+            sys.exit()
+
+        # these sanity checks probably needs to be moved somewhere else,
+        # but whatever. fuckit shipit.
+        if options['ssid_whitelist']:
+            with open(options['ssid_whitelist']) as input_handle:
+                for index,line in enumerate(input_handle):
+                    ssid = line.strip()
+                    if len(ssid) > 32:
+                        parser.print_usage()
+                        print()
+                        msg = ('[!] In SSID whitelist file {} line {}: '
+                               'Length of SSID {} is too long. SSIDS must '
+                               'have a length of no more than 32 '  
+                               'characters.'.format(options['ssid_whitelist'],
+                                                index+1, ssid))
+                        print(msg, end='')
+                        sys.exit()
+
+        if options['ssid_blacklist']:
+            with open(options['ssid_blacklist']) as input_handle:
+                for index,line in enumerate(input_handle):
+                    ssid = line.strip()
+                    if len(ssid) > 32:
+                        parser.print_usage()
+                        print()
+                        msg = ('[!] In SSID blacklist file {} line {}: '
+                               'Length of SSID {} is too long. SSIDS must '
+                               'have a length of no more than 32 '  
+                               'characters.'.format(options['ssid_blacklist'],
+                                                index+1, ssid))
+                        print(msg, end='')
+                        sys.exit()
+
 
     except SystemExit:
 

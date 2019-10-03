@@ -837,7 +837,6 @@ void handle_probe_req(struct hostapd_data *hapd,
 	eh_ssid_t *next_ssid;
 	eh_sta_t *next_sta;
 	eh_ssid_iter_t *iterator;
-
 #endif
 
 	if (len < IEEE80211_HDRLEN)
@@ -927,6 +926,24 @@ void handle_probe_req(struct hostapd_data *hapd,
 		wpabuf_free(p2p);
 	}
 #endif /* CONFIG_P2P */
+
+#ifdef EAPHAMMER
+	if ( eaphammer_global_conf.use_ssid_acl && elems.ssid_len != 0 ) {
+
+		wpa_printf(MSG_DEBUG, "[eaphammer] ssid ACL enabled");
+		wpa_printf(MSG_DEBUG, "[eaphammer] Checking %s against ACL", wpa_ssid_txt(elems.ssid, elems.ssid_len));
+		
+		if ( hostapd_ssid_acl_accept(hapd->conf->ssid_acl,
+										hapd->conf->ssid_acl_len,
+										wpa_ssid_txt(elems.ssid, elems.ssid_len)) ) {
+
+			wpa_printf(MSG_DEBUG, "[eaphammer] Rejecting probe for %s due to SSID ACL reject", wpa_ssid_txt(elems.ssid, elems.ssid_len));
+			return;
+		}
+		wpa_printf(MSG_DEBUG, "[eaphammer] Accepting probe for %s due to SSID ACL accept", wpa_ssid_txt(elems.ssid, elems.ssid_len));
+	}
+
+#endif
 
 	if (hapd->conf->ignore_broadcast_ssid && elems.ssid_len == 0 &&
 	    elems.ssid_list_len == 0) {
@@ -1184,7 +1201,7 @@ void handle_probe_req(struct hostapd_data *hapd,
 
 				wpa_printf(MSG_DEBUG, "[EAPHAMMER] DEBUG 2");
 
-				// generate the probe response 
+				// generate the probe response 1
 				eh_msg_dbg_gen_bc_probe_resp(next_ssid->str, next_ssid->len, mgmt->sa);
 				resp = hostapd_gen_probe_resp(hapd,
 										next_ssid->bytes,
@@ -1209,7 +1226,7 @@ void handle_probe_req(struct hostapd_data *hapd,
 
 				wpa_printf(MSG_DEBUG, "[EAPHAMMER] DEBUG 2");
 
-				// generate the probe response 
+				// generate the probe response 2
 				eh_msg_dbg_gen_bc_probe_resp(next_ssid->str, next_ssid->len, mgmt->sa);
 				resp = hostapd_gen_probe_resp(hapd,
 										next_ssid->bytes,
@@ -1232,6 +1249,8 @@ void handle_probe_req(struct hostapd_data *hapd,
 		if (eaphammer_global_conf.use_karma) {
 
 			wpa_printf(MSG_DEBUG, "[EAPHAMMER] DEBUG 4");
+		
+			// generate probe response 3
 			eh_msg_dbg_gen_probe_resp(elems.ssid, elems.ssid_len, mgmt->sa);
 			resp = hostapd_gen_probe_resp(hapd,
 									elems.ssid,
@@ -1242,6 +1261,7 @@ void handle_probe_req(struct hostapd_data *hapd,
 		}
 		else {
 
+			// generate probe response 4
 			wpa_printf(MSG_DEBUG, "[EAPHAMMER] DEBUG 5");
 			resp = hostapd_gen_probe_resp(hapd,
 									hapd->conf->ssid.ssid,

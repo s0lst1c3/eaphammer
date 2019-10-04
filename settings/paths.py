@@ -98,6 +98,10 @@ EAP_USER_HEADER = os.path.join(DB_DIR, 'eap_user.header')
 PHASE1_ACCOUNTS = os.path.join(DB_DIR, 'phase1.accounts')
 PHASE2_ACCOUNTS = os.path.join(DB_DIR, 'phase2.accounts')
 
+# known ssids file
+output_file = OutputFile(ext='known_ssids').string()
+KNOWN_SSIDS_FILE = os.path.join(TMP_DIR, output_file)
+
 # ACL Files
 output_file = OutputFile(ext='accept').string()
 HOSTAPD_MAC_WHITELIST = os.path.join(TMP_DIR, output_file)
@@ -193,6 +197,7 @@ paths = {
         'mac_blacklist' : HOSTAPD_MAC_BLACKLIST,
         'ssid_whitelist' : HOSTAPD_SSID_WHITELIST,
         'ssid_blacklist' : HOSTAPD_SSID_BLACKLIST,
+        'known_ssids' : KNOWN_SSIDS_FILE,
     },
 
     'certs' : {

@@ -21,6 +21,7 @@ from core.hostapd_config import HostapdConfig
 from core.eap_user_file import EAPUserFile
 from core.hostapd_mac_acl import HostapdMACACL
 from core.hostapd_ssid_acl import HostapdSSIDACL
+from core.known_ssids_file import KnownSSIDSFile
 from core.responder_config import ResponderConfig
 from core.lazy_file_reader import LazyFileReader
 from core.redirect_server import RedirectServer
@@ -73,6 +74,10 @@ def hostile_portal():
         if options['ssid_whitelist'] is not None or options['ssid_blacklist'] is not None:
             hostapd_ssid_acl = HostapdSSIDACL(settings, options)
             hostapd_ssid_acl.generate()
+
+        if options['known_beacons']:
+            known_ssids_file = KnownSSIDSFile(settings, options)
+            known_ssids_file.generate()
 
         # write hostapd config file to tmp directory
         hostapd_conf = HostapdConfig(settings, options)
@@ -247,6 +252,10 @@ def captive_portal():
             hostapd_ssid_acl = HostapdSSIDACL(settings, options)
             hostapd_ssid_acl.generate()
 
+        if options['known_beacons']:
+            known_ssids_file = KnownSSIDSFile(settings, options)
+            known_ssids_file.generate()
+
         # write hostapd config file to tmp directory
         hostapd_conf = HostapdConfig(settings, options)
         hostapd_conf.write()
@@ -303,6 +312,9 @@ def captive_portal():
 
             # remove acl file from tmp directory
             hostapd_ssid_acl.remove()
+
+        if options['known_beacons']:
+            known_ssids_file.remove()
         
         # restore iptables to a clean state (policy, flush tables)
         utils.Iptables.accept_all()
@@ -341,6 +353,9 @@ def captive_portal():
 
             # remove acl file from tmp directory
             hostapd_ssid_acl.remove()
+
+        if options['known_beacons']:
+            known_ssids_file.remove()
         
         # restore iptables to a clean state (policy, flush tables)
         utils.Iptables.accept_all()
@@ -377,6 +392,10 @@ def troll_defender():
         if options['ssid_whitelist'] is not None or options['ssid_blacklist'] is not None:
             hostapd_ssid_acl = HostapdSSIDACL(settings, options)
             hostapd_ssid_acl.generate()
+
+        if options['known_beacons']:
+            known_ssids_file = KnownSSIDSFile(settings, options)
+            known_ssids_file.generate()
 
         # write hostapd config file to tmp directory
         hostapd_conf = HostapdConfig(settings, options)
@@ -420,6 +439,9 @@ def troll_defender():
 
             # remove acl file from tmp directory
             hostapd_ssid_acl.remove()
+
+        if options['known_beacons']:
+            known_ssids_file.remove()
 
         # cleanly allow network manager to regain control of interface
         interface.nm_on()
@@ -462,6 +484,10 @@ def reap_creds():
             hostapd_ssid_acl = HostapdSSIDACL(settings, options)
             hostapd_ssid_acl.generate()
 
+        if options['known_beacons']:
+            known_ssids_file = KnownSSIDSFile(settings, options)
+            known_ssids_file.generate()
+
         # write hostapd config file to tmp directory
         hostapd_conf = HostapdConfig(settings, options)
         hostapd_conf.write()
@@ -497,6 +523,9 @@ def reap_creds():
             # remove acl file from tmp directory
             hostapd_ssid_acl.remove()
 
+        if options['known_beacons']:
+            known_ssids_file.remove()
+
         # cleanly allow network manager to regain control of interface
         interface.nm_on()
 
@@ -525,6 +554,9 @@ def reap_creds():
 
             # remove acl file from tmp directory
             hostapd_ssid_acl.remove()
+
+        if options['known_beacons']:
+            known_ssids_file.remove()
 
         # cleanly allow network manager to regain control of interface
         interface.nm_on()

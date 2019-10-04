@@ -50,6 +50,7 @@ BASIC_OPTIONS = [
     'user_list',
     'bootstrap',
     'known_ssids_file',
+    'known_ssids',
     'negotiate',
 ]
 
@@ -466,6 +467,13 @@ def set_options():
                            type=str,
                            help='Specify the wordlist to use with '
                                 'the --known-beacons features.')
+
+    karma_group.add_argument('--known-ssids',
+                           dest='known_ssids',
+                           nargs='+',
+                           default=None,
+                           type=str,
+                           help='Specify known ssids via the CLI')
 
     ap_advanced_subgroup = parser.add_argument_group('AP Advanced Options')
 
@@ -908,18 +916,32 @@ def set_options():
                 print(msg, end='')
                 sys.exit()
 
-            if options['known_ssids_file'] is None:
+            if options['known_ssids_file'] is None and \
+                    options['known_ssids'] is None:
 
                 parser.print_usage()
                 print()
-                msg = ('[!] Cannot use --known-beacons without known SSIDS file. '
-                       'Please specify path to known SSIDS file with --known-ssids flag.')
+                msg = ('[!] Cannot use --known-beacons '
+                        'without list of known SSIDS. '
+                        'Please specify path to known SSIDS '
+                        'file with the --known-ssids-file flag, '
+                        'or provide a list of known SSIDS '
+                        'using the --known-ssids flag.')
                 print(msg, end='')
                 sys.exit()
                 
-    
+            if options['known_ssids_file'] is not None and \
+                    options['known_ssids'] is not None:
 
-            if not Path(options['known_ssids_file']).is_file():
+                parser.print_usage()
+                print()
+                msg = ('[!] Cannot use --known-ssids-file '
+                        'and --known-ssids flags simultaneously.')
+                print(msg, end='')
+                sys.exit()
+
+            if options['known_ssids_file'] is not None and \
+                not Path(options['known_ssids_file']).is_file():
 
                 parser.print_usage()
                 print()

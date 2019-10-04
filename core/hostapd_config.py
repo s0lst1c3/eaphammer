@@ -526,7 +526,7 @@ class HostapdConfig(object):
 
         if options['known_beacons']:
             general_configs['known_beacons'] = '1'
-            general_configs['known_ssids_file'] = options['known_ssids_file']
+            general_configs['known_ssids_file'] = settings.dict['paths']['hostapd']['known_ssids']
         else:
             general_configs['known_beacons'] = settings.dict['core']['hostapd']['general']['known_beacons']
 

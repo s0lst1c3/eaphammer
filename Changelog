@@ -150,3 +150,6 @@ Added ssid and mac address level ACLs.
 
 1.11.0 - Gabriel Ryan <gryan@specterops.io>
 Added beacon forger for executing known SSID bursts
+
+1.12.0 - Gabriel Ryan <gryan@specterops.io>
+Added --known-ssids flag that can be used instead of --known-ssids-file flag.

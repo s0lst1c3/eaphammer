@@ -14,6 +14,10 @@ Overview
 EAPHammer is a toolkit for performing targeted evil twin attacks against WPA2-Enterprise networks. It is designed to be used in full scope wireless assessments and red team engagements. As such, focus is placed on providing an easy-to-use interface that can be leveraged to execute powerful wireless attacks with minimal manual configuration. 
 To illustrate just how fast this tool is, our Quick Start section provides an example of how to execute a credential stealing evil twin attack against a WPA/2-EAP network in just commands.
 
+## Disclaimer
+
+EAPHammer (the "Software") and associated documentation is provided “AS IS”. The Developer makes no other warranties, express or implied, and hereby disclaims all implied warranties, including any warranty of merchantability and warranty of fitness for a particular purpose. Any actions or activities related to the use of the Software are the sole responsibility of the end user. The Developer will not be held responsible in the event that any criminal charges are brought against any individuals using or misusing the Software. It is up to the end user to use the Software in an authorized manner and to ensure that their use complies with all applicable laws and regulations.
+
 ## Quick Start Guide (Kali)
 
 Begin by cloning the __eaphammer__ repo using the following command:

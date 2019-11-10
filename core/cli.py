@@ -34,6 +34,7 @@ BASIC_OPTIONS = [
     'cloaking',
     'auth',
     'karma',
+    'mana',
     'loud',
     'known_beacons',
     'channel_width',
@@ -408,7 +409,7 @@ def set_options():
                                          '(802.11w) (default: disable) '
                                          '(OWE default: require).')
 
-    access_point_group.add_argument('--karma',
+    access_point_group.add_argument('--karma', '--mana',
                                     dest='karma',
                                     action='store_true',
                                     help='Enable karma.')

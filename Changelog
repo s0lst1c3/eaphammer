@@ -153,3 +153,6 @@ Added beacon forger for executing known SSID bursts
 
 1.12.0 - Gabriel Ryan <gryan@specterops.io>
 Added --known-ssids flag that can be used instead of --known-ssids-file flag.
+
+1.12.1 - Gabriel Ryan <gabriel@specterops.io>
+Hostapd ctrl_interface name randomly generated to support multiple concurrent eaphammer instances, given absolute path

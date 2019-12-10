@@ -491,7 +491,8 @@ class HostapdConfig(object):
 
         general_configs['country_code'] = settings.dict['core']['hostapd']['general']['country_code']
 
-        general_configs['ctrl_interface'] = settings.dict['core']['hostapd']['general']['ctrl_interface']
+        #general_configs['ctrl_interface'] = settings.dict['core']['hostapd']['general']['ctrl_interface']
+        general_configs['ctrl_interface'] = settings.dict['paths']['hostapd']['ctrl_interface']
 
         general_configs['ctrl_interface_group'] = settings.dict['core']['hostapd']['general']['ctrl_interface_group']
 

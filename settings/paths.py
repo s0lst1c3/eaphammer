@@ -7,9 +7,9 @@ from datetime import datetime
 
 class OutputFile(object):
 
-    def __init__(self, name='', ext=''):
+    def __init__(self, name='', ext='', length=32):
         datestring = datetime.strftime(datetime.now(), '%Y-%m-%d-%H-%M-%S')
-        randstring = ''.join(random.choice(string.ascii_letters+string.digits) for _ in range(32))
+        randstring = ''.join(random.choice(string.ascii_letters+string.digits) for _ in range(length))
         self.str = ''
         if name != '':
             self.str += '%s-' % name
@@ -28,6 +28,7 @@ ROOT_DIR = os.path.split(os.path.dirname(os.path.abspath(__file__)))[0]
 CONF_DIR = os.path.join(ROOT_DIR, 'settings')
 SAVE_DIR = os.path.join(ROOT_DIR, 'saved-configs')
 LOG_DIR = os.path.join(ROOT_DIR, 'logs')
+RUN_DIR = os.path.join(ROOT_DIR, 'run')
 SCRIPT_DIR = os.path.join(ROOT_DIR, 'scripts')
 DB_DIR = os.path.join(ROOT_DIR, 'db')
 TMP_DIR = os.path.join(ROOT_DIR, 'tmp')
@@ -81,6 +82,9 @@ HCXPCAPTOOL_OFILE = os.path.join(TMP_DIR, output_file)
 HOSTAPD_BIN = os.path.join(HOSTAPD_DIR, 'hostapd-eaphammer')
 HOSTAPD_LIB = os.path.join(HOSTAPD_DIR, 'libhostapd-eaphammer.so')
 HOSTAPD_LOG = os.path.join(LOG_DIR, 'hostapd-eaphammer.log')
+#output_file = 'hostapd-control-interface' # fuckit
+output_file = OutputFile(name='ctrl-iface', length=8).string()
+HOSTAPD_CTRL_INTERFACE = os.path.join(RUN_DIR, output_file)
 
 # eap_spray paths
 EAP_SPRAY_LOG = os.path.join(LOG_DIR, 'eap_spray.log')
@@ -191,6 +195,7 @@ paths = {
         'phase1_accounts' : PHASE1_ACCOUNTS,
         'phase2_accounts' : PHASE2_ACCOUNTS,
         'fifo' : FIFO_PATH,
+        'ctrl_interface' : HOSTAPD_CTRL_INTERFACE,
         'conf' : HOSTAPD_CONF,
         'save' : HOSTAPD_SAVE,
         'mac_whitelist' : HOSTAPD_MAC_WHITELIST,

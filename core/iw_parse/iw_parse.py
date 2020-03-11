@@ -163,6 +163,13 @@ def match(line, keyword):
     returns the end of that line. Otherwise checks if keyword is
     anywhere in the line and returns that section, else returns None"""
 
+    #print('in match(line, keyword)')
+
+    #print('value of line:', line)
+    #print('type of line:', type(line))
+    #print('value of keyword:', keyword)
+    #print('type of keyword:', type(keyword))
+
     line = line.lstrip()
     length = len(keyword)
     if line[:length] == keyword:
@@ -225,6 +232,8 @@ def get_parsed_cells(iw_data, rules=None):
             properties: Name, Address, Quality, Channel, Encryption.
     """
 
+    #print('in get_parsed_cells: value of iw_data is', iw_data)
+
     # Here's a dictionary of rules that will be applied to the description
     # of each cell. The key will be the name of the column in the table.
     # The value is a function defined above.
@@ -241,8 +250,12 @@ def get_parsed_cells(iw_data, rules=None):
     cells = [[]]
     parsed_cells = []
 
+    #print('iterating through iw_data')
     for line in iw_data:
-        cell_line = match(line, "Cell ")
+        #print('next line type:', type(line))
+        #print('next line is:', line)
+        #print('about to call match(line, "Cell ")')
+        cell_line = match(line, b"Cell ")
         if cell_line != None:
             cells.append([])
             line = cell_line[-27:]
@@ -281,4 +294,9 @@ def get_interfaces(interface="wlan0"):
         @return dict
             properties: dictionary of iwlist attributes
     """
-    return get_parsed_cells(call_iwlist(interface).split('\n'))
+    resultz = call_iwlist(interface)
+    #print('results from call_iwlist():', resultz)
+    split_results = resultz.split(b'\n')
+    #print('after splitting:', split_results)
+    parsed_cellz = get_parsed_cells(split_results)
+    return parsed_cellz

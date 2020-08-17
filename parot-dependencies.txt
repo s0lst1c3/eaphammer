@@ -1,0 +1,10 @@
+apache2
+dnsmasq
+libssl-dev
+libnfnetlink-dev
+libnl-3-dev
+libnl-genl-3-dev
+libcurl4-openssl-dev
+zlib1g-dev
+libpcap-dev
+python3-pip

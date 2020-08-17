@@ -1,10 +1,10 @@
 ![logo](https://rawcdn.githack.com/s0lst1c3/eaphammer/ab8202de4a298957a2bc5662f986cdfb195490e4/docs/img/logo.png)
 
-by Gabriel Ryan ([s0lst1c3](https://twitter.com/s0lst1c3))(gabriel[at]specterops.io)
+by Gabriel Ryan ([s0lst1c3](https://twitter.com/s0lst1c3))(gabriel[at]solstice|d0t|sh)
 
 [![Foo](https://rawcdn.githack.com/toolswatch/badges/8bd9be6dac2a1d445367001f2371176cc50a5707/arsenal/usa/2017.svg)](https://www.blackhat.com/us-17/arsenal.html#eaphammer)
 
-Current release: [v1.12.2](https://github.com/s0lst1c3/eaphammer/releases/tag/v1.12.0)
+Current release: [v1.12.3](https://github.com/s0lst1c3/eaphammer/releases/tag/v1.12.0)
 
 Supports _Python 3.5+_.
 
@@ -18,7 +18,7 @@ To illustrate just how fast this tool is, our Quick Start section provides an ex
 
 EAPHammer (the "Software") and associated documentation is provided “AS IS”. The Developer makes no other warranties, express or implied, and hereby disclaims all implied warranties, including any warranty of merchantability and warranty of fitness for a particular purpose. Any actions or activities related to the use of the Software are the sole responsibility of the end user. The Developer will not be held responsible in the event that any criminal charges are brought against any individuals using or misusing the Software. It is up to the end user to use the Software in an authorized manner and to ensure that their use complies with all applicable laws and regulations.
 
-## Quick Start Guide (Kali)
+## Quick Start Guide - Kali
 
 Begin by cloning the __eaphammer__ repo using the following command:
 
@@ -35,6 +35,25 @@ To setup and execute a credential stealing evil twin attack against a WPA/2-EAP 
 
 	# launch attack
 	./eaphammer -i wlan0 --channel 4 --auth wpa-eap --essid CorpWifi --creds
+
+## Quick Start Guide - Parot OS (Security)
+
+Begin by cloning the __eaphammer__ repo using the following command:
+
+	git clone https://github.com/s0lst1c3/eaphammer.git
+
+Next run the parot-setup file as shown below to complete the eaphammer setup process. This will install dependencies and compile the project:
+
+	./parot-setup
+
+To setup and execute a credential stealing evil twin attack against a WPA/2-EAP network:
+
+	# generate certificates
+	./eaphammer --cert-wizard
+
+	# launch attack
+	./eaphammer -i wlan0 --channel 4 --auth wpa-eap --essid CorpWifi --creds
+
 
 ## Usage and Setup Instructions
 

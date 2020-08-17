@@ -159,3 +159,6 @@ Hostapd ctrl_interface name randomly generated to support multiple concurrent ea
 
 1.12.2 - Gabriel Ryan <gabriel@specterops.io>
 Fixed kali-setup file, updated kali-dependencies.txt file
+
+1.12.3 - Gabriel Ryan <gabriel@specterops.io>
+Added official support for Parot OS (Security)

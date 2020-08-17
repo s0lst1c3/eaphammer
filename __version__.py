@@ -1,4 +1,4 @@
-__version__ = '1.12.1'
+__version__ = '1.12.2'
 __codename__ = 'Power Overwhelming'
 __author__ = '@s0lst1c3'
 __contact__ = 'gabriel@specterops.io'

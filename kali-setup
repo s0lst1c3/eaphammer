@@ -1,13 +1,21 @@
 #!/usr/bin/env python3
 import os
+import sys
 
 from settings import settings
+
+def exit_if_not_root():
+
+    if os.getuid() != 0:
+        sys.exit("[!} Error: this script must be run as root.")
 
 def read_deps_file(deps_file):
     with open(deps_file) as fd:
         return ' '.join([ line.strip() for line in fd ])
 
 if __name__ == '__main__':
+
+    exit_if_not_root()
                     
 
     default_wordlist = os.path.join(settings.dict['paths']['directories']['wordlists'], settings.dict['core']['eaphammer']['general']['default_wordlist'])
@@ -25,19 +33,10 @@ if __name__ == '__main__':
     openssl_bin = settings.dict['paths']['openssl']['bin']
     dh_file = settings.dict['paths']['certs']['dh']
 
-    if input('Do you want update your package list ("apt -y update")(recommended)? [y/N]: ').lower() == 'y':
-        print('\n[*] Downloading package lists from kali repositories...\n')
-        os.system('apt -y update')
-        print('\n[*] complete!\n')
-
+    if input('Important: it is highly recommended that you run "apt -y update" and "apt -y upgrade" prior to running this setup script. Do you wish to proceed? Enter [y/N]: ').lower() != 'y':
+        sys.exit('Aborting.')
     print()
 
-    if input('Do you want upgrade your installed packages ("apt -y upgrade")(recommended)? [y/N]: ').lower() == 'y':
-        print('\n[*] Performing upgrade...\n')
-        os.system('apt -y upgrade')
-        print('\n[*] complete!\n')
-
-    print()
 
     print('\n[*] Removing stub files...\n')
     os.system('find {} -type f -name \'stub\' -exec rm -f {{}} +'.format(root_dir))

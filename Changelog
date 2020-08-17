@@ -156,3 +156,6 @@ Added --known-ssids flag that can be used instead of --known-ssids-file flag.
 
 1.12.1 - Gabriel Ryan <gabriel@specterops.io>
 Hostapd ctrl_interface name randomly generated to support multiple concurrent eaphammer instances, given absolute path
+
+1.12.2 - Gabriel Ryan <gabriel@specterops.io>
+Fixed kali-setup file, updated kali-dependencies.txt file

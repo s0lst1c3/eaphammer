@@ -27,6 +27,7 @@ from core.lazy_file_reader import LazyFileReader
 from core.redirect_server import RedirectServer
 from core.wpa_supplicant import WPA_Supplicant
 from core.wpa_supplicant_conf import WPASupplicantConf
+from core.portal_server import PortalServer
 from datetime import datetime
 from multiprocessing import Queue
 from settings import settings
@@ -272,8 +273,9 @@ def captive_portal():
         conf_manager.dnsmasq_captive_portal_cnf.configure(interface=str(interface))
         services.Dnsmasq.hardstart('-C %s 2>&1' % settings.dict['paths']['dnsmasq']['conf'])
 
-        # start httpd
-        services.Httpd.start()
+        ## start httpd
+        #services.Httpd.start()
+    
 
         # set iptables policy, flush all tables for good measure
         utils.Iptables.accept_all()
@@ -284,12 +286,24 @@ def captive_portal():
         utils.Iptables.route_dns2_addr('10.0.0.1', interface)
         utils.Iptables.route_http2_addr('10.0.0.1', interface)
         
-        # pause execution until user quits
+        # ADD CODE HERE
+        # initialize, configure, and start PortalServer
+        portal_server = PortalServer.get_instance()
+        portal_server.configure(options)
+        portal_server.start()
+        ###
+        
+        ## pause execution until user quits
         input('\n\nPress enter to quit...\n\n')
 
         hostapd.stop()
         services.Dnsmasq.kill()
-        services.Httpd.stop()
+
+        #services.Httpd.stop()
+        # ADD CODE HERE
+        portal_server.stop()
+        ###
+
         if use_autocrack:
             autocrack.stop()
 
@@ -328,9 +342,10 @@ def captive_portal():
 
     except KeyboardInterrupt:
 
+        portal_server.stop()
         hostapd.stop()
         services.Dnsmasq.kill()
-        services.Httpd.stop()
+        #services.Httpd.stop()
         if use_autocrack:
             autocrack.stop()
 

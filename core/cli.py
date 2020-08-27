@@ -792,6 +792,61 @@ def set_options():
                            help='Specify the wordlist to use with '
                                 'the autocrack feature.')
 
+    cptl_group = parser.add_argument_group('Captive Portal Options', 
+                            'Only applicable if --captive-portal is used')
+
+
+    cptl_group.add_argument('--portal-lhost',
+                    dest='portal_lhost',
+                    type=str,
+                    default='127.0.0.1',
+                    required=False,
+                    help='Your ip address')
+
+    cptl_group.add_argument('--portal-lport',
+                    dest='portal_lport',
+                    type=int,
+                    default=80,
+                    required=False,
+                    help='Port on which to run keylogger.')
+
+    cptl_group.add_argument('--portal-template',
+                    dest='portal_user_template',
+                    type=str,
+                    default='login',
+                    required=False,
+                    help='Specify template directory')
+
+    cptl_group.add_argument('--portal-debug',
+                    dest='portal_debug',
+                    action='store_true',
+                    required=False,
+                    help='Show debug for portal server only')
+
+    cptl_group.add_argument('--portal-https',
+                    dest='portal_https',
+                    action='store_true',
+                    required=False,
+                    help='Use HTTPS')
+
+    cptl_group.add_argument('--portal-priv-key',
+                    dest='portal_private_key',
+                    type=str,
+                    required=False,
+                    help='private key')
+
+    cptl_group.add_argument('--portal-fullchain',
+                    dest='portal_fullchain',
+                    type=str,
+                    required=False,
+                    help='fullchain')
+
+    cptl_group.add_argument('--portal-cert',
+                    dest='portal_cert',
+                    type=str,
+                    required=False,
+                    help='cert')
+
     hp_group = parser.add_argument_group('Hostile Portal Options', 
                             'Only applicable if --hostile-portal is used')
 

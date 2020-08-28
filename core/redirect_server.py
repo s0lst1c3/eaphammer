@@ -8,6 +8,8 @@ from socketserver import ThreadingMixIn
 from multiprocessing import Process
 
 upper_alnum = string.ascii_uppercase + string.digits
+bind_addr = None
+bind_port = None
 
 class RedirectHandler(BaseHTTPRequestHandler):
 
@@ -15,7 +17,7 @@ class RedirectHandler(BaseHTTPRequestHandler):
 
         s.send_response(302)
         share_path = ''.join(random.choice(upper_alnum) for _ in range(8))
-        new_location = 'file://10.0.0.1/%s' % (share_path)
+        new_location = 'file://%s:%s/%s' % (bind_addr, bind_port, share_path)
         s.send_header('Location', new_location)
         s.end_headers()
 
@@ -44,10 +46,17 @@ class RedirectServer(object):
             instance = RedirectServer()
         return instance
 
-    def configure(self, bind_addr, bind_port=80):
+    def configure(self, lbind_addr, lbind_port=80):
 
-        self.bind_addr = bind_addr
-        self.bind_port = bind_port
+        global bind_addr
+        global bind_port
+
+        self.bind_addr = lbind_addr
+        self.bind_port = lbind_port
+
+        bind_addr = lbind_addr
+        bind_port = lbind_port
+        
 
     @staticmethod
     def _start(bind_addr, bind_port):

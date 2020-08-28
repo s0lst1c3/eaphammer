@@ -33,9 +33,16 @@ from multiprocessing import Queue
 from settings import settings
 from __version__ import __version__, __tagline__, __author__, __contact__, __codename__
 from threading import Thread
+from core.utils import ip_replace_last_octet
+from core.loader import Loader
 
 def hostile_portal():
     global responder
+
+    lport = options['lport']
+    lhost = options['lhost']
+    lnet = ip_replace_last_octet(lhost, '0')
+    lmask = '255.255.255.0'
 
     use_autocrack = options['autocrack']
     wordlist = options['wordlist']
@@ -89,16 +96,18 @@ def hostile_portal():
         hostapd.start()
 
         # configure routing 
-        interface.set_ip_and_netmask('10.0.0.1', '255.255.255.0')
-        os.system('route add -net 10.0.0.0 netmask 255.255.255.0 gw 10.0.0.1')
+        interface.set_ip_and_netmask(lhost, lmask)
+        os.system('route add -net %s netmask %s gw %s' %\
+                 (lnet, lmask, lhost))
 
         # configure dnsmasq
-        conf_manager.dnsmasq_captive_portal_cnf.configure(interface=str(interface))
+        conf_manager.dnsmasq_captive_portal_cnf.configure(interface=str(interface),
+                                                          lhost=lhost)
         services.Dnsmasq.hardstart('-C %s 2>&1' % settings.dict['paths']['dnsmasq']['conf'])
 
         # start RedirectServer
         rs = RedirectServer.get_instance()
-        rs.configure('10.0.0.1')
+        rs.configure(lhost)
         rs.start()
 
         # start Responder
@@ -127,8 +136,8 @@ def hostile_portal():
         utils.Iptables.flush('nat')
 
         # use iptables to redirect all DNS and HTTP(S) traffic to PHY
-        utils.Iptables.route_dns2_addr('10.0.0.1', interface)
-        utils.Iptables.route_http2_addr('10.0.0.1', interface)
+        utils.Iptables.route_dns2_addr(lhost, interface)
+        utils.Iptables.route_http2_addr(lhost, interface)
 
         # pause execution until user quits
         input('\n\nPress enter to quit...\n\n')
@@ -215,6 +224,11 @@ def hostile_portal():
 
 def captive_portal():
 
+    lport = options['lport']
+    lhost = options['lhost']
+    lnet = ip_replace_last_octet(lhost, '0')
+    lmask = '255.255.255.0'
+
     if options['manual_config'] is None:
         interface = core.interface.Interface(options['interface'])
     else:
@@ -266,11 +280,13 @@ def captive_portal():
         hostapd.start()
 
         # configure routing 
-        interface.set_ip_and_netmask('10.0.0.1', '255.255.255.0')
-        os.system('route add -net 10.0.0.0 netmask 255.255.255.0 gw 10.0.0.1')
+        interface.set_ip_and_netmask(lhost, lmask)
+        os.system('route add -net %s netmask %s gw %s' %
+                    (lnet, lmask, lhost))
 
         # configure dnsmasq
-        conf_manager.dnsmasq_captive_portal_cnf.configure(interface=str(interface))
+        conf_manager.dnsmasq_captive_portal_cnf.configure(interface=str(interface),
+                                                          lhost=lhost)
         services.Dnsmasq.hardstart('-C %s 2>&1' % settings.dict['paths']['dnsmasq']['conf'])
 
         ## start httpd
@@ -283,8 +299,8 @@ def captive_portal():
         utils.Iptables.flush('nat')
 
         # use iptables to redirect all DNS and HTTP(S) traffic to PHY
-        utils.Iptables.route_dns2_addr('10.0.0.1', interface)
-        utils.Iptables.route_http2_addr('10.0.0.1', interface)
+        utils.Iptables.route_dns2_addr(lhost, interface)
+        utils.Iptables.route_http2_addr(lhost, interface)
         
         # ADD CODE HERE
         # initialize, configure, and start PortalServer
@@ -384,6 +400,11 @@ def captive_portal():
 
 def troll_defender():
 
+    lport = options['lport']
+    lhost = options['lhost']
+    lnet = ip_replace_last_octet(lhost, '0')
+    lmask = '255.255.255.0'
+
     interface = core.interface.Interface(options['interface'])
 
     try:
@@ -462,6 +483,11 @@ def troll_defender():
         interface.nm_on()
 
 def reap_creds():
+
+    lport = options['lport']
+    lhost = options['lhost']
+    lnet = ip_replace_last_octet(lhost, '0')
+    lmask = '255.255.255.0'
 
     if options['manual_config'] is None:
         interface = core.interface.Interface(options['interface'])
@@ -578,6 +604,11 @@ def reap_creds():
 
 def pmkid_attack():
 
+    lport = options['lport']
+    lhost = options['lhost']
+    lnet = ip_replace_last_octet(lhost, '0')
+    lmask = '255.255.255.0'
+
     bssid = options['bssid']
     channel = options['channel']
     essid = options['essid']
@@ -689,6 +720,11 @@ def pmkid_attack():
 
 def eap_spray():
 
+    lport = options['lport']
+    lhost = options['lhost']
+    lnet = ip_replace_last_octet(lhost, '0')
+    lmask = '255.255.255.0'
+
     # set variables from settings / options
     interfaces = options['interface_pool']
     essid = options['essid']
@@ -717,6 +753,11 @@ def eap_spray():
     cred_logger.join()
 
 def save_config_only():
+
+    lport = options['lport']
+    lhost = options['lhost']
+    lnet = ip_replace_last_octet(lhost, '0')
+    lmask = '255.255.255.0'
 
     hostapd_conf = HostapdConfig(settings, options)
     hostapd_conf.write()
@@ -783,6 +824,25 @@ def run_cert_wizard():
     else:
 
         raise Exception('Invalid argument passed to --cert-wizard')
+
+def list_templates():
+
+
+    
+    loader = Loader(paths=[settings.dict['paths']['wskeyloggerd']['usr_templates']],
+                    mtype='MPortalTemplate')
+
+
+    templates = loader.get_loadables()
+
+
+    print()
+    print('[*] Listing available captive portal templates:')
+    print()
+    for t in templates:
+
+        print(t)
+    print()
             
 def am_i_rooot():
 
@@ -834,6 +894,8 @@ if __name__ == '__main__':
 
     if options['cert_wizard'] or options['bootstrap']:
         run_cert_wizard()
+    elif options['list_templates']:
+        list_templates()
     elif options['save_config_only']:
         save_config_only()        
     elif options['captive_portal']:

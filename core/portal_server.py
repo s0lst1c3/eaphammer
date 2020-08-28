@@ -22,7 +22,7 @@ class PortalServer(object):
     @staticmethod
     def _start(options):
 
-        core.wskeyloggerd.run(settings, options)
+        core.wskeyloggerd.run(options)
 
     def configure(self, options):
 

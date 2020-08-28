@@ -12,6 +12,7 @@ from pathlib import Path
 BASIC_OPTIONS = [
 
     'cert_wizard',
+    'list_templates',
     'reap_creds',
     'capture_wpa_handshakes',
     'psk_capture_file',
@@ -22,6 +23,7 @@ BASIC_OPTIONS = [
     'ssid_blacklist',
     'hostile_portal',
     'captive_portal',
+    'payload',
     'debug',
     'interface',
     'essid',
@@ -29,10 +31,13 @@ BASIC_OPTIONS = [
     'pmf',
     'owe_transition_bssid',
     'owe_transition_ssid',
+    'portal_user_template',
     'channel',
     'hw_mode',
     'cloaking',
     'auth',
+    'lhost',
+    'lport',
     'karma',
     'mana',
     'loud',
@@ -95,6 +100,12 @@ def set_options():
                                    'configuration. Use "--cert-wizard dh" '
                                    'to manually regenerate eaphammer\'s dh '
                                    'parameters.')
+
+    modes_group_.add_argument('--list-templates',
+                              dest='list_templates',
+                              action='store_true',
+                              help=('List available templates for the '
+                                    'captive portal'))
 
     modes_group_.add_argument('--bootstrap',
                               dest='bootstrap',
@@ -327,6 +338,13 @@ def set_options():
                                    help='Specify CA key password.')
 
     access_point_group = parser.add_argument_group('Access Point')
+
+    access_point_group.add_argument('--lhost',
+                    dest='lhost',
+                    type=str,
+                    default='10.0.0.1',
+                    required=False,
+                    help='Your AP\'s IP address')
 
     access_point_group.add_argument('-i', '--interface',
                                     dest='interface',
@@ -796,19 +814,19 @@ def set_options():
                             'Only applicable if --captive-portal is used')
 
 
-    cptl_group.add_argument('--portal-lhost',
-                    dest='portal_lhost',
-                    type=str,
-                    default='127.0.0.1',
-                    required=False,
-                    help='Your ip address')
-
-    cptl_group.add_argument('--portal-lport',
-                    dest='portal_lport',
+    cptl_group.add_argument('--lport',
+                    dest='lport',
                     type=int,
                     default=80,
                     required=False,
-                    help='Port on which to run keylogger.')
+                    help='Port on which to run captive portal.')
+
+    cptl_group.add_argument('--payload',
+                    dest='payload',
+                    type=str,
+                    default='profile.msi',
+                    required=False,
+                    help='Specify payload name (defaults to payload.msi test file)')
 
     cptl_group.add_argument('--portal-template',
                     dest='portal_user_template',
@@ -902,6 +920,7 @@ def set_options():
             options['advanced_help'] is False and
             options['eap_spray'] is False and
             options['bootstrap'] is False and
+            options['list_templates'] is False and
             options['interface'] is None):
 
             parser.print_usage()

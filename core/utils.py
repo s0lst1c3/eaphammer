@@ -4,6 +4,10 @@ import time
 from settings import settings
 from tqdm import tqdm
 
+def ip_replace_last_octet(ip_addr, new_val):
+
+    return '.'.join(ip_addr.split('.')[:-1]+[new_val])
+
 def extract_iface_from_hostapd_conf(hostapd_conf_path):
 
     with open(hostapd_conf_path) as fd:
@@ -98,3 +102,4 @@ class Iptables(object):
             os.system('iptables-restore </tmp/rules_file.txt')
         else:
             os.system('iptables-restore > ' + rules_file)
+

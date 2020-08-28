@@ -97,3 +97,18 @@ if __name__ == '__main__':
     os.system("cd %s && git clone https://github.com/lgandx/Responder.git" % (settings.dict['paths']['directories']['local']))
     print('\n[*] complete!\n')
 
+    print('\n[*] Creating symlink to captive portal template directory...\n')
+    os.symlink(settings.dict['paths']['wskeyloggerd']['usr_templates'],
+               settings.dict['paths']['wskeyloggerd']['usr_templates_sl'])
+    print('\n[*] complete!\n')
+
+    print('\n[*] Creating symlink to captive portal static file directory...\n')
+    os.symlink(settings.dict['paths']['wskeyloggerd']['static'],
+               settings.dict['paths']['wskeyloggerd']['static_sl'])
+    print('\n[*] complete!\n')
+
+    print('\n[*] Creating symlink to captive portal payload directory...\n')
+    os.symlink(settings.dict['paths']['wskeyloggerd']['payloads'],
+               settings.dict['paths']['wskeyloggerd']['payloads_sl'])
+    print('\n[*] complete!\n')
+

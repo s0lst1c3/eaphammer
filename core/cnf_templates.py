@@ -2028,15 +2028,16 @@ except-interface=lo
 port=0
 
 # DHCP configs
-dhcp-range=10.0.0.100,10.0.0.254,1h
-dhcp-option=6,10.0.0.1 #DNS
-dhcp-option=3,10.0.0.1 #Gateway
+dhcp-range=%s,%s,1h
+dhcp-option=6,%s #DNS
+dhcp-option=3,%s #Gateway
 dhcp-authoritative
 log-queries
 log-dhcp
 log-facility=%s
 dhcp-script=%s
 '''
+# % (interface, dhcp_start, dhcp_end, lhost, lhost, log_file, dhcp_script))
 
 dnsmasq_captive_portal = '''
 # general configs
@@ -2045,9 +2046,9 @@ interface=%s
 except-interface=lo
 
 # DHCP configs
-dhcp-range=10.0.0.100,10.0.0.254,1h
-dhcp-option=6,10.0.0.1 #DNS
-dhcp-option=3,10.0.0.1 #Gateway
+dhcp-range=%s,%s,1h
+dhcp-option=6,%s #DNS
+dhcp-option=3,%s #Gateway
 dhcp-authoritative
 log-queries
 log-dhcp
@@ -2055,8 +2056,9 @@ log-facility=%s
 dhcp-script=%s
 
 # DNS configs
-address=/#/10.0.0.1
+address=/#/%s
 '''
+# % (interface, dhcp_start, dhcp_end, lhost, lhost, log_file, dhcp_script, lhost)
 
 responder_cnf = '''
 [Responder Core]

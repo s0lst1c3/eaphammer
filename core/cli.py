@@ -50,6 +50,7 @@ BASIC_OPTIONS = [
     'remote_rig',
     'wordlist',
     'pivot',
+    'captive_portal_server_only',
     'eap_spray',
     'password',
     'interface_pool',
@@ -143,6 +144,12 @@ def set_options():
                               action='store_true',
                               help='Force clients to connect '
                                    'to hostile portal')
+
+    modes_group_.add_argument('--captive-portal-server-only',
+                              dest='captive_portal_server_only',
+                              action='store_true',
+                              help='Run the captive portal server as a'
+                                   'standalone service.')
 
     modes_group_.add_argument('--captive-portal',
                               dest='captive_portal',
@@ -921,6 +928,7 @@ def set_options():
             options['eap_spray'] is False and
             options['bootstrap'] is False and
             options['list_templates'] is False and
+            options['captive_portal_server_only'] is False and
             options['interface'] is None):
 
             parser.print_usage()

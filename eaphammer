@@ -222,6 +222,114 @@ def hostile_portal():
         # cleanly allow network manager to regain control of interface
         interface.nm_on()
 
+def captive_portal_server_only():
+
+    lport = options['lport']
+    lhost = options['lhost']
+    lnet = ip_replace_last_octet(lhost, '0')
+    lmask = '255.255.255.0'
+
+    try:
+
+        # initialize, configure, and start PortalServer
+        portal_server = PortalServer.get_instance()
+        portal_server.configure(options)
+        portal_server.start()
+        
+        ## pause execution until user quits
+        input('\n\nPress enter to quit...\n\n')
+
+        portal_server.stop()
+
+    except KeyboardInterrupt:
+
+        portal_server.stop()
+
+
+def troll_defender():
+
+    lport = options['lport']
+    lhost = options['lhost']
+    lnet = ip_replace_last_octet(lhost, '0')
+    lmask = '255.255.255.0'
+
+    interface = core.interface.Interface(options['interface'])
+
+    try:
+
+        utils.Iptables.save_rules()
+
+        interface.nm_off()
+
+        options['essid'] = 'C:\\Temp\\Invoke-Mimikatz.ps1'
+
+        if options['auth'] == 'wpa-eap':
+
+            # generate eap user file and write to tmp directory
+            eap_user_file = EAPUserFile(settings, options)
+            eap_user_file.generate()
+
+        if options['mac_whitelist'] is not None or options['mac_blacklist'] is not None:
+            hostapd_acl = HostapdMACACL(settings, options)
+            hostapd_acl.generate()
+
+        if options['ssid_whitelist'] is not None or options['ssid_blacklist'] is not None:
+            hostapd_ssid_acl = HostapdSSIDACL(settings, options)
+            hostapd_ssid_acl.generate()
+
+        if options['known_beacons']:
+            known_ssids_file = KnownSSIDSFile(settings, options)
+            known_ssids_file.generate()
+
+        # write hostapd config file to tmp directory
+        hostapd_conf = HostapdConfig(settings, options)
+        hostapd_conf.write()
+
+        # start hostapd
+        hostapd = HostapdEaphammer(settings, options)
+        hostapd.start()
+
+        # pause execution until user quits  
+        input('\n\nPress enter to quit...\n\n')
+
+        hostapd.stop()
+        hostapd_conf.remove()
+
+        if options['auth'] == 'wpa-eap':
+
+            # remove eap user file from tmp directory
+            eap_user_file.remove()
+
+        # cleanly allow network manager to regain control of interface
+        interface.nm_on()
+
+    except KeyboardInterrupt:
+
+        hostapd.stop()
+
+        hostapd_conf.remove()
+
+        if options['auth'] == 'wpa-eap':
+
+            # remove eap user file from tmp directory
+            eap_user_file.remove()
+
+        if options['mac_whitelist'] is not None or options['mac_blacklist'] is not None:
+
+            # remove acl file from tmp directory
+            hostapd_acl.remove()
+
+        if options['ssid_whitelist'] is not None or options['ssid_blacklist'] is not None:
+
+            # remove acl file from tmp directory
+            hostapd_ssid_acl.remove()
+
+        if options['known_beacons']:
+            known_ssids_file.remove()
+
+        # cleanly allow network manager to regain control of interface
+        interface.nm_on()
+
 def captive_portal():
 
     lport = options['lport']
@@ -361,7 +469,7 @@ def captive_portal():
         portal_server.stop()
         hostapd.stop()
         services.Dnsmasq.kill()
-        #services.Httpd.stop()
+        portal_server.stop()
         if use_autocrack:
             autocrack.stop()
 
@@ -900,6 +1008,8 @@ if __name__ == '__main__':
         save_config_only()        
     elif options['captive_portal']:
         captive_portal()
+    elif options['captive_portal_server_only']:
+        captive_portal_server_only()
     elif options['hostile_portal']:
         hostile_portal()
     elif options['pmkid']:

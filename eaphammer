@@ -416,8 +416,6 @@ def captive_portal():
 
         # prepare environment
         utils.set_ipforward(1)
-        print('type is', type(use_nm))
-        print(use_nm)
         if use_nm:
             interface.nm_off()
         

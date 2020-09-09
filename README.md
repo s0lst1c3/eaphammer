@@ -79,7 +79,10 @@ Features
 - Fast and automated PMKID attacks against PSK networks using hcxtools
 - Password spraying across multiple usernames against a single ESSID
 
-### New (as of Version 1.7.0)(latest): 
+### New (as of Version 1.13.0)(latest): 
+EAPHammer now has a modular captive portal with keylogging and payload delivery capabilities, as well as an integrated website cloaner for easily creating portal modules.
+
+### WPA/2-PSK handshake captures (added as for version 1.7.0)
 EAPHammer now supports WPA/2-PSK along with WPA handshake captures.
 
 ### OWE (added as of Version 1.5.0):

@@ -6,6 +6,7 @@ import hashlib
 import random
 import string
 import core.wskeyloggerd.loggers as loggers
+import errno
 
 from flask import Flask
 from flask import make_response
@@ -154,6 +155,7 @@ def serve():
     lport   = options['lport']
 
     payload_path = os.path.join(payload_dir, options['payload'])
+
 
     if 'view_state' not in request.cookies:
 
@@ -476,10 +478,23 @@ def run(options):
     app.config['USE_RELOADER'] = False
     app.config['use_reloader'] = False
 
+    puser_template = options['portal_user_template']
+    user_template_dir = os.path.join(pathsd['usr_templates'], puser_template)
+    static_dir = os.path.join(user_template_dir, 'static')
+
+    try:
+
+        os.symlink(static_dir, pathsd['static'])
+
+    except OSError as e:
+
+        if e.errno == errno.EEXIST:
+            os.remove(pathsd['static'])
+            os.symlink(static_dir, pathsd['static'])
+
     if options['debug'] or options['portal_debug']:
 
         app.config['DEBUG'] = True
-
 
     if options['portal_https']:
 

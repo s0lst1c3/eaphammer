@@ -9,3 +9,4 @@ from . import interface
 from . import iw_parse
 from . import wskeyloggerd
 from . import portal_server
+from . import module_maker

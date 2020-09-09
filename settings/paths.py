@@ -52,8 +52,7 @@ WSKEYLOGGER_USR_SL = os.path.join(ROOT_DIR, 'templates')
 
 WSKEYLOGGER_STATIC = os.path.join(WSKEYLOGGER_DIR, 'static')
 WSKEYLOGGER_STATIC_SL = os.path.join(ROOT_DIR, 'static')
-WSKEYLOGGER_PAYLOADS = os.path.join(WSKEYLOGGER_STATIC, 'payloads')
-WSKEYLOGGER_PAYLOADS_SL = os.path.join(ROOT_DIR, 'payloads')
+WSKEYLOGGER_PAYLOADS = os.path.join(ROOT_DIR, 'payloads')
 
 # responder paths
 RESPONDER_BIN = os.path.join(RESPONDER_DIR, 'Responder.py')
@@ -263,7 +262,6 @@ paths = {
         'static' : WSKEYLOGGER_STATIC,
         'static_sl' : WSKEYLOGGER_STATIC_SL,
         'payloads' : WSKEYLOGGER_PAYLOADS,
-        'payloads_sl' : WSKEYLOGGER_PAYLOADS_SL,
     },
 }
 

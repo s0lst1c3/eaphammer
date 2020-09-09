@@ -11,6 +11,7 @@ import signal
 import subprocess
 import sys
 import time
+import shutil
 
 from argparse import ArgumentParser
 from core import conf_manager, utils, responder, services
@@ -35,6 +36,8 @@ from __version__ import __version__, __tagline__, __author__, __contact__, __cod
 from threading import Thread
 from core.utils import ip_replace_last_octet
 from core.loader import Loader
+
+from core.module_maker import ModuleMaker
 
 def hostile_portal():
     global responder
@@ -965,6 +968,41 @@ def am_i_rooot():
 
     print('[*] Root privs confirmed! 8D')
 
+def create_template():
+
+    name = options['name']
+    url = options['url']
+    description = options['description']
+    author = options['author']
+
+    dl_form_message = options['dl_form_message']
+    add_downloader = options['add_download_form']
+
+    mm = ModuleMaker(name=name,
+                     url=url,
+                     description=description,
+                     dl_form_message=dl_form_message,
+                     add_downloader=add_downloader,
+                     author=author)
+
+    mm.run()
+
+def delete_template():
+
+    name = options['name']
+
+    usr_tmpl_dir = settings.dict['paths']['wskeyloggerd']['usr_templates']
+
+    del_path = os.path.join(usr_tmpl_dir, name)
+
+    try:
+
+        shutil.rmtree(del_path)
+
+    except FileNotFoundError:
+
+        print('[*] Template does not exist')
+
 def print_banner():
 
 
@@ -1018,5 +1056,9 @@ if __name__ == '__main__':
         eap_spray()
     elif options['troll_defender']:
         troll_defender()
+    elif options['create_template']:
+        create_template()
+    elif options['delete_template']:
+        delete_template()
     else:
         reap_creds()

@@ -102,13 +102,3 @@ if __name__ == '__main__':
                settings.dict['paths']['wskeyloggerd']['usr_templates_sl'])
     print('\n[*] complete!\n')
 
-    print('\n[*] Creating symlink to captive portal static file directory...\n')
-    os.symlink(settings.dict['paths']['wskeyloggerd']['static'],
-               settings.dict['paths']['wskeyloggerd']['static_sl'])
-    print('\n[*] complete!\n')
-
-    print('\n[*] Creating symlink to captive portal payload directory...\n')
-    os.symlink(settings.dict['paths']['wskeyloggerd']['payloads'],
-               settings.dict['paths']['wskeyloggerd']['payloads_sl'])
-    print('\n[*] complete!\n')
-

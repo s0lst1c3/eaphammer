@@ -45,7 +45,7 @@ if __name__ == '__main__':
 
 
     print('\n[*] Installing Kali dependencies...\n')
-    os.system('apt -y install %s' % read_deps_file('kali-dependencies.txt'))
+    os.system('apt -y install %s' % read_deps_file('raspbian-dependencies.txt'))
     print('\n[*] complete!\n')
 
     print('\n[*] Installing Python dependencies...\n')

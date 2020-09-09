@@ -106,3 +106,16 @@ class WPASupplicant(Service):
     service_name = services_settings['wpa_supplicant']
     bin_path = services_settings['wpa_supplicant_bin']
     sleep_time = services_settings['wpa_supplicant_sleep']
+
+class Avahi(Service):
+
+    service_name = services_settings['avahi']
+    bin_path = services_settings['avahi_bin']
+    sleep_time = services_settings['avahi_sleep_time']
+
+class Dhcpcd(Service):
+
+    service_name = services_settings['dhcpcd']
+    bin_path = services_settings['dhcpcd_bin']
+    sleep_time = services_settings['dhcpcd_sleep_time']
+

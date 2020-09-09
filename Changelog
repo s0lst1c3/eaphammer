@@ -164,4 +164,4 @@ Fixed kali-setup file, updated kali-dependencies.txt file
 Added official support for Parot OS (Security)
 
 1.13.0 - Gabriel Ryan <gabriel@solstice.sh>
-Revamped captive portal system. Added integrated website cloaner.
+Revamped captive portal system. Added integrated website cloaner. Added raspbian support.

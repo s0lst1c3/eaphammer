@@ -142,7 +142,6 @@ class ModuleMaker(object):
 
             script['src'] = "{{ url_for('static', filename='%s') }}" % script['src']
 
-
         body = soup.body.extract()
         head = soup.head.extract()
 

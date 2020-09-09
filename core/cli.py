@@ -12,6 +12,7 @@ from pathlib import Path
 BASIC_OPTIONS = [
 
     'cert_wizard',
+    'list_templates',
     'reap_creds',
     'capture_wpa_handshakes',
     'psk_capture_file',
@@ -21,21 +22,32 @@ BASIC_OPTIONS = [
     'ssid_whitelist',
     'ssid_blacklist',
     'hostile_portal',
+    'dl_form_message',
     'captive_portal',
+    'payload',
     'debug',
     'interface',
     'essid',
     'bssid',
     'pmf',
     'owe_transition_bssid',
+    'add_download_form',
     'owe_transition_ssid',
+    'portal_user_template',
     'channel',
     'hw_mode',
     'cloaking',
     'auth',
+    'lhost',
+    'lport',
     'karma',
     'mana',
     'loud',
+    'create_template',
+    'delete_template',
+    'name',
+    'description',
+    'author',
     'known_beacons',
     'channel_width',
     'auth_alg',
@@ -45,6 +57,7 @@ BASIC_OPTIONS = [
     'remote_rig',
     'wordlist',
     'pivot',
+    'captive_portal_server_only',
     'eap_spray',
     'password',
     'interface_pool',
@@ -96,6 +109,23 @@ def set_options():
                                    'to manually regenerate eaphammer\'s dh '
                                    'parameters.')
 
+    modes_group_.add_argument('--list-templates',
+                              dest='list_templates',
+                              action='store_true',
+                              help=('List available templates for the '
+                                    'captive portal'))
+
+    modes_group_.add_argument('--create-template',
+                              dest='create_template',
+                              action='store_true',
+                              help=('Create a template by cloaning '
+                                    'a login page'))
+
+    modes_group_.add_argument('--delete-template',
+                              dest='delete_template',
+                              action='store_true',
+                              help=('Delete a captive portal template.'))
+
     modes_group_.add_argument('--bootstrap',
                               dest='bootstrap',
                               action='store_true',
@@ -132,6 +162,12 @@ def set_options():
                               action='store_true',
                               help='Force clients to connect '
                                    'to hostile portal')
+
+    modes_group_.add_argument('--captive-portal-server-only',
+                              dest='captive_portal_server_only',
+                              action='store_true',
+                              help='Run the captive portal server as a'
+                                   'standalone service.')
 
     modes_group_.add_argument('--captive-portal',
                               dest='captive_portal',
@@ -327,6 +363,13 @@ def set_options():
                                    help='Specify CA key password.')
 
     access_point_group = parser.add_argument_group('Access Point')
+
+    access_point_group.add_argument('--lhost',
+                    dest='lhost',
+                    type=str,
+                    default='10.0.0.1',
+                    required=False,
+                    help='Your AP\'s IP address')
 
     access_point_group.add_argument('-i', '--interface',
                                     dest='interface',
@@ -792,6 +835,104 @@ def set_options():
                            help='Specify the wordlist to use with '
                                 'the autocrack feature.')
 
+    ctmp_group = parser.add_argument_group('Create / Delete Template Options', 
+                            ('Only applicable if --create-template '
+                             'or --delete-template is used.'))
+
+    ctmp_group.add_argument('--url',
+                    dest='url',
+                    type=str,
+                    default=None,
+                    required=False,
+                    help='Specify url from which to clone captive portal')
+
+    ctmp_group.add_argument('--name',
+                    dest='name',
+                    type=str,
+                    default=None,
+                    required=False,
+                    help='Specify name of resulting portal template module')
+
+    ctmp_group.add_argument('--description',
+                    dest='description',
+                    type=str,
+                    default='',
+                    required=False,
+                    help='Specify description of resulting portal template module')
+
+    ctmp_group.add_argument('--author',
+                    dest='author',
+                    type=str,
+                    default='',
+                    required=False,
+                    help='Specify author of resulting portal template module')
+
+    ctmp_group.add_argument('--add-download-form',
+                    dest='add_download_form',
+                    action='store_true',
+                    help='Add a download form to your captive portal.')
+
+    ctmp_group.add_argument('--dl-form-message',
+                    dest='dl_form_message',
+                    type=str,
+                    default='Please download our secure profile to continue.',
+                    required=False,
+                    help='Specify download form text.')
+
+    cptl_group = parser.add_argument_group('Captive Portal Options', 
+                            'Only applicable if --captive-portal is used')
+
+    cptl_group.add_argument('--lport',
+                    dest='lport',
+                    type=int,
+                    default=80,
+                    required=False,
+                    help='Port on which to run captive portal.')
+
+    cptl_group.add_argument('--payload',
+                    dest='payload',
+                    type=str,
+                    default='profile.msi',
+                    required=False,
+                    help='Specify payload name (defaults to payload.msi test file)')
+
+    cptl_group.add_argument('--portal-template',
+                    dest='portal_user_template',
+                    type=str,
+                    default='login',
+                    required=False,
+                    help='Specify template directory')
+
+    cptl_group.add_argument('--portal-debug',
+                    dest='portal_debug',
+                    action='store_true',
+                    required=False,
+                    help='Show debug for portal server only')
+
+    cptl_group.add_argument('--portal-https',
+                    dest='portal_https',
+                    action='store_true',
+                    required=False,
+                    help='Use HTTPS')
+
+    cptl_group.add_argument('--portal-priv-key',
+                    dest='portal_private_key',
+                    type=str,
+                    required=False,
+                    help='private key')
+
+    cptl_group.add_argument('--portal-fullchain',
+                    dest='portal_fullchain',
+                    type=str,
+                    required=False,
+                    help='fullchain')
+
+    cptl_group.add_argument('--portal-cert',
+                    dest='portal_cert',
+                    type=str,
+                    required=False,
+                    help='cert')
+
     hp_group = parser.add_argument_group('Hostile Portal Options', 
                             'Only applicable if --hostile-portal is used')
 
@@ -847,6 +988,10 @@ def set_options():
             options['advanced_help'] is False and
             options['eap_spray'] is False and
             options['bootstrap'] is False and
+            options['list_templates'] is False and
+            options['captive_portal_server_only'] is False and
+            options['delete_template'] is False and
+            options['create_template'] is False and
             options['interface'] is None):
 
             parser.print_usage()
@@ -897,6 +1042,34 @@ def set_options():
                            'certificate using the --server-cert flag.')
                     print(msg, end='')
                     sys.exit()
+
+        if options['delete_template']:
+
+            if options['name'] is None:
+                parser.print_usage()
+                print()
+                msg = ('[!] Please specify a name for your template '
+                        'using the --name flag.')
+                print(msg, end='')
+                sys.exit()
+
+        if options['create_template']:
+
+            if options['name'] is None:
+                parser.print_usage()
+                print()
+                msg = ('[!] Please specify a name for your template '
+                        'using the --name flag.')
+                print(msg, end='')
+                sys.exit()
+
+            if options['url'] is None:
+                parser.print_usage()
+                print()
+                msg = ('[!] Please specify a url from which to clone '
+                       'clone your template using the --url flag.')
+                print(msg, end='')
+                sys.exit()
 
         if options['loud'] and not options['karma']:
 

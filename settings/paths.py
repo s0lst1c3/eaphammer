@@ -42,6 +42,17 @@ ASLEAP_DIR = os.path.join(LOCAL_DIR, 'asleap')
 HCXDUMPTOOL_DIR = os.path.join(LOCAL_DIR, 'hcxdumptool')
 HCXTOOLS_DIR = os.path.join(LOCAL_DIR, 'hcxtools')
 RESPONDER_DIR = os.path.join(LOCAL_DIR, 'Responder')
+WSKEYLOGGER_DIR = os.path.join(ROOT_DIR, 'core/wskeyloggerd')
+
+# wskeyloggerd paths
+WSKEYLOGGER_TEMPLATES = os.path.join(WSKEYLOGGER_DIR, 'templates')
+WSKEYLOGGER_PAR_TEMPL = os.path.join(WSKEYLOGGER_TEMPLATES, 'dont_touch')
+WSKEYLOGGER_USR_TEMPL = os.path.join(WSKEYLOGGER_TEMPLATES, 'user_defined')
+WSKEYLOGGER_USR_SL = os.path.join(ROOT_DIR, 'templates')
+
+WSKEYLOGGER_STATIC = os.path.join(WSKEYLOGGER_DIR, 'static')
+WSKEYLOGGER_STATIC_SL = os.path.join(ROOT_DIR, 'static')
+WSKEYLOGGER_PAYLOADS = os.path.join(ROOT_DIR, 'payloads')
 
 # responder paths
 RESPONDER_BIN = os.path.join(RESPONDER_DIR, 'Responder.py')
@@ -243,4 +254,14 @@ paths = {
 
         'script' : DHCP_SCRIPT,
     },
+    'wskeyloggerd' : {
+        'templates' : WSKEYLOGGER_TEMPLATES,
+        'par_templates' : WSKEYLOGGER_PAR_TEMPL,
+        'usr_templates' : WSKEYLOGGER_USR_TEMPL,
+        'usr_templates_sl' : WSKEYLOGGER_USR_SL,
+        'static' : WSKEYLOGGER_STATIC,
+        'static_sl' : WSKEYLOGGER_STATIC_SL,
+        'payloads' : WSKEYLOGGER_PAYLOADS,
+    },
 }
+

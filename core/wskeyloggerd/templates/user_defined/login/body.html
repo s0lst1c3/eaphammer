@@ -1,0 +1,12 @@
+{% block body %}
+<!-- place all <body> content here -->
+
+<form method='POST'>
+	Username: <input type='text' name='username'/><br/>
+	Password: <input type='password' name='password'/><br/>
+	<input value='Submit' type='submit'/><br/>
+</form>
+
+<img src={{ url_for('static', filename='img/bigbrain.png') }} />
+
+{% endblock %}

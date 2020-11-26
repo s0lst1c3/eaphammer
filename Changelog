@@ -165,3 +165,10 @@ Added official support for Parot OS (Security)
 
 1.13.0 - Gabriel Ryan <gabriel@solstice.sh>
 Revamped captive portal system. Added integrated website cloaner. Added raspbian support.
+
+1.13.0 - Gabriel Ryan <gabriel@solstice.sh>
+Revamped captive portal system. Added integrated website cloaner. Added raspbian support.
+
+1.13.1 - Gabriel Ryan <gabriel@solstice.sh>
+Updated pip.req to reflect changes in 1.13.0 - (Credit goes to Jan Rude
+(github.com/whoot))

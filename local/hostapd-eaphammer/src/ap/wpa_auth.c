@@ -1062,8 +1062,10 @@ void wpa_receive(struct wpa_authenticator *wpa_auth,
 			for (i=0;i<16;i++) {
 				fwrite("\x00",1,1,psk_cap_file);
 			}
-			fwrite(&key_data_length,2,1,psk_cap_file);
-			fwrite(key+1,WPA_GET_BE16(&key_data_length),1,psk_cap_file);
+
+			uint16_t  key_data_length_be = htobe16(key_data_length);
+			fwrite(&key_data_length_be,2,1,psk_cap_file);
+			fwrite(key_data,key_data_length,1,psk_cap_file);
 			for (i=0;i<(256 - sizeof(*hdr) - ntohs(hdr->length) - (0));i++) {
 				fwrite("\x00",1,1,psk_cap_file);
 			}

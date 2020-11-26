@@ -176,6 +176,6 @@ Updated pip.req to reflect changes in 1.13.0 - (Credit goes to Jan Rude (github.
 Resolve issue #142 by updating /src/ap/wpa_auth.c - (Credit goes to github.com/rsrdesarrollo)
 
 1.13.3 - Gabriel Ryan <gabriel@solstice.sh>
-Resolve issue #53 by fixing Python3 unicode bullshit. - (Credit goes to github.com/MarkusKrell)
+Resolve issue #59 by fixing Python3 unicode bullshit. - (Credit goes to github.com/MarkusKrell)
 
 

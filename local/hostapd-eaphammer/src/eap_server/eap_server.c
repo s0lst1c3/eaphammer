@@ -182,7 +182,8 @@ int eap_user_get(struct eap_sm *sm, const u8 *identity, size_t identity_len,
 
 	#ifdef EAPHAMMER
 	user2 = os_zalloc(sizeof(*user));
-	if (user == NULL) {
+	if (user2 == NULL) {
+		  os_free(user);
 	    return -1;
 	}
 
@@ -191,7 +192,7 @@ int eap_user_get(struct eap_sm *sm, const u8 *identity, size_t identity_len,
 	// or password hash
 	if (sm->eapol_cb->get_eap_user(sm->eapol_ctx, identity,
 				       identity_len, phase2, user2) != 0) {
-
+		eap_user_free(user2);
 		user2 = NULL;
 	}
 
@@ -207,6 +208,9 @@ int eap_user_get(struct eap_sm *sm, const u8 *identity, size_t identity_len,
 
 	if (sm->eapol_cb->get_eap_user(sm->eapol_ctx, identity,
 				       identity_len, phase2, user) != 0) {
+#ifdef EAPHAMMER
+		eap_user_free(user2);
+#endif
 		eap_user_free(user);
 		return -1;
 	}
@@ -214,9 +218,10 @@ int eap_user_get(struct eap_sm *sm, const u8 *identity, size_t identity_len,
 	#ifdef EAPHAMMER
 	if (user2 != NULL) {
 
-
 		user->password = user2->password;
 		user->password_len = user2->password_len;
+
+		os_free(user2);
 	}
 	#endif
 

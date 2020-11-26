@@ -170,9 +170,12 @@ Revamped captive portal system. Added integrated website cloaner. Added raspbian
 Revamped captive portal system. Added integrated website cloaner. Added raspbian support.
 
 1.13.1 - Gabriel Ryan <gabriel@solstice.sh>
-Updated pip.req to reflect changes in 1.13.0 - (Credit goes to Jan Rude
-(github.com/whoot))
+Updated pip.req to reflect changes in 1.13.0 - (Credit goes to Jan Rude (github.com/whoot))
 
 1.13.2 - Gabriel Ryan <gabriel@solstice.sh>
-Resolve issue #142 by updating /src/ap/wpa_auth.c - (Credit goes to
-github.com/rsrdesarrollo)
+Resolve issue #142 by updating /src/ap/wpa_auth.c - (Credit goes to github.com/rsrdesarrollo)
+
+1.13.3 - Gabriel Ryan <gabriel@solstice.sh>
+Resolve issue #53 by fixing Python3 unicode bullshit. - (Credit goes to github.com/MarkusKrell)
+
+

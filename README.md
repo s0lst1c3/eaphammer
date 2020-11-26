@@ -4,7 +4,7 @@ by Gabriel Ryan ([s0lst1c3](https://twitter.com/s0lst1c3))(gabriel[at]solstice|d
 
 [![Foo](https://rawcdn.githack.com/toolswatch/badges/8bd9be6dac2a1d445367001f2371176cc50a5707/arsenal/usa/2017.svg)](https://www.blackhat.com/us-17/arsenal.html#eaphammer)
 
-Current release: [v1.13.1](https://github.com/s0lst1c3/eaphammer/releases/tag/v1.13.1)
+Current release: [v1.13.2](https://github.com/s0lst1c3/eaphammer/releases/tag/v1.13.2)
 
 Supports _Python 3.5+_.
 
@@ -79,7 +79,7 @@ Features
 - Fast and automated PMKID attacks against PSK networks using hcxtools
 - Password spraying across multiple usernames against a single ESSID
 
-### New (as of Version 1.13.1)(latest): 
+### New (as of Version 1.13.2)(latest): 
 EAPHammer now has a modular captive portal with keylogging and payload delivery capabilities, as well as an integrated website cloaner for easily creating portal modules.
 
 ### WPA/2-PSK handshake captures (added as for version 1.7.0)

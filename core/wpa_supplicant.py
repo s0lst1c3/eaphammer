@@ -14,7 +14,7 @@ class WPA_Supplicant(object):
 
         p = subprocess.Popen(['wpa_supplicant', '-i', self.interface, '-c', self.conf.path], shell=False, stdout=subprocess.PIPE, preexec_fn=os.setsid)
         while True:
-            line = p.stdout.readline()
+            line = p.stdout.readline().decode("utf-8")
             print(line.replace('%s:' % self.interface, '[%s]' % self.interface), end=' ')
             if 'CTRL-EVENT-EAP-SUCCESS' in line:
                 p.kill()

@@ -1,4 +1,4 @@
-__version__ = '1.13.2'
+__version__ = '1.13.3'
 __codename__ = 'Power Overwhelming'
 __author__ = '@s0lst1c3'
 __contact__ = 'gabriel<<at>>solstice(doT)sh'

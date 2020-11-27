@@ -281,4 +281,6 @@ def get_interfaces(interface="wlan0"):
         @return dict
             properties: dictionary of iwlist attributes
     """
-    return get_parsed_cells(call_iwlist(interface).split('\n'))
+    result = call_iwlist(interface).decode()
+    result = result.split('\n') 
+    return get_parsed_cells(result)

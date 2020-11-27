@@ -178,4 +178,6 @@ Resolve issue #142 by updating /src/ap/wpa_auth.c - (Credit goes to github.com/r
 1.13.3 - Gabriel Ryan <gabriel@solstice.sh>
 Resolve issue #59 by fixing Python3 unicode bullshit. - (Credit goes to github.com/MarkusKrell)
 
+1.13.4 - Gabriel Ryan <gabriel@solstice.sh>
+Resolve issue #59 by fixing Python3 unicode bullshit.  :D 
 

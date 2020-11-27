@@ -181,3 +181,5 @@ Resolve issue #59 by fixing Python3 unicode bullshit. - (Credit goes to github.c
 1.13.4 - Gabriel Ryan <gabriel@solstice.sh>
 Resolve issue #59 by fixing Python3 unicode bullshit.  :D 
 
+1.13.5 - Gabriel Ryan <gabriel@solstice.sh>
+Fixed gevent / python 3.9 related fuckery.

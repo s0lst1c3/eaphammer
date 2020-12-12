@@ -95,7 +95,7 @@ EAPHammer now supports 802.11w (Protected Management Frames), Loud Karma attacks
 EAPHammer will now automatically attempt a GTC Downgrade attack against connected clients in an attempt to capture plaintext credentials (see: https://www.youtube.com/watch?v=-uqTqJwTFyU&feature=youtu.be&t=22m34s). 
 
 ### Improved Certificate Handling
-EAPHammer's Cert Wizard has been expanded to provide users with the ability to create, import, and manage SSL certificates in a highly flexible manner. Cert Wizard's previous functionality has been preserved as Cert Wizard's Interactive Mode, which uses the same syntax as previous versions. See [XIII - Cert Wizard](#xiii---cert-wizard) for additional details.
+EAPHammer's Cert Wizard has been expanded to provide users with the ability to create, import, and manage SSL certificates in a highly flexible manner. Cert Wizard's previous functionality has been preserved as Cert Wizard's Interactive Mode, which uses the same syntax as previous versions. See [XIV - Cert Wizard](https://github.com/s0lst1c3/eaphammer/wiki/XIV.-Cert-Wizard) for additional details.
 
 ### TLS / SSL Backwards Compatibility
 EAPHammer now uses a local build of libssl that exists independently of the systemwide install. This local version is compiled with support for SSLv3, allowing EAPHammer to be used against legacy clients without compromising the integrity of the attacker's operating system.

@@ -36,7 +36,7 @@ To setup and execute a credential stealing evil twin attack against a WPA/2-EAP 
 	# launch attack
 	./eaphammer -i wlan0 --channel 4 --auth wpa-eap --essid CorpWifi --creds
 
-## Quick Start Guide - Parot OS (Security)
+## Quick Start Guide - Parrot OS (Security)
 
 Begin by cloning the __eaphammer__ repo using the following command:
 

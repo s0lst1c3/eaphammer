@@ -7,7 +7,7 @@ lxml
 beautifulsoup4
 pyquery
 requests_html
-pywebcopy
+git+git://github.com/davidwgrossman/pywebcopy
 jinja2
 flask-cors
 flask-socketio

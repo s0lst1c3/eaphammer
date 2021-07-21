@@ -2,4 +2,4 @@
 
 ## Reporting a Vulnerability
 
-If you find any security issues, please report to gabriel@solstice.sh
+If you find any security issues, please open an issue on GitHub.

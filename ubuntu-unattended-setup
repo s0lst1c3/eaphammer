@@ -33,9 +33,6 @@ if __name__ == '__main__':
     openssl_bin = settings.dict['paths']['openssl']['bin']
     dh_file = settings.dict['paths']['certs']['dh']
 
-    if input('Important: it is highly recommended that you run "apt -y update" and "apt -y upgrade" prior to running this setup script. Do you wish to proceed? Enter [y/N]: ').lower() != 'y':
-        sys.exit('Aborting.')
-    print()
 
 
     print('\n[*] Removing stub files...\n')

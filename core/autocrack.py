@@ -13,6 +13,7 @@ import subprocess
 import select
 import json
 import core.utils
+import re
 
 from multiprocessing import Process
 from settings import settings
@@ -21,6 +22,10 @@ remote_rig = False
 
 ASLEAP_CMD = 'asleap -C %s -R %s -W %s | grep -v asleap | grep password'
 EAP_USERS_ENTRY =  '"%s"\tTTLS-PAP,TTLS-CHAP,TTLS-MSCHAP,MSCHAPV2,MD5,GTC,TTLS,TTLS-MSCHAPV2\t"%s"\t[2]'
+
+challenge_pattern = re.compile("^([0-9A-Fa-f]{2}[:]){7}([0-9A-Fa-f]{2})$")
+response_pattern = re.compile("^([0-9A-Fa-f]{2}[:]){23}([0-9A-Fa-f]{2})$")
+
 
 def crack_locally(username, challenge, response, wordlist):
 
@@ -74,13 +79,13 @@ def run_autocrack(wordlist):
 
                 if remote_rig:
                     pass
-                else:
-
+                elif re.match(challenge_pattern, challenge) and re.match(response_pattern, response):
                     crack_locally(username,
                             challenge,
                             response,
                             wordlist)
-
+                else:
+                    print('[autocrack] invalid input: {}'.format(data))
 
 class Autocrack(object):
 

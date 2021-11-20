@@ -27,6 +27,7 @@
 #include <sys/time.h>
 #include <sys/stat.h>
 #include <sys/ioctl.h>
+#include <linux/sockios.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>  
 #include <net/if.h>

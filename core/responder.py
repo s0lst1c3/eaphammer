@@ -18,7 +18,7 @@ class Responder(object):
     def start(self, iface):
 
         responder_bin = settings.dict['paths']['responder']['bin']
-        self.process = subprocess.Popen([responder_bin, '-wrf', '--lm', '-I', iface])
+        self.process = subprocess.Popen([responder_bin, '-wF', '--lm', '-I', iface])
 
     def stop(self):
 

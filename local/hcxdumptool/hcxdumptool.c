@@ -47,6 +47,7 @@
 #include "include/pcap.c"
 #include "include/strings.c"
 #include "include/hashops.c"
+#include <linux/sockios.h>
 /*===========================================================================*/
 /* global var */
 

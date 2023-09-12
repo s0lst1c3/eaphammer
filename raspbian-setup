@@ -69,9 +69,9 @@ if __name__ == '__main__':
     os.system('cd {}/openssl && make install_sw'.format(local_dir))
     print('\n[*] complete!\n')
 
-    #print('\n[*] Create DH parameters file with default length of 2048...\n')
-    #os.system('{} dhparam -out {} 2048'.format(openssl_bin, dh_file))
-    #print('\ncomplete!\n')
+    print('\n[*] Create DH parameters file with default length of 2048...\n')
+    os.system('{} dhparam -out {} 2048'.format(openssl_bin, dh_file))
+    print('\ncomplete!\n')
 
     print('\n[*] Compiling hostapd...\n')
     os.system("cd %s && cp defconfig .config" % settings.dict['paths']['directories']['hostapd'])

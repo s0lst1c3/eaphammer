@@ -36,15 +36,15 @@ To setup and execute a credential stealing evil twin attack against a WPA/2-EAP 
 	# launch attack
 	./eaphammer -i wlan0 --channel 4 --auth wpa-eap --essid CorpWifi --creds
 
-## Quick Start Guide - Parrot OS (Security)
+## Quick Start Guide - Parot OS (Security)
 
 Begin by cloning the __eaphammer__ repo using the following command:
 
 	git clone https://github.com/s0lst1c3/eaphammer.git
 
-Next run the parrot-setup file as shown below to complete the eaphammer setup process. This will install dependencies and compile the project:
+Next run the parot-setup file as shown below to complete the eaphammer setup process. This will install dependencies and compile the project:
 
-	./parrot-setup
+	./parot-setup
 
 To setup and execute a credential stealing evil twin attack against a WPA/2-EAP network:
 
@@ -79,7 +79,10 @@ Features
 - Fast and automated PMKID attacks against PSK networks using hcxtools
 - Password spraying across multiple usernames against a single ESSID
 
-### New (as of Version 1.13.5)(latest): 
+### New (as of Version 1.14.0)(latest):
+Added support for ESSID Stripping attacks.
+
+### Captive Portal with Keylogging, Payload Delivery, and Integrated Website Cloaner (added in version 1.13.5): 
 EAPHammer now has a modular captive portal with keylogging and payload delivery capabilities, as well as an integrated website cloaner for easily creating portal modules.
 
 ### WPA/2-PSK handshake captures (added as for version 1.7.0)
@@ -130,13 +133,6 @@ EAPHammer now supports attacks against 802.11a and 802.11n networks. This includ
 - RIFS
 - HT power management
 
-Upcoming Features
------------------
-
-- Perform seamless MITM attacks with partial HSTS bypasses
-- directed rogue AP attacks (deauth then evil twin from PNL, deauth then karma + ACL)
-- Integrated website cloner for cloning captive portal login pages
-- Integrated HTTP server for captive portals
 
 ## Contributing
 
@@ -168,6 +164,7 @@ This tool either builds upon, is inspired by, or directly incorporates nearly fi
 * Adam Toscher
 * George Chatzisofroniou
 * Mathy Vanhoef
+* Raúl Calvo Laorden
 
 For a complete description of what each of these people has contributed to the current wireless security landscape and this tool, please see:
 

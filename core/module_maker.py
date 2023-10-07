@@ -16,7 +16,7 @@ g_template_dir = g_wk_paths['usr_templates']
 
 class Cloaner(object):
 
-    def __init__(self, url, project_name=None):
+    def __init__(self, url, project_name=None, debug=False, bypass_robots=False, verify=False):
 
         self.url = url
 
@@ -28,19 +28,43 @@ class Cloaner(object):
 
         self.full_project_path = os.path.join(g_tmp_dir, project_name, self.target_host)
 
+        self.debug = debug
+
+        self.bypass_robots = bypass_robots
+
+        self.verify = verify
+
     def run(self):
 
         kwargs = {
             'bypass_robots' : True,
             'project_name' : self.project_name,
         }
-        
-        save_webpage(
-        
-            url=self.url,
-            project_folder=g_tmp_dir,
-            **kwargs
+
+        from pywebcopy.configs import get_config
+        config = get_config(
+            self.url,
+            g_tmp_dir,
+            self.project_name,
+            self.bypass_robots,
+            self.debug,
+            delay=None,
+            threaded=None,
         )
+
+        page = config.create_page()
+        page.session.verify = self.verify
+
+        page.get(self.url)
+
+        page.save_complete(pop=True)
+
+        #save_webpage(
+        #
+        #    url=self.url,
+        #    project_folder=g_tmp_dir,
+        #    **kwargs
+        #)
     
         return 
 
@@ -140,7 +164,8 @@ class ModuleMaker(object):
         # script src
         for script in soup.findAll('script'):
 
-            script['src'] = "{{ url_for('static', filename='%s') }}" % script['src']
+            if 'src' in script:
+                script['src'] = "{{ url_for('static', filename='%s') }}" % script['src']
 
         body = soup.body.extract()
         head = soup.head.extract()

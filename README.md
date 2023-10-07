@@ -1,12 +1,12 @@
 ![logo](https://rawcdn.githack.com/s0lst1c3/eaphammer/ab8202de4a298957a2bc5662f986cdfb195490e4/docs/img/logo.png)
 
-by Gabriel Ryan ([s0lst1c3](https://twitter.com/s0lst1c3))(gabriel[at]solstice|d0t|sh)
+by Gabriel Ryan ([s0lst1c3](https://twitter.com/s0lst1c3))
 
 [![Foo](https://rawcdn.githack.com/toolswatch/badges/8bd9be6dac2a1d445367001f2371176cc50a5707/arsenal/usa/2017.svg)](https://www.blackhat.com/us-17/arsenal.html#eaphammer)
 
-Current release: [v1.13.5](https://github.com/s0lst1c3/eaphammer/releases/tag/v1.13.5)
+Current release: [v1.14.0](https://github.com/s0lst1c3/eaphammer/releases/tag/v1.14.0)
 
-Supports _Python 3.5+_.
+Supports _Python 3.9+_.
 
 Overview
 --------
@@ -80,7 +80,7 @@ Features
 - Password spraying across multiple usernames against a single ESSID
 
 ### New (as of Version 1.14.0)(latest):
-Added support for ESSID Stripping attacks.
+Added support for ESSID Stripping attacks. Fixed many, many bugs.
 
 ### Captive Portal with Keylogging, Payload Delivery, and Integrated Website Cloaner (added in version 1.13.5): 
 EAPHammer now has a modular captive portal with keylogging and payload delivery capabilities, as well as an integrated website cloaner for easily creating portal modules.

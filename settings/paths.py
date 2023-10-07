@@ -93,7 +93,8 @@ HCXPCAPTOOL_OFILE = os.path.join(TMP_DIR, output_file)
 HOSTAPD_BIN = os.path.join(HOSTAPD_DIR, 'hostapd-eaphammer')
 HOSTAPD_LIB = os.path.join(HOSTAPD_DIR, 'libhostapd-eaphammer.so')
 HOSTAPD_LOG = os.path.join(LOG_DIR, 'hostapd-eaphammer.log')
-output_file = OutputFile(name='ctl-if', length=1).string()
+#output_file = 'hostapd-control-interface' # fuckit
+output_file = OutputFile(name='ctrl-iface', length=8).string()
 HOSTAPD_CTRL_INTERFACE = os.path.join(RUN_DIR, output_file)
 
 # eap_spray paths

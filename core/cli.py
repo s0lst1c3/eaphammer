@@ -42,6 +42,7 @@ BASIC_OPTIONS = [
     'lport',
     'karma',
     'mana',
+    'essid_stripping',
     'loud',
     'create_template',
     'delete_template',
@@ -75,6 +76,22 @@ ROGUE_AP_ATTACKS = [
     'reap_creds',
 ]
 
+def suppress_banner():
+
+    version_flag_found = False
+    help_flag_found = False
+    for arg in sys.argv:
+        if arg.strip() in ['--help', '-h', '-hh']:
+            return False
+        if arg.strip() in ['--version', '-V']:
+            version_flag_found = True
+
+    if version_flag_found: # and help_flag_found == False
+        return True
+    else:
+        return False
+
+
 def set_options():
 
 
@@ -82,6 +99,11 @@ def set_options():
 
     modes_group = parser.add_argument_group('Modes')
     modes_group_ = modes_group.add_mutually_exclusive_group()
+
+    modes_group_.add_argument('--version', '-V',
+                              dest='mode_show_version',
+                              action='store_true',
+                              help='Print version info')
 
     modes_group_.add_argument('--cert-wizard',
                               dest='cert_wizard',
@@ -456,6 +478,14 @@ def set_options():
                                     dest='karma',
                                     action='store_true',
                                     help='Enable karma.')
+
+
+    access_point_group.add_argument('--essid-stripping',
+                                    dest='essid_stripping',
+                                    type=str,
+                                    choices=['\\r', '\\n', '\\t', '\\x20'],
+                                    default=None,
+                                    help='Enable ESSID Stripping adding \\r.')
 
     access_point_group.add_argument('--mac-whitelist',
                                     dest='mac_whitelist',
@@ -984,6 +1014,7 @@ def set_options():
             sys.exit()
 
         if (options['cert_wizard'] is False and
+            options['mode_show_version'] is False and
             options['manual_config'] is None and
             options['advanced_help'] is False and
             options['eap_spray'] is False and

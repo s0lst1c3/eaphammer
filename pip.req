@@ -1,6 +1,6 @@
 gevent>=1.5.0
 tqdm
-pem
+pem==21.2.0
 pyOpenSSL
 scapy
 lxml

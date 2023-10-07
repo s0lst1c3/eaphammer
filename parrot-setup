@@ -16,7 +16,7 @@ def read_deps_file(deps_file):
 if __name__ == '__main__':
 
     exit_if_not_root()
-                    
+
 
     default_wordlist = os.path.join(settings.dict['paths']['directories']['wordlists'], settings.dict['core']['eaphammer']['general']['default_wordlist'])
 
@@ -44,8 +44,9 @@ if __name__ == '__main__':
 
 
     print('\n[*] Installing Parot dependencies...\n')
-    os.system('apt -y install %s' % read_deps_file('parot-dependencies.txt'))
+    os.system('apt -y install %s -t parrot-backports' % read_deps_file('parrot-dependencies.txt'))
     print('\n[*] complete!\n')
+
 
     print('\n[*] Installing Python dependencies...\n')
     os.system('python3 -m pip install -r pip.req')

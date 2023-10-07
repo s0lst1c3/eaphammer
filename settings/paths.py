@@ -63,8 +63,8 @@ RESPONDER_ANALYZER_LOG = os.path.join(LOG_DIR, 'Analyzer-Session.log')
 RESPONDER_CONFIG_LOG = os.path.join(LOG_DIR, 'Config-Responder.log')
 RESPONDER_HTML = os.path.join(RESPONDER_DIR, 'files/AccessDenied.html')
 RESPONDER_EXE = os.path.join(RESPONDER_DIR, 'files/BindShell.exe')
-RESPONDER_CERT = os.path.join(RESPONDER_DIR, 'certs/responder.crt')
-RESPONDER_KEY = os.path.join(RESPONDER_DIR, 'certs/responder.key')
+RESPONDER_CERT = os.path.join(ROOT_DIR, 'certs/responder.crt')
+RESPONDER_KEY = os.path.join(ROOT_DIR, 'certs/responder.key')
 
 # asleap paths
 ASLEAP_BIN = os.path.join(ASLEAP_DIR, 'asleap')
@@ -93,8 +93,7 @@ HCXPCAPTOOL_OFILE = os.path.join(TMP_DIR, output_file)
 HOSTAPD_BIN = os.path.join(HOSTAPD_DIR, 'hostapd-eaphammer')
 HOSTAPD_LIB = os.path.join(HOSTAPD_DIR, 'libhostapd-eaphammer.so')
 HOSTAPD_LOG = os.path.join(LOG_DIR, 'hostapd-eaphammer.log')
-#output_file = 'hostapd-control-interface' # fuckit
-output_file = OutputFile(name='ctrl-iface', length=8).string()
+output_file = OutputFile(name='ctl-if', length=1).string()
 HOSTAPD_CTRL_INTERFACE = os.path.join(RUN_DIR, output_file)
 
 # eap_spray paths

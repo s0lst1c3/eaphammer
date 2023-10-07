@@ -361,6 +361,15 @@ class HostapdConfig(object):
         if options['essid'] is None:
             general_configs['ssid'] = settings.dict['core']['hostapd']['general']['ssid']
         else:
+            if options['essid_stripping']:
+                UTF8_char = options['essid_stripping']
+                general_configs['ssid'] = options['essid'] 
+                # Add UTF8 and ssid2=P"wifi-AP\n"
+                general_configs['ssid2'] = "P\"" + options['essid'] + UTF8_char +"\""
+                general_configs['utf8_ssid'] = 1
+            else:
+                general_configs['ssid'] = options['essid']
+
             general_configs['ssid'] = options['essid']
 
         if options['bssid'] is None:

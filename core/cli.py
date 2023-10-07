@@ -1005,6 +1005,7 @@ def set_options():
             sys.exit()
 
         if (options['cert_wizard'] is False and
+            options['mode_show_version'] is False and
             options['manual_config'] is None and
             options['advanced_help'] is False and
             options['eap_spray'] is False and

@@ -63,8 +63,8 @@ RESPONDER_ANALYZER_LOG = os.path.join(LOG_DIR, 'Analyzer-Session.log')
 RESPONDER_CONFIG_LOG = os.path.join(LOG_DIR, 'Config-Responder.log')
 RESPONDER_HTML = os.path.join(RESPONDER_DIR, 'files/AccessDenied.html')
 RESPONDER_EXE = os.path.join(RESPONDER_DIR, 'files/BindShell.exe')
-RESPONDER_CERT = os.path.join(RESPONDER_DIR, 'certs/responder.crt')
-RESPONDER_KEY = os.path.join(RESPONDER_DIR, 'certs/responder.key')
+RESPONDER_CERT = os.path.join(ROOT_DIR, 'certs/responder.crt')
+RESPONDER_KEY = os.path.join(ROOT_DIR, 'certs/responder.key')
 
 # asleap paths
 ASLEAP_BIN = os.path.join(ASLEAP_DIR, 'asleap')

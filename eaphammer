@@ -1176,11 +1176,14 @@ _/ __ \\\\__  \\ \\____ \\|  |  \\\\__  \\  /     \\ /     \\_/ __ \\_  __ \\
 
 if __name__ == '__main__':
 
-    print_banner()
+    if not core.cli.suppress_banner():
+
+        print_banner()
 
     options = core.cli.set_options()
 
-    am_i_rooot()
+    if not options['mode_show_version']:
+        am_i_rooot()
 
     if options['debug']:
         print('[debug] Settings:')
@@ -1188,7 +1191,9 @@ if __name__ == '__main__':
         print('[debug] Options:')
         print(json.dumps(options, indent=4, sort_keys=True))
 
-    if options['cert_wizard'] or options['bootstrap']:
+    if options['mode_show_version']:
+        print(__version__)
+    elif options['cert_wizard'] or options['bootstrap']:
         run_cert_wizard()
     elif options['list_templates']:
         list_templates()

@@ -75,6 +75,22 @@ ROGUE_AP_ATTACKS = [
     'reap_creds',
 ]
 
+def suppress_banner():
+
+    version_flag_found = False
+    help_flag_found = False
+    for arg in sys.argv:
+        if arg.strip() in ['--help', '-h', '-hh']:
+            return False
+        if arg.strip() in ['--version', '-V']:
+            version_flag_found = True
+
+    if version_flag_found: # and help_flag_found == False
+        return True
+    else:
+        return False
+
+
 def set_options():
 
 
@@ -82,6 +98,11 @@ def set_options():
 
     modes_group = parser.add_argument_group('Modes')
     modes_group_ = modes_group.add_mutually_exclusive_group()
+
+    modes_group_.add_argument('--version', '-V',
+                              dest='mode_show_version',
+                              action='store_true',
+                              help='Print version info')
 
     modes_group_.add_argument('--cert-wizard',
                               dest='cert_wizard',

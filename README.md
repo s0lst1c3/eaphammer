@@ -42,9 +42,9 @@ Begin by cloning the __eaphammer__ repo using the following command:
 
 	git clone https://github.com/s0lst1c3/eaphammer.git
 
-Next run the parot-setup file as shown below to complete the eaphammer setup process. This will install dependencies and compile the project:
+Next run the parrot-setup file as shown below to complete the eaphammer setup process. This will install dependencies and compile the project:
 
-	./parot-setup
+	./parrot-setup
 
 To setup and execute a credential stealing evil twin attack against a WPA/2-EAP network:
 

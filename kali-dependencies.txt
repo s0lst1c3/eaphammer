@@ -8,3 +8,4 @@ libcurl4-openssl-dev
 zlib1g-dev
 libpcap-dev
 python3-pip
+wget

@@ -28,6 +28,16 @@ Next run the kali-setup file as shown below to complete the eaphammer setup proc
 
 	./kali-setup
 
+ Now available with : 
+
+ ```
+sudo apt install eaphammer
+```
+or
+ ```
+sudo apt-get install eaphammer
+```
+
 To setup and execute a credential stealing evil twin attack against a WPA/2-EAP network:
 
 	# generate certificates

@@ -36,10 +36,9 @@ from __version__ import __version__, __tagline__, __author__, __contact__, __cod
 from threading import Thread
 from core.utils import ip_replace_last_octet
 from core.loader import Loader
+from core.strtobool import strtobool
 
 from core.module_maker import ModuleMaker
-
-from distutils.util import strtobool
 
 def hostile_portal():
 

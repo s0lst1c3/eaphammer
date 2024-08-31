@@ -10,7 +10,7 @@
 import re
 import subprocess
 
-VERSION_RGX = re.compile("version\s+\d+", re.IGNORECASE)
+VERSION_RGX = re.compile(r"version\s+\d+", re.IGNORECASE)
 
 def get_name(cell):
     """ Gets the name / essid of a network / cell.

@@ -47,10 +47,6 @@ if __name__ == '__main__':
     os.system('apt -y install %s' % read_deps_file('kali-dependencies.txt'))
     print('\n[*] complete!\n')
 
-    print('\n[*] Installing Python dependencies...\n')
-    os.system('python3 -m pip install -r pip.req')
-    print('\n[*] complete!\n')
-    
 
     print('\n[*] Downloading OpenSSL_{}...\n'.format(openssl_version.replace('.', '_')))
     os.system('wget {} -O {}/openssl.tar.gz'.format(openssl_source, local_dir))

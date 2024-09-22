@@ -7,6 +7,7 @@ libnl-genl-3-dev
 libcurl4-openssl-dev
 zlib1g-dev
 libpcap-dev
+wget
 python3-pip
 python3-gevent
 python3-tqdm
@@ -18,4 +19,3 @@ python3-pywebcopy
 python3-bs4
 python3-flask-cors
 python3-flask-socketio
-

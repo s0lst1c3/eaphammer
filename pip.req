@@ -1,13 +1,10 @@
 gevent>=1.5.0
 tqdm
-pem==21.2.0
+pem>=21.2.0
 pyOpenSSL
 scapy
 lxml
 beautifulsoup4
-pyquery
-requests_html
 pywebcopy
-jinja2
 flask-cors
 flask-socketio

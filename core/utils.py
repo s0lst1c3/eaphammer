@@ -4,6 +4,28 @@ import time
 from settings import settings
 from tqdm import tqdm
 
+
+_STR2BOOL_MAP = {
+    'y': True,
+    'yes': True,
+    't': True,
+    'true': True,
+    'on': True,
+    '1': True,
+    'n': False,
+    'no': False,
+    'f': False,
+    'false': False,
+    'off': False,
+    '0': False
+}
+
+def strtobool(value):
+    try:
+        return _STR2BOOL_MAP[str(value).lower()]
+    except KeyError:
+        raise ValueError(f'"{value}" is not a valid bool value')
+
 def ip_replace_last_octet(ip_addr, new_val):
 
     return '.'.join(ip_addr.split('.')[:-1]+[new_val])

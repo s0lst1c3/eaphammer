@@ -4,7 +4,7 @@ by Gabriel Ryan ([s0lst1c3](https://twitter.com/s0lst1c3))
 
 [![Foo](https://rawcdn.githack.com/toolswatch/badges/8bd9be6dac2a1d445367001f2371176cc50a5707/arsenal/usa/2017.svg)](https://www.blackhat.com/us-17/arsenal.html#eaphammer)
 
-Current release: [v1.14.0](https://github.com/s0lst1c3/eaphammer/releases/tag/v1.14.0)
+Current release: [v1.14.1](https://github.com/s0lst1c3/eaphammer/releases/tag/v1.14.1)
 
 Supports _Python 3.9+_.
 
@@ -20,6 +20,16 @@ EAPHammer (the "Software") and associated documentation is provided “AS IS”.
 
 ## Quick Start Guide - Kali
 
+### Install using Apt
+
+```
+sudo apt update
+sudo apt upgrade
+sudo apt install eaphammer
+```
+
+### Build from source
+
 Begin by cloning the __eaphammer__ repo using the following command:
 
 	git clone https://github.com/s0lst1c3/eaphammer.git
@@ -28,15 +38,7 @@ Next run the kali-setup file as shown below to complete the eaphammer setup proc
 
 	./kali-setup
 
- Now available with : 
-
- ```
-sudo apt install eaphammer
-```
-or
- ```
-sudo apt-get install eaphammer
-```
+### Basic Usage
 
 To setup and execute a credential stealing evil twin attack against a WPA/2-EAP network:
 

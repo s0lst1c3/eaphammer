@@ -183,3 +183,11 @@ Resolve issue #59 by fixing Python3 unicode bullshit.  :D
 
 1.13.5 - Gabriel Ryan <gabriel@solstice.sh>
 Fixed gevent / python 3.9 related fuckery.
+
+1.14.1 - Gabriel Ryan <gabriel@transmitengage.com>
+Fixed hostapd-eaphammer_lib build issues.
+The system-wide package manager (i.e. apt) is now the single source of truth for dependencies, including Python. Sounds stupid, but realistically it's probably the most stable option until we start managing the Python portions of this thing with something that isn't archaic (like Poetry) and published as a proper PyPi package.
+Removed unused Python dependencies: jinja2, pyquery
+Added support for Python 3.12 (Credit: github.com/D3vil0p3r)
+Updated README to reflect use of apt during installation instructions (Credit: github.com/readloud)
+Added wget to dependencies (Credit: github/pes-soft)

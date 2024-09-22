@@ -1,4 +1,4 @@
-__version__ = '1.14.0'
+__version__ = '1.14.1'
 __codename__ = 'Final Frontier'
 __author__ = '@s0lst1c3'
 __contact__ = 'gabriel<<at>>transmitengage.com'

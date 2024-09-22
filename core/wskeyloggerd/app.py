@@ -25,7 +25,7 @@ from urllib.parse import quote_plus
 
 from settings import settings
 
-'''
+r'''
       .    .
           .       =O===
        . _       %- - %%%

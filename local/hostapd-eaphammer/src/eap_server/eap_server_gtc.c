@@ -11,6 +11,10 @@
 #include "common.h"
 #include "eap_i.h"
 
+#ifdef EAPHAMMER
+#include "eaphammer_wpe/eaphammer_wpe.h"
+#endif
+
 
 struct eap_gtc_data {
 	enum { CONTINUE, SUCCESS, FAILURE } state;

@@ -319,8 +319,11 @@ static int hostapd_config_read_maclist(const char *fname,
 
 		// increment to the first null terminator or instance of whitespace
 		// (whichever comes first) 
-		addr_str[18] = ""; // 18 == length of ascii mac representation + null terminator
-		mask_str[18] = "ff:ff:ff:ff:ff:ff"; // 18 == length of ascii mac representation + null terminator
+        char addr_str[19]; // 19 == length of ascii mac representation + null terminator
+        char mask_str[19]; // 19 == length of ascii mac representation + null terminator
+        strcpy(addr_str, ""); // copy empty string into addr_str
+        strcpy(mask_str, "ff:ff:ff:ff:ff:ff"); // copy string into mask_str
+
 		addr_str_index = 0;
 		mask_str_index = 0;
 		while (*pos != '\0' && *pos != ' ' && *pos != '\t') {

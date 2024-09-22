@@ -13,8 +13,13 @@
 #include "eap_i.h"
 #include "eap_common/chap.h"
 
+#ifdef EAPHAMMER
+#include "eaphammer_wpe/eaphammer_wpe.h"
+#endif
+
 
 #define CHALLENGE_LEN 16
+
 
 struct eap_md5_data {
 	u8 challenge[CHALLENGE_LEN];

@@ -2,6 +2,7 @@ import os
 import json
 import random
 import string
+import tempfile
 
 from datetime import datetime
 
@@ -31,7 +32,7 @@ LOG_DIR = os.path.join(ROOT_DIR, 'logs')
 RUN_DIR = os.path.join(ROOT_DIR, 'run')
 SCRIPT_DIR = os.path.join(ROOT_DIR, 'scripts')
 DB_DIR = os.path.join(ROOT_DIR, 'db')
-TMP_DIR = os.path.join(ROOT_DIR, 'tmp')
+TMP_DIR = tempfile.gettempdir()
 WORDLIST_DIR = os.path.join(ROOT_DIR, 'wordlists')
 LOCAL_DIR = os.path.join(ROOT_DIR, 'local')
 HOSTAPD_DIR = os.path.join(LOCAL_DIR, 'hostapd-eaphammer', 'hostapd')

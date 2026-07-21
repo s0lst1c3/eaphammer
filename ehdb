@@ -451,7 +451,7 @@ def set_options():
             required=False,
             type=str,
             help='Leave this as the default unless you really know what you are doing. '
-                 'A comma seperated list of the authentication methods that should be used '
+                 'A comma separated list of the authentication methods that should be used '
                  'when the user attempts to connect. EAPHammer will attempt to use each of '
                  'these methods one by one until the victim accepts one.',
     )

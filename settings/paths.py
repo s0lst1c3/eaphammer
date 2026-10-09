@@ -78,7 +78,7 @@ HCXDUMPTOOL_FILTER = os.path.join(TMP_DIR, output_file)
 
 # wpa handshake cpature file paths
 #options['psk_capture_file']
-output_file = OutputFile(name='wpa_handshake_capture', ext='hccapx').string()
+output_file = OutputFile(name='wpa_handshake_capture', ext='22000').string()
 PSK_CAPTURE_FILE = os.path.join(LOOT_DIR, output_file)
 
 # openssl paths
@@ -263,4 +263,3 @@ paths = {
         'payloads' : WSKEYLOGGER_PAYLOADS,
     },
 }
-
